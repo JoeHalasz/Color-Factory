@@ -1,0 +1,67 @@
+
+
+INPUTS - 
+	trucks come in with a base color on it.
+	they can either be bought from "third parties" or 
+	later in the game you can order from your own color factory. 
+	Each truck station will automatically order a truck of paint and fill a belt with that paint constantly 
+	as long as the player has enough money to buy that paint or the factory they are ordering from has enough of it 
+
+FACTORY - 
+	Belts
+		move colors around. 
+
+	Machines
+		machines to combine the colors
+		machines to change the paint type (Flat/Matte, Eggshell, satin, gloss) 
+		Maybe instead of changing paint type, different types of paint can be ordered for different paint types 
+		beggining of the game machines are not as accurate, so can not get customers that have a high accuracy order. 
+	
+	Logic gates 
+		Small black box that the user can click on and they are brought to another screen
+		where they can choose the number of inputs, output, and place different logic gates.
+		Once rep is high enough the machines can be attached to logic gates and turned on and off.
+		Should allow for auto paint machines that can create any color of paint. 
+
+	Storage 
+		Belts can go directly into a storage container to keep the paint. 
+		A storage container can only keep one type of paint in it at a time. 
+
+OUTPUTS - 
+	Trucks can either -
+		sell directly to client that asks for a specific color
+		send to your paint storage
+		send directly to another one of your factories 
+
+Orders - 
+	The goal of the game is to complete orders. 
+	As the player progresses the orders will get more and more complex. 
+	Orders will have 5 things. 
+		- Number of different requested paints
+		- Percentage accuracy of the paint color
+		- list of colors to put on the truck
+		- amounts of each color (ratio of each color to put on the truck)
+		- how many trucks total, or trucks per minute of the colors are needed. 
+
+	At the beggining of the game orders are simple. Examples -
+		1 truck of  blue and green 50/50 ratio (order 2 trucks and belt them to an output)
+		1 truck of dark blue (order blue and black and combine them)
+		1 truck of matte blue (order blue and make it matte)
+		
+	The orders will get more and more complex as the game continues
+	eventually they will be procedurally generated
+
+
+PLAY -
+	As the user does more and more orders, their rep will get higher. 
+	As the users rep gets higher, they will get orders that require higher accuracy.
+	These higher accuracy orders require better machines in the factory, but also pay higher and may give more rep. 
+	Higher rep machines can also combine more than one color at the same time. 
+
+	Can fail orders if the accuracy of the paint is not high enough. 
+	Machines and belts cost money to build, and better machines and faster belts can only be bought with more rep.
+
+	Orders can either be a certain amount of a paint, or a certain amount of paint per minute, for a certain amount of time, or forever. 
+	Orders will either give a lump some of money and rep once it is finished or 
+	passive money as the paint is sold on the trucks and no rep ( if it is paint per minute ). 
+	 
