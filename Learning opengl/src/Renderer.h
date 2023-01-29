@@ -21,7 +21,7 @@ private:
     std::unique_ptr<IndexBuffer> m_IndexBuffer;
     std::unique_ptr<Shader> m_Shader;
     std::unique_ptr<VertexBufferLayout> m_Layout;
-    std::unique_ptr<Texture> m_Texture;
+    std::vector<std::unique_ptr<Texture>> m_Textures;
 public:
     Renderer();
     void Clear() const;
