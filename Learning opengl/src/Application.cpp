@@ -17,6 +17,7 @@
 #include "imgui/imgui_impl_glfw_gl3.h"
 
 #include "tests/TestTexture2D.h"
+#include "RenderLots.h"
 
 
 int main(void)
@@ -50,10 +51,10 @@ int main(void)
         printf("Glew Init did not work!\n");
         return 1;
     }
+
     { // this fixes some error when trying to close the window
 
-        GLCall(glEnable(GL_BLEND));
-        GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
 
         Renderer renderer;
 
@@ -61,35 +62,15 @@ int main(void)
         ImGui_ImplGlfwGL3_Init(window, true);
         ImGui::StyleColorsDark();
 
-
-        test::Test* currentTest = nullptr;
-        test::TestMenu* testMenu = new test::TestMenu(currentTest);
-        currentTest = testMenu;
-
-        testMenu->RegisterTest<test::TestTexture2D>("2D Texture");
-
         while (!glfwWindowShouldClose(window))
         {
-            GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f))
-            renderer.Clear();
+            
+
+            GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
 
             ImGui_ImplGlfwGL3_NewFrame();
-            if (currentTest)
-            {
-                currentTest->OnUpdate(0.0f);
-                currentTest->OnRender();
-                ImGui::Begin("Test");
-                if (currentTest != testMenu && ImGui::Button("<-"))
-                {
-                    delete currentTest;
-                    currentTest = testMenu;
-                }
-                currentTest->OnImGuiRender();
-                ImGui::End();
-            }
 
-            ImGui::Render();
-            ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
+            renderer.OnRender();
 
             glfwSwapBuffers(window);
 

@@ -1,5 +1,5 @@
 #include "TestTexture2D.h"
-#include "Renderer.h"
+#include "ErrorCatching.h"
 #include "imgui/imgui.h"
 
 
@@ -68,14 +68,14 @@ namespace test {
 			glm::mat4 mvp = m_Proj * m_View * model;
 			m_Shader->Bind();
 			m_Shader->SetUniformMat4f("u_MVP", mvp);
-			renderer.Draw(*m_VAO, *m_IndexBuffer, *m_Shader);
+			//renderer.Draw(*m_VAO, *m_IndexBuffer, *m_Shader);
 		}
 		{
 			glm::mat4 model = glm::translate(glm::mat4(1.0f), m_TranslationB);
 			glm::mat4 mvp = m_Proj * m_View * model;
 			m_Shader->Bind();
 			m_Shader->SetUniformMat4f("u_MVP", mvp);
-			renderer.Draw(*m_VAO, *m_IndexBuffer, *m_Shader);
+			//renderer.Draw(*m_VAO, *m_IndexBuffer, *m_Shader);
 		}
 	}
 

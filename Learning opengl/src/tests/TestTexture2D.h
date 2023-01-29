@@ -5,8 +5,9 @@
 #include "VertexBuffer.h"
 #include "VertexBufferLayout.h"
 #include "Texture.h"
-
+#include "VertexArray.h"
 #include <memory>
+#include "Renderer.h"
 
 namespace test {
 	class TestTexture2D : public Test
