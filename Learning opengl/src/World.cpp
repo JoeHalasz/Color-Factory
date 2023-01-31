@@ -65,6 +65,11 @@ void World::checkKeyPresses()
     {
         m_ZoomChange -= ZOOM_CHANGE_BY;
     }
+    action = glfwGetKey(m_Window, GLFW_KEY_SPACE);
+    if (action == GLFW_PRESS || action == GLFW_REPEAT)
+    {
+        m_Position = glm::vec3(0, 0, 0);
+    }
 }
 
 void World::OnUpdate()
@@ -78,6 +83,7 @@ void World::OnUpdate()
         m_ZoomAmount = ZOOM_MIN;
     }
     m_Position += m_Speed + (m_Speed * m_ZoomAmount);
+    m_Position.z = 0; // this might fix white artifacts some times
     m_Speed = glm::vec3(0.0f);
     m_ZoomChange = 0.0f;
 }

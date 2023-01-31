@@ -35,7 +35,7 @@ int main(void)
 
     int WIDTH, HEIGHT;
 
-    if (1) // fullscreen
+    if (0) // fullscreen
     {
         WIDTH = mode->width;
         HEIGHT = mode->height;

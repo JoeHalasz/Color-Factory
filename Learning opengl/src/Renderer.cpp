@@ -122,7 +122,6 @@ void Renderer::OnRender(int width, int height, glm::vec3 position, float zoomAmo
     float v3 = -1 * (float)(height/2) - ((height/2) * zoomAmount);
     float v4 = -1 * v3;
 
-
     glm::mat4 proj = glm::ortho(v1, v2, v3, v4, -1.0f, 1.0f);
     glm::mat4 view = glm::translate(glm::mat4(1.0f), position);
     Clear();
@@ -134,6 +133,7 @@ void Renderer::OnRender(int width, int height, glm::vec3 position, float zoomAmo
     m_Shader->SetUniform1iv("u_Textures", 2, samplers);
     {
         glm::mat4 mvp = proj * view;
+        
         m_Shader->Bind();
         m_Shader->SetUniformMat4f("u_MVP", mvp);
         Draw();
