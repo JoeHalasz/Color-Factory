@@ -87,14 +87,17 @@ int main(void)
         int nbFrames = 0;
         int counter = 1;
 
+        bool printStuff = true;
         while (!glfwWindowShouldClose(window))
         {
+            bool beenOneSecond = false;
             // Measure fps
             {
                 double currentTime = glfwGetTime();
                 nbFrames++;
                 if (currentTime - lastTime >= 1.0) { // If last prinf() was more than 1 sec ago
                     // printf and reset timer
+                    beenOneSecond = true;
                     printf("%f ms/frame %f fps\n", 1000.0 / double(nbFrames), double(nbFrames));
                     nbFrames = 0;
                     lastTime += 1.0;
@@ -125,7 +128,11 @@ int main(void)
             }
 
             ImGui_ImplGlfwGL3_NewFrame();
-            
+            if (beenOneSecond && printStuff)
+            {
+                std::cout << "Drawing " << renderer.GetAmountOfCurrentQuads() << "/" << renderer.GetMaxAmountOfQuads() 
+                    << " Quads: " << renderer.GetAmountOfCurrentQuads() / renderer.GetMaxAmountOfQuads() << "% " << std::endl;
+            }
             renderer.OnRender(WIDTH, HEIGHT, world.GetPosition(), world.GetZoomAmount());
 
             renderer.Clean();

@@ -52,18 +52,6 @@ static std::vector<Vertex> CreateQuad(float textureID, float size, float x, floa
 Renderer::Renderer()
 {
     m_MAXNUMQUADS = 100000;
-    
-    /*float positions[] = {
-        100.0f, 100.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-        200.0f, 100.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-        200.0f, 200.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-        100.0f, 200.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-
-        200.0f, 100.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        300.0f, 100.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-        300.0f, 200.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-        200.0f, 200.0f, 1.0f, 0.0f, 1.0f, 1.0f
-    };*/
 
     std::vector<unsigned int> indices = makeIndices(m_MAXNUMQUADS);
     GLCall(glEnable(GL_BLEND));
@@ -117,8 +105,8 @@ void Renderer::OnRender(int width, int height, glm::vec3 position, float zoomAmo
     {
         std::cout << "TOO MANY QUADS" << std::endl;
         std::cout << "Need " << m_AllQuads.size() << " Quads" << std::endl;
+        std::cout << "Max is " << m_MAXNUMQUADS << " Quads" << std::endl;
     }
-    std::cout << "Drawing " << m_AllQuads.size() << " Quads" << std::endl;
     Vertex* buffer = vertices.data();
 
     for (unsigned int i = 0; i < m_AllQuads.size(); i++)

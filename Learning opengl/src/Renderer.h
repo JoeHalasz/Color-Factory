@@ -31,7 +31,7 @@ private:
     std::unique_ptr<Shader> m_Shader;
     std::unique_ptr<VertexBufferLayout> m_Layout;
     std::vector<std::unique_ptr<Texture>> m_Textures;
-    int m_MAXNUMQUADS;
+    unsigned int m_MAXNUMQUADS;
 public:
     Renderer();
     void Clear() const;
@@ -39,4 +39,6 @@ public:
     void Draw() const;
     void OnRender(int width, int height, glm::vec3 position, float zoomAmount);
     void AddQuad(float textureID, float size, float x, float y, float z = 1.0f);
+    inline unsigned int GetAmountOfCurrentQuads() { return m_AllQuads.size(); }
+    inline unsigned int GetMaxAmountOfQuads() { return m_MAXNUMQUADS; }
 };
