@@ -127,11 +127,13 @@ int main(void)
                 }
             }
 
+            renderer.AddQuad(0, size, 0, 0);
+
             ImGui_ImplGlfwGL3_NewFrame();
             if (beenOneSecond && printStuff)
             {
                 std::cout << "Drawing " << renderer.GetAmountOfCurrentQuads() << "/" << renderer.GetMaxAmountOfQuads() 
-                    << " Quads: " << renderer.GetAmountOfCurrentQuads() / renderer.GetMaxAmountOfQuads() << "% " << std::endl;
+                    << " Quads: " << ((float)renderer.GetAmountOfCurrentQuads() / renderer.GetMaxAmountOfQuads()) * 100 << "% " << std::endl;
             }
             renderer.OnRender(WIDTH, HEIGHT, world.GetPosition(), world.GetZoomAmount());
 

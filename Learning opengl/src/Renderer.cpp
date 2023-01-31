@@ -58,7 +58,7 @@ Renderer::Renderer()
     GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
     m_VertexArray = std::make_unique<VertexArray>();
-    m_VertexBuffer = std::make_unique<VertexBuffer>(sizeof(Vertex) * m_MAXNUMQUADS); // max amount of vertices
+    m_VertexBuffer = std::make_unique<VertexBuffer>(sizeof(Vertex) * m_MAXNUMQUADS * 4); // max amount of vertices
 
     m_Layout = std::make_unique<VertexBufferLayout>();
     m_Layout->Push<float>(3);

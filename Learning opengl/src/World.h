@@ -11,9 +11,10 @@ private:
 	float m_ZoomAmount;
 	float m_ZoomChange;
 
-	float ZOOM_MAX = 1.0f;
+	float ZOOM_MAX = 3.0f;
 	float ZOOM_MIN = .01f;
-	float ZOOM_CHANGE_BY = .01f;
+	float ZOOM_CHANGE_BY = .02f;
+	float ORIGINAL_MOVE_SPEED = 5.0f;
 	
 public:
 	World(GLFWwindow* window);
