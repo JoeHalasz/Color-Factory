@@ -92,10 +92,11 @@ int main(void)
         {
             bool beenOneSecond = false;
             // Measure fps
-            {
+            if (printStuff) {
                 double currentTime = glfwGetTime();
                 nbFrames++;
                 if (currentTime - lastTime >= 1.0) { // If last prinf() was more than 1 sec ago
+                    std::cout << "\x1B[2J\x1B[H";
                     // printf and reset timer
                     beenOneSecond = true;
                     printf("%f ms/frame %f fps\n", 1000.0 / double(nbFrames), double(nbFrames));
@@ -135,7 +136,7 @@ int main(void)
                 std::cout << "Drawing " << renderer.GetAmountOfCurrentQuads() << "/" << renderer.GetMaxAmountOfQuads() 
                     << " Quads: " << ((float)renderer.GetAmountOfCurrentQuads() / renderer.GetMaxAmountOfQuads()) * 100 << "% " << std::endl;
             }
-            renderer.OnRender(WIDTH, HEIGHT, world.GetPosition(), world.GetZoomAmount());
+            renderer.OnRender(WIDTH, HEIGHT, world.GetPosition(), world.GetZoomAmount(), world.GetRotation());
 
             renderer.Clean();
 

@@ -37,7 +37,7 @@ public:
     void Clear() const;
     void Clean();
     void Draw() const;
-    void OnRender(int width, int height, glm::vec3 position, float zoomAmount);
+    void OnRender(int width, int height, glm::vec3 position, float zoomAmount, float rotation);
     void AddQuad(float textureID, float size, float x, float y, float z = 1.0f);
     inline unsigned int GetAmountOfCurrentQuads() { return m_AllQuads.size(); }
     inline unsigned int GetMaxAmountOfQuads() { return m_MAXNUMQUADS; }

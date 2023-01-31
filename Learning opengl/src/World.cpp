@@ -6,17 +6,17 @@
 
 
 World::World(GLFWwindow* window)
-    :m_Window(window), m_Position(glm::vec3(0.0f, 0.0f, 0.0f)), m_Speed(glm::vec3(0.0f, 0.0f, 0.0f)), m_ZoomAmount(.25), m_ZoomChange(0)
+    :m_Window(window), m_Position(glm::vec3(0.0f, 0.0f, 0.0f)), m_Speed(glm::vec3(0.0f, 0.0f, 0.0f))
 {
 }
 
 World::World(GLFWwindow* window, glm::vec3 position)
-    :m_Window(window), m_Position(position), m_Speed(glm::vec3(0.0f, 0.0f, 0.0f)), m_ZoomAmount(.25), m_ZoomChange(0)
+    :m_Window(window), m_Position(position), m_Speed(glm::vec3(0.0f, 0.0f, 0.0f))
 {
 }
 
 World::World(GLFWwindow* window, glm::vec3 position, glm::vec3 speed)
-    :m_Window(window), m_Position(position), m_Speed(speed), m_ZoomAmount(.25), m_ZoomChange(0)
+    :m_Window(window), m_Position(position), m_Speed(speed)
 {
 }
 
@@ -70,6 +70,16 @@ void World::checkKeyPresses()
     {
         m_Position = glm::vec3(0, 0, 0);
     }
+    action = glfwGetKey(m_Window, GLFW_KEY_G);
+    if (action == GLFW_PRESS || action == GLFW_REPEAT)
+    {
+        m_RotationChange += .01f;
+    }
+    action = glfwGetKey(m_Window, GLFW_KEY_H);
+    if (action == GLFW_PRESS || action == GLFW_REPEAT)
+    {
+        m_RotationChange -= .01f;
+    }
 }
 
 void World::OnUpdate()
@@ -84,6 +94,8 @@ void World::OnUpdate()
     }
     m_Position += m_Speed + (m_Speed * m_ZoomAmount);
     m_Position.z = 0; // this might fix white artifacts some times
+    m_Rotation += m_RotationChange;
+    m_RotationChange = 0;
     m_Speed = glm::vec3(0.0f);
     m_ZoomChange = 0.0f;
 }

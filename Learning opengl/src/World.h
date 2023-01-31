@@ -8,8 +8,10 @@ private:
 	GLFWwindow* m_Window;
 	glm::vec3 m_Position;
 	glm::vec3 m_Speed;
-	float m_ZoomAmount;
-	float m_ZoomChange;
+	float m_ZoomAmount = .25f;
+	float m_ZoomChange = 0;
+	float m_Rotation;
+	float m_RotationChange = 0;
 
 	float ZOOM_MAX = 3.0f;
 	float ZOOM_MIN = .01f;
@@ -26,6 +28,7 @@ public:
 	inline glm::vec3 GetPosition() const { return m_Position; }
 	inline glm::vec3 GetSpeed() const { return m_Speed; }
 	inline float GetZoomAmount() const { return m_ZoomAmount;  }
+	inline float GetRotation() const { return m_Rotation;  }
 
 
 };

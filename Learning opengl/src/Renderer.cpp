@@ -7,6 +7,10 @@
 #include <vector>
 #include <array>
 
+#include <glm/gtc/quaternion.hpp> 
+#include <glm/gtx/quaternion.hpp>
+
+
 std::vector<unsigned int> makeIndices(int numQuads)
 {
     std::vector<unsigned int> indices((numQuads * 6));
@@ -97,7 +101,7 @@ void Renderer::AddQuad(float textureID, float size, float x, float y, float z)
     m_AllQuads.push_back(CreateQuad(textureID, size, x, y, z));
 }
 
-void Renderer::OnRender(int width, int height, glm::vec3 position, float zoomAmount)
+void Renderer::OnRender(int width, int height, glm::vec3 position, float zoomAmount, float rotation)
 {
     // set dynamic vertex buffer
     std::vector<Vertex> vertices(m_AllQuads.size()*4);
@@ -131,6 +135,16 @@ void Renderer::OnRender(int width, int height, glm::vec3 position, float zoomAmo
     }
     int samplers[2] = { 0, 1 };
     m_Shader->SetUniform1iv("u_Textures", 2, samplers);
+
+    // rotation
+    glm::vec3 EulerAngles(0, 0, rotation);
+    glm::quat MyQuaternion = glm::quat(EulerAngles);
+    
+    MyQuaternion *= glm::quat(glm::vec3(3.14/180, 3.14 / 180, 3.14 / 180));
+    
+    glm::mat4 RotationMatrix = glm::toMat4(MyQuaternion);
+
+
     {
         glm::mat4 mvp = proj * view;
         
