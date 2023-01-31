@@ -1,6 +1,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h> 
 #include <stdio.h>
+#include <iostream>
 
 #include "Renderer.h"
 #include "VertexBuffer.h"
@@ -8,6 +9,7 @@
 #include "IndexBuffer.h"
 #include "VertexArray.h"
 #include "Shader.h"
+#include "World.h"
 #include "Texture.h"
 
 #include "glm/glm.hpp"
@@ -15,10 +17,6 @@
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw_gl3.h"
-
-#include "tests/TestTexture2D.h"
-#include "RenderLots.h"
-
 
 int main(void)
 {
@@ -32,18 +30,37 @@ int main(void)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
 
-    
+    auto monitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 
-    /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(960, 540, "Hello World", NULL, NULL);
+    int WIDTH, HEIGHT;
+
+    if (1) // fullscreen
+    {
+        WIDTH = mode->width;
+        HEIGHT = mode->height;
+        window = glfwCreateWindow(WIDTH, HEIGHT, "Color Factory", NULL, NULL);
+        glfwSetWindowMonitor(window, monitor, 0, 0, WIDTH, HEIGHT, mode->refreshRate);
+    }
+    else
+    {
+        WIDTH = 960;
+        HEIGHT = 540;
+        window = glfwCreateWindow(WIDTH, HEIGHT, "Color Factory", NULL, NULL);
+    }
+    std::cout << "Resolution: " << WIDTH << "/" << HEIGHT << std::endl;
+    std::cout << "Refresh rate: " << mode->refreshRate << std::endl;
+
     if (!window)
     {
         glfwTerminate();
         return -1;
     }
+    
 
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
+    
 
     glfwSwapInterval(1);
 
@@ -62,15 +79,56 @@ int main(void)
         ImGui_ImplGlfwGL3_Init(window, true);
         ImGui::StyleColorsDark();
 
+        // set up world
+        World world(window);
+
+        // renderer.AddQuad(1, 50, 200, 100);
+        double lastTime = glfwGetTime();
+        int nbFrames = 0;
+        int counter = 1;
+
         while (!glfwWindowShouldClose(window))
         {
+            // Measure fps
+            {
+                double currentTime = glfwGetTime();
+                nbFrames++;
+                if (currentTime - lastTime >= 1.0) { // If last prinf() was more than 1 sec ago
+                    // printf and reset timer
+                    printf("%f ms/frame %f fps\n", 1000.0 / double(nbFrames), double(nbFrames));
+                    nbFrames = 0;
+                    lastTime += 1.0;
+                    counter++;
+                }
+            }
             
+            // inputs and update world
+            world.OnUpdate();
 
-            GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
+
+            // draw background
+            int size = 75;
+
+            float zoomedWidth  = -1 * (-1 * (float)(WIDTH / 2) - ((WIDTH / 2) * world.GetZoomAmount()));
+            float zoomedHeight = -1 * (-1 * (float)(HEIGHT / 2) - ((HEIGHT / 2) * world.GetZoomAmount()));
+
+            int startDrawX = (-1 * ((world.GetPosition().x / size) + (zoomedWidth / size))) - 1;
+            int startDrawY = (-1 * ((world.GetPosition().y / size) + (zoomedHeight / size))) - 1;
+            int amountToDrawX = (zoomedWidth / size)*2;
+            int amountToDrawY = (zoomedHeight / size)*2;
+            
+            int extraQuads = 3;
+            for (int x = startDrawX; x < startDrawX + amountToDrawX + extraQuads; x++) {
+                for (int y = startDrawY; y < startDrawY + amountToDrawY + extraQuads; y++) {
+                    renderer.AddQuad(1, size, x * size, y * size);
+                }
+            }
 
             ImGui_ImplGlfwGL3_NewFrame();
+            
+            renderer.OnRender(WIDTH, HEIGHT, world.GetPosition(), world.GetZoomAmount());
 
-            renderer.OnRender();
+            renderer.Clean();
 
             glfwSwapBuffers(window);
 

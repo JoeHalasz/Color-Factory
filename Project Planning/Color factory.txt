@@ -10,6 +10,7 @@ INPUTS -
 FACTORY - 
 	Belts
 		move colors around. 
+		spliters and mergers
 
 	Machines
 		machines to combine the colors
