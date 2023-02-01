@@ -100,7 +100,7 @@ void Renderer::AddQuad(float textureID, float size, float x, float y, float z)
     m_AllQuads.push_back(CreateQuad(textureID, size, x, y, z));
 }
 
-void Renderer::OnRender(int width, int height, glm::vec3 position, float zoomAmount, float rotation)
+void Renderer::OnRender(int width, int height, World world)
 {
     Clear();
     // set dynamic vertex buffer
@@ -121,13 +121,13 @@ void Renderer::OnRender(int width, int height, glm::vec3 position, float zoomAmo
     m_VertexBuffer->Bind();
     GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(Vertex), vertices.data()));
 
-    float v1 = -1 * (float)(width/2) - ((width/2) * zoomAmount);
+    float v1 = -1 * (float)(width/2) - ((width/2) * world.GetZoomAmount());
     float v2 = -1 * v1;
-    float v3 = -1 * (float)(height/2) - ((height/2) * zoomAmount);
+    float v3 = -1 * (float)(height/2) - ((height/2) * world.GetZoomAmount());
     float v4 = -1 * v3;
 
     glm::mat4 proj = glm::ortho(v1, v2, v3, v4, -1.0f, 1.0f);
-    glm::mat4 view = glm::translate(glm::mat4(1.0f), position);
+    glm::mat4 view = glm::translate(glm::mat4(1.0f), world.GetPosition());
     Clear();
 
     for (unsigned int i = 0; i < m_Textures.size(); i++) {
@@ -136,17 +136,10 @@ void Renderer::OnRender(int width, int height, glm::vec3 position, float zoomAmo
     int samplers[2] = { 0, 1 };
     m_Shader->SetUniform1iv("u_Textures", 2, samplers);
 
-    // rotation
-    glm::vec3 EulerAngles(0, 0, rotation);
-    glm::quat MyQuaternion = glm::quat(EulerAngles);
-    if (rotation != 0) {
-        glRotatef(45, 0, 0, 1); // now rotate
-        std::cout << "rotating" << std::endl;
+    if (world.IS3D) {
+        view = glm::rotate(view, glm::radians(world.GetRotation()), glm::vec3(1, 0, 0));
+        proj = glm::perspective(glm::radians(90.0f), v2/v4, -1.0f, 1.0f);
     }
-    MyQuaternion *= glm::quat(glm::vec3(3.14/180, 3.14 / 180, 3.14 / 180));
-    
-    glm::mat4 RotationMatrix = glm::toMat4(MyQuaternion);
-
 
     {
         glm::mat4 mvp = proj * view;

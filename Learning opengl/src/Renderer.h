@@ -9,7 +9,7 @@
 #include "VertexBufferLayout.h"
 #include "Shader.h"
 #include "Texture.h"
-
+#include "World.h"
 
 struct Vec3 { float x, y, z; };
 struct Vec2 { float x, y; };
@@ -37,7 +37,7 @@ public:
     void Clear() const;
     void DeleteQuads();
     void Draw() const;
-    void OnRender(int width, int height, glm::vec3 position, float zoomAmount, float rotation);
+    void OnRender(int width, int height, World world);
     void AddQuad(float textureID, float size, float x, float y, float z = 1.0f);
     inline unsigned int GetAmountOfCurrentQuads() { return m_AllQuads.size(); }
     inline unsigned int GetMaxAmountOfQuads() { return m_MAXNUMQUADS; }

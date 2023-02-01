@@ -135,9 +135,11 @@ int main(void)
             {
                 std::cout << "Drawing " << renderer.GetAmountOfCurrentQuads() << "/" << renderer.GetMaxAmountOfQuads() 
                     << " Quads: " << ((float)renderer.GetAmountOfCurrentQuads() / renderer.GetMaxAmountOfQuads()) * 100 << "% " << std::endl;
+                std::cout << world.GetPosition().x << ", " << world.GetPosition().y << ", " << world.GetPosition().z << std::endl;
+                std::cout << world.GetRotation() << std::endl;
             }
 
-            renderer.OnRender(WIDTH, HEIGHT, world.GetPosition(), world.GetZoomAmount(), world.GetRotation());
+            renderer.OnRender(WIDTH, HEIGHT, world);
 
             renderer.DeleteQuads();
 

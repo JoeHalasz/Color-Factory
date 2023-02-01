@@ -4,82 +4,67 @@
 #include <iostream>
 #include <iomanip>
 
-
 World::World(GLFWwindow* window)
-    :m_Window(window), m_Position(glm::vec3(0.0f, 0.0f, 0.0f)), m_Speed(glm::vec3(0.0f, 0.0f, 0.0f))
+    :m_Window(window)
 {
+    if (IS3D)
+    {
+        m_Position.z = -350;
+    }
 }
 
 World::World(GLFWwindow* window, glm::vec3 position)
-    :m_Window(window), m_Position(position), m_Speed(glm::vec3(0.0f, 0.0f, 0.0f))
+    :m_Window(window), m_Position(position)
 {
+    if (IS3D)
+    {
+        m_Position.z = -350;
+    }
 }
 
 World::World(GLFWwindow* window, glm::vec3 position, glm::vec3 speed)
     :m_Window(window), m_Position(position), m_Speed(speed)
 {
+    if (IS3D)
+    {
+        m_Position.z = -350;
+    }
 }
 
 World::~World()
 {
 }
 
+bool World::KeyPressed(int key)
+{
+    int action = glfwGetKey(m_Window, key);
+    if (action == GLFW_PRESS || action == GLFW_REPEAT) return true;
+    return false;
+}
+
 void World::checkKeyPresses()
 {
-    int action;
-    action = glfwGetKey(m_Window, GLFW_KEY_LEFT_SHIFT);
     float MOVE_SPEED = ORIGINAL_MOVE_SPEED;
-    if (action == GLFW_PRESS || action == GLFW_REPEAT)
-    {
-        MOVE_SPEED *= 2;
+    int action;
+     
+    if (KeyPressed(GLFW_KEY_LEFT_SHIFT)) MOVE_SPEED *= 2;
+
+    if (KeyPressed(GLFW_KEY_W)) m_Speed += glm::vec3(0.0f, -1*MOVE_SPEED, 0.0f);
+    if (KeyPressed(GLFW_KEY_S)) m_Speed += glm::vec3(0.0f, MOVE_SPEED, 0.0f);
+    if (KeyPressed(GLFW_KEY_A)) m_Speed += glm::vec3(MOVE_SPEED, 0.0f, 0.0f);
+    if (KeyPressed(GLFW_KEY_D)) m_Speed += glm::vec3(-1*MOVE_SPEED, 0.0f, 0.0f);
+
+    if (KeyPressed(GLFW_KEY_T)) m_ZoomChange += ZOOM_CHANGE_BY;
+    if (KeyPressed(GLFW_KEY_Y)) m_ZoomChange -= ZOOM_CHANGE_BY;
+    if (KeyPressed(GLFW_KEY_SPACE)) m_Position = glm::vec3(0, 0, 0);
+    if (IS3D) {
+        if (KeyPressed(GLFW_KEY_E)) m_Speed += glm::vec3(0.0f, 0.0f, -1 * MOVE_SPEED);
+        if (KeyPressed(GLFW_KEY_Q)) m_Speed += glm::vec3(0.0f, 0.0f, MOVE_SPEED);
+        if (KeyPressed(GLFW_KEY_G)) m_RotationChange += ROTATION_SPEED;
+        if (KeyPressed(GLFW_KEY_H)) m_RotationChange -= ROTATION_SPEED;
     }
-    action = glfwGetKey(m_Window, GLFW_KEY_W);
-    if (action == GLFW_PRESS || action == GLFW_REPEAT)
-    {
-        m_Speed += glm::vec3(0.0f, -1*MOVE_SPEED, 0.0f);
-    }
-    action = glfwGetKey(m_Window, GLFW_KEY_S);
-    if (action == GLFW_PRESS || action == GLFW_REPEAT)
-    {
-        m_Speed += glm::vec3(0.0f, MOVE_SPEED, 0.0f);
-    }
-    action = glfwGetKey(m_Window, GLFW_KEY_A);
-    if (action == GLFW_PRESS || action == GLFW_REPEAT)
-    {
-        
-        m_Speed += glm::vec3(MOVE_SPEED, 0.0f, 0.0f);
-    }
-    action = glfwGetKey(m_Window, GLFW_KEY_D);
-    if (action == GLFW_PRESS || action == GLFW_REPEAT)
-    {
-        
-        m_Speed += glm::vec3(-1*MOVE_SPEED, 0.0f, 0.0f);
-    }
-    action = glfwGetKey(m_Window, GLFW_KEY_T);
-    if (action == GLFW_PRESS || action == GLFW_REPEAT)
-    {
-        m_ZoomChange += ZOOM_CHANGE_BY;
-    }
-    action = glfwGetKey(m_Window, GLFW_KEY_Y);
-    if (action == GLFW_PRESS || action == GLFW_REPEAT)
-    {
-        m_ZoomChange -= ZOOM_CHANGE_BY;
-    }
-    action = glfwGetKey(m_Window, GLFW_KEY_SPACE);
-    if (action == GLFW_PRESS || action == GLFW_REPEAT)
-    {
-        m_Position = glm::vec3(0, 0, 0);
-    }
-    action = glfwGetKey(m_Window, GLFW_KEY_G);
-    if (action == GLFW_PRESS || action == GLFW_REPEAT)
-    {
-        m_RotationChange += .01f;
-    }
-    action = glfwGetKey(m_Window, GLFW_KEY_H);
-    if (action == GLFW_PRESS || action == GLFW_REPEAT)
-    {
-        m_RotationChange -= .01f;
-    }
+    
+    
 }
 
 void World::OnUpdate()
