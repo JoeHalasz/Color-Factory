@@ -127,7 +127,7 @@ int main(void)
                     renderer.AddQuad(1, size, x * size, y * size);
                 }
             }
-
+            
             renderer.AddQuad(0, size, 0, 0);
 
             ImGui_ImplGlfwGL3_NewFrame();
@@ -136,9 +136,10 @@ int main(void)
                 std::cout << "Drawing " << renderer.GetAmountOfCurrentQuads() << "/" << renderer.GetMaxAmountOfQuads() 
                     << " Quads: " << ((float)renderer.GetAmountOfCurrentQuads() / renderer.GetMaxAmountOfQuads()) * 100 << "% " << std::endl;
             }
+
             renderer.OnRender(WIDTH, HEIGHT, world.GetPosition(), world.GetZoomAmount(), world.GetRotation());
 
-            renderer.Clean();
+            renderer.DeleteQuads();
 
             glfwSwapBuffers(window);
 

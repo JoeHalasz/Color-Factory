@@ -84,8 +84,7 @@ Renderer::Renderer()
 void Renderer::Clear() const
 {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+    glClear(GL_COLOR_BUFFER_BIT );
 }
 
 void Renderer::Draw() const
@@ -103,6 +102,7 @@ void Renderer::AddQuad(float textureID, float size, float x, float y, float z)
 
 void Renderer::OnRender(int width, int height, glm::vec3 position, float zoomAmount, float rotation)
 {
+    Clear();
     // set dynamic vertex buffer
     std::vector<Vertex> vertices(m_AllQuads.size()*4);
     if (m_MAXNUMQUADS < m_AllQuads.size())
@@ -139,7 +139,10 @@ void Renderer::OnRender(int width, int height, glm::vec3 position, float zoomAmo
     // rotation
     glm::vec3 EulerAngles(0, 0, rotation);
     glm::quat MyQuaternion = glm::quat(EulerAngles);
-    
+    if (rotation != 0) {
+        glRotatef(45, 0, 0, 1); // now rotate
+        std::cout << "rotating" << std::endl;
+    }
     MyQuaternion *= glm::quat(glm::vec3(3.14/180, 3.14 / 180, 3.14 / 180));
     
     glm::mat4 RotationMatrix = glm::toMat4(MyQuaternion);
@@ -154,7 +157,7 @@ void Renderer::OnRender(int width, int height, glm::vec3 position, float zoomAmo
     }
 }
 
-void Renderer::Clean()
+void Renderer::DeleteQuads()
 {
     m_AllQuads.clear();
 }

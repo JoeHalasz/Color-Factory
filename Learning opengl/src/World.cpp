@@ -93,7 +93,6 @@ void World::OnUpdate()
         m_ZoomAmount = ZOOM_MIN;
     }
     m_Position += m_Speed + (m_Speed * m_ZoomAmount);
-    m_Position.z = 0; // this might fix white artifacts some times
     m_Rotation += m_RotationChange;
     m_RotationChange = 0;
     m_Speed = glm::vec3(0.0f);

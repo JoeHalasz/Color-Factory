@@ -35,7 +35,7 @@ private:
 public:
     Renderer();
     void Clear() const;
-    void Clean();
+    void DeleteQuads();
     void Draw() const;
     void OnRender(int width, int height, glm::vec3 position, float zoomAmount, float rotation);
     void AddQuad(float textureID, float size, float x, float y, float z = 1.0f);
