@@ -46,7 +46,7 @@ void World::checkKeyPresses()
 {
     float MOVE_SPEED = ORIGINAL_MOVE_SPEED;
     int action;
-     
+
     if (KeyPressed(GLFW_KEY_LEFT_SHIFT)) MOVE_SPEED *= 2;
 
     if (KeyPressed(GLFW_KEY_W)) m_Speed += glm::vec3(0.0f, -1*MOVE_SPEED, 0.0f);

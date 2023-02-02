@@ -13,15 +13,13 @@ private:
 	float m_ZoomChange = 0;
 	float m_Rotation = 0;
 	float m_RotationChange = 0;
-	
-
 	float ZOOM_MAX = 3.0f;
 	float ZOOM_MIN = .01f;
 	float ZOOM_CHANGE_BY = .02f;
 	float ORIGINAL_MOVE_SPEED = 5.0f;
 	float ROTATION_SPEED = .25f;
 public:
-	bool IS3D = false;
+	bool IS3D = false; // Only works if there is only one texture
 	
 	World(GLFWwindow* window);
 	World(GLFWwindow* window, glm::vec3 position);

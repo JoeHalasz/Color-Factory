@@ -57,7 +57,6 @@ Renderer::Renderer()
 {
     m_MAXNUMQUADS = 100000;
 
-    std::vector<unsigned int> indices = makeIndices(m_MAXNUMQUADS);
     GLCall(glEnable(GL_BLEND));
     GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
@@ -70,13 +69,12 @@ Renderer::Renderer()
     m_Layout->Push<float>(1);
     m_VertexArray->AddBuffer(*m_VertexBuffer, *m_Layout);
 
-    m_IndexBuffer = std::make_unique<IndexBuffer>(indices.data(), indices.size());
-
     m_Shader = std::make_unique<Shader>("res/shaders/vertex.shader", "res/shaders/fragment.shader");
     m_Shader->Bind();
 
     m_Textures.push_back(std::make_unique<Texture>("res/textures/floortile.png"));
     m_Textures.push_back(std::make_unique<Texture>("res/textures/floortile dark.png"));
+    m_Textures.push_back(std::make_unique<Texture>("res/textures/conveyor belt.png"));
 
 
 }
@@ -102,6 +100,8 @@ void Renderer::AddQuad(float textureID, float size, float x, float y, float z)
 
 void Renderer::OnRender(int width, int height, World world)
 {
+    std::vector<unsigned int> indices = makeIndices(m_AllQuads.size());
+    m_IndexBuffer = std::make_unique<IndexBuffer>(indices.data(), indices.size());
     Clear();
     // set dynamic vertex buffer
     std::vector<Vertex> vertices(m_AllQuads.size()*4);
@@ -133,8 +133,8 @@ void Renderer::OnRender(int width, int height, World world)
     for (unsigned int i = 0; i < m_Textures.size(); i++) {
         m_Textures[i]->Bind(i);
     }
-    int samplers[2] = { 0, 1 };
-    m_Shader->SetUniform1iv("u_Textures", 2, samplers);
+    int samplers[3] = { 0, 1, 2};
+    m_Shader->SetUniform1iv("u_Textures", 3, samplers);
 
     if (world.IS3D) {
         view = glm::rotate(view, glm::radians(world.GetRotation()), glm::vec3(1, 0, 0));

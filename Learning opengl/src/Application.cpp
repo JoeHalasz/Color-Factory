@@ -18,6 +18,14 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw_gl3.h"
 
+
+double mouseXpos = 0;
+double mouseYpos = 0;
+static void cursor_position_callback(GLFWwindow* window, double mouseXpos, double mouseYpos)
+{
+    glfwGetCursorPos(window, &mouseXpos, &mouseYpos);
+}
+
 int main(void)
 {
     GLFWwindow* window;
@@ -40,6 +48,7 @@ int main(void)
         WIDTH = mode->width;
         HEIGHT = mode->height;
         window = glfwCreateWindow(WIDTH, HEIGHT, "Color Factory", NULL, NULL);
+        
         glfwSetWindowMonitor(window, monitor, 0, 0, WIDTH, HEIGHT, mode->refreshRate);
     }
     else
@@ -56,10 +65,13 @@ int main(void)
         glfwTerminate();
         return -1;
     }
+    glfwSetCursorPosCallback(window, cursor_position_callback);
     
 
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
+
+    
     
 
     glfwSwapInterval(1);
@@ -70,8 +82,6 @@ int main(void)
     }
 
     { // this fixes some error when trying to close the window
-
-
 
         Renderer renderer;
 
@@ -90,6 +100,16 @@ int main(void)
         bool printStuff = true;
         while (!glfwWindowShouldClose(window))
         {
+            int lastWidth = WIDTH;
+            int lastHeight = HEIGHT;
+            glfwGetWindowSize(window, &WIDTH, &HEIGHT);
+            if (lastWidth != WIDTH || lastHeight != HEIGHT) {
+                // window was resized. HELP
+                std::cout << "window was resized. HELP" << std::endl;
+            }
+            if (mouseXpos != 0 || mouseYpos != 0) {
+                std::cout << mouseXpos << " " << mouseYpos << std::endl;
+            }
             bool beenOneSecond = false;
             // Measure fps
             if (printStuff) {
@@ -108,7 +128,6 @@ int main(void)
             
             // inputs and update world
             world.OnUpdate();
-
 
             // draw background
             int size = 75;
@@ -129,14 +148,16 @@ int main(void)
             }
             
             renderer.AddQuad(0, size, 0, 0);
+            renderer.AddQuad(2, size, 0, 1 * size);
+            renderer.AddQuad(2, size, 0, 2 * size);
+            renderer.AddQuad(2, size, 0, 3 * size);
+            renderer.AddQuad(2, size, 0, 4 * size);
 
             ImGui_ImplGlfwGL3_NewFrame();
             if (beenOneSecond && printStuff)
             {
                 std::cout << "Drawing " << renderer.GetAmountOfCurrentQuads() << "/" << renderer.GetMaxAmountOfQuads() 
                     << " Quads: " << ((float)renderer.GetAmountOfCurrentQuads() / renderer.GetMaxAmountOfQuads()) * 100 << "% " << std::endl;
-                std::cout << world.GetPosition().x << ", " << world.GetPosition().y << ", " << world.GetPosition().z << std::endl;
-                std::cout << world.GetRotation() << std::endl;
             }
 
             renderer.OnRender(WIDTH, HEIGHT, world);
