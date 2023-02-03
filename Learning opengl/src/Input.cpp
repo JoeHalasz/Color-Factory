@@ -73,12 +73,21 @@ void Input::CheckInputPresses()
      
     if (glfwGetMouseButton(m_Window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
     {
-        m_MouseDown = true;
+        m_LeftMouseDown = true;
     }
     else {
-        if (m_MouseDown) m_MouseUp = true;
-        else m_MouseUp = false;
-        m_MouseDown = false;
+        if (m_LeftMouseDown) m_LeftMouseUp = true;
+        else m_LeftMouseUp = false;
+        m_LeftMouseDown = false;
+    }
+    if (glfwGetMouseButton(m_Window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
+    {
+        m_RightMouseDown = true;
+    }
+    else {
+        if (m_RightMouseDown) m_RightMouseUp = true;
+        else m_RightMouseUp = false;
+        m_RightMouseDown = false;
     }
 
     if (IS3D) {

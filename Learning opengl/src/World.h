@@ -39,6 +39,7 @@ public:
 	void OnUpdate(Input* input);
 	bool AddWorldTile(WorldTile tile);
 	bool AddWorldTileBelt(WorldTile tile);
+	void DeleteAllInTile(glm::vec3 pos);
 
 	inline glm::vec3 GetPosition() const { return m_Position; }
 	inline int GetZoomAmount() const { return (int)m_ZoomAmount;  }

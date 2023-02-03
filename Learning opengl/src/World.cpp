@@ -68,16 +68,20 @@ void World::OnUpdate(Input* input)
     if (mousePosY < 0) mousePosY = floor(mousePosY);
     else mousePosY = floor(mousePosY);
 
-    if (input->GetMouseDown())
+    if (input->GetLeftMouseDown())
     {
-        switch (input->GetLastNumPressed()) {
-        case(1): AddBelt(TileTypeYellowArrow, glm::vec3(mousePosX, mousePosY, 1), (Direction)input->GetDirection()); break;
-        case(2): AddBelt(TileTypeOrangeArrow, glm::vec3(mousePosX, mousePosY, 1), (Direction)input->GetDirection()); break;
-        case(3): AddBelt(TileTypeRedArrow, glm::vec3(mousePosX, mousePosY, 1), (Direction)input->GetDirection()); break;
-        default: std::cout << "No tile for that number yet" << std::endl;
+        switch (input->GetLastNumPressed()) 
+        {
+            case(1): AddBelt(TileTypeYellowArrow, glm::vec3(mousePosX, mousePosY, 1), (Direction)input->GetDirection()); break;
+            case(2): AddBelt(TileTypeOrangeArrow, glm::vec3(mousePosX, mousePosY, 1), (Direction)input->GetDirection()); break;
+            case(3): AddBelt(TileTypeRedArrow, glm::vec3(mousePosX, mousePosY, 1), (Direction)input->GetDirection()); break;
+            default: std::cout << "No tile for that number yet" << std::endl;
         }
     }
-
+    if (input->GetRightMouseDown())
+    {
+        DeleteAllInTile(glm::vec3(mousePosX, mousePosY, 1));
+    }
 
     input->Reset();
 }
@@ -121,4 +125,9 @@ bool World::AddWorldTileBelt(WorldTile tile)
     }
 
     return false;
+}
+
+void World::DeleteAllInTile(glm::vec3 pos)
+{
+    m_WorldTiles[pos.x][pos.y].clear();
 }

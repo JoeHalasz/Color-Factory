@@ -24,8 +24,11 @@ private:
 
 	double m_ScrollOffset = 0;
 
-	bool m_MouseDown = false;
-	bool m_MouseUp = false;
+	bool m_LeftMouseDown = false;
+	bool m_LeftMouseUp = false;
+
+	bool m_RightMouseDown = false;
+	bool m_RightMouseUp = false;
 
 	Direction m_Direction = DirectionUp;
 	
@@ -44,8 +47,10 @@ public:
 	inline float GetChangeZoom() { return m_ScrollOffset; }
 	inline double GetMousePosX() { return m_MousePosX; }
 	inline double GetMousePosY() { return m_MousePosY; }
-	inline bool GetMouseUp() { return m_MouseUp; }
-	inline bool GetMouseDown() { return m_MouseDown; }
+	inline bool GetLeftMouseUp() { return m_LeftMouseUp; }
+	inline bool GetLeftMouseDown() { return m_LeftMouseDown; }
+	inline bool GetRightMouseUp() { return m_RightMouseUp; }
+	inline bool GetRightMouseDown() { return m_RightMouseDown; }
 	inline int GetLastNumPressed() { return m_LastNumPressed; }
 	inline int GetDirection() { return m_Direction; }
 	inline void ChangeDirection(){ m_Direction = (Direction)((int)m_Direction + 1); if (m_Direction == 4) m_Direction = (Direction)0; }
