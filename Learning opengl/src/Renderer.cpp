@@ -55,7 +55,7 @@ static std::vector<Vertex> CreateQuad(float textureID, float size, float x, floa
 
 Renderer::Renderer()
 {
-    m_MAXNUMQUADS = 100000;
+    m_MAXNUMQUADS = 2000000;
 
     GLCall(glEnable(GL_BLEND));
     GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
@@ -72,13 +72,15 @@ Renderer::Renderer()
     m_Shader = std::make_unique<Shader>("res/shaders/vertex.shader", "res/shaders/fragment.shader");
     m_Shader->Bind();
 
-    m_Textures.push_back(std::make_unique<Texture>("res/textures/floortile.png"));
-    m_Textures.push_back(std::make_unique<Texture>("res/textures/floortile dark.png"));
-    m_Textures.push_back(std::make_unique<Texture>("res/textures/conveyor belt.png"));
-    m_Textures.push_back(std::make_unique<Texture>("res/textures/belts/round.png"));
+    m_Textures.push_back(std::make_unique<Texture>("res/textures/background/floortile.png"));
+    m_Textures.push_back(std::make_unique<Texture>("res/textures/background/floortile dark.png"));
+    m_Textures.push_back(std::make_unique<Texture>("res/textures/belts/single belt.png"));
+    m_Textures.push_back(std::make_unique<Texture>("res/textures/belts/one connect belt.png"));
+    m_Textures.push_back(std::make_unique<Texture>("res/textures/belts/two connect belt.png"));
+    m_Textures.push_back(std::make_unique<Texture>("res/textures/belts/turn belt.png"));
     m_Textures.push_back(std::make_unique<Texture>("res/textures/belts/yellow arrow.png"));
-
-
+    m_Textures.push_back(std::make_unique<Texture>("res/textures/belts/orange arrow.png"));
+    m_Textures.push_back(std::make_unique<Texture>("res/textures/belts/red arrow.png"));
 }
 
 void Renderer::Clear() const
@@ -102,6 +104,11 @@ void Renderer::AddQuad(float textureID, float size, float x, float y, float z)
 
 void Renderer::OnRender(int width, int height, World world)
 {
+    std::vector<WorldTile> worldTiles = world.GetWorldTiles();
+    for (int i = 0; i < worldTiles.size();i++)
+    {
+        AddQuad( worldTiles[i].GetType(), worldTiles[i].GetSize(), worldTiles[i].GetPos().x, worldTiles[i].GetPos().y, worldTiles[i].GetPos().z);
+    }
     std::vector<unsigned int> indices = makeIndices(m_AllQuads.size());
     m_IndexBuffer = std::make_unique<IndexBuffer>(indices.data(), indices.size());
     Clear();
@@ -136,8 +143,8 @@ void Renderer::OnRender(int width, int height, World world)
     for (unsigned int i = 0; i < m_Textures.size(); i++) {
         m_Textures[i]->Bind(i);
     }
-    int samplers[5] = { 0, 1, 2, 3, 4};
-    m_Shader->SetUniform1iv("u_Textures", 5, samplers);
+    int samplers[9] = { 0, 1, 2, 3, 4, 5, 6, 7, 8};
+    m_Shader->SetUniform1iv("u_Textures", 9, samplers);
 
     if (world.IS3D) {
         view = glm::rotate(view, glm::radians(world.GetRotation()), glm::vec3(1, 0, 0));

@@ -51,6 +51,16 @@ void Input::CheckInputPresses()
     if (KeyHeld(GLFW_KEY_A)) m_Speed += glm::vec3(MOVE_SPEED, 0.0f, 0.0f);
     if (KeyHeld(GLFW_KEY_D)) m_Speed += glm::vec3(-1 * MOVE_SPEED, 0.0f, 0.0f);
 
+    if (KeyHeld(GLFW_KEY_1)) m_LastNumPressed = 1;
+    if (KeyHeld(GLFW_KEY_2)) m_LastNumPressed = 2;
+    if (KeyHeld(GLFW_KEY_3)) m_LastNumPressed = 3;
+    if (KeyHeld(GLFW_KEY_4)) m_LastNumPressed = 4;
+    if (KeyHeld(GLFW_KEY_5)) m_LastNumPressed = 5;
+    if (KeyHeld(GLFW_KEY_6)) m_LastNumPressed = 6;
+    if (KeyHeld(GLFW_KEY_7)) m_LastNumPressed = 7;
+    if (KeyHeld(GLFW_KEY_8)) m_LastNumPressed = 8;
+    if (KeyHeld(GLFW_KEY_9)) m_LastNumPressed = 9;
+
     if (KeyPressed(GLFW_KEY_SPACE)) changePos = true; m_NewPos = glm::vec3(0, 0, 0);
 
     if (glfwGetMouseButton(m_Window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)

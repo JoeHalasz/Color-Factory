@@ -16,6 +16,8 @@ private:
 	bool changePos = false;
 	glm::vec3 m_NewPos = glm::vec3(0.0f);
 
+	int m_LastNumPressed = 1;
+
 	double m_MousePosX = 0;
 	double m_MousePosY = 0;
 
@@ -42,6 +44,7 @@ public:
 	inline double GetMousePosY() { return m_MousePosY; }
 	inline bool GetMouseUp() { return m_MouseUp; }
 	inline bool GetMouseDown() { return m_MouseDown; }
+	inline int GetLastNumPressed() { return m_LastNumPressed; }
 	void SetMouseXandY(double x, double y);
 	void SetScrollOffset(double offset);
 };

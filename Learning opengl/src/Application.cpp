@@ -12,6 +12,7 @@
 #include "Shader.h"
 #include "World.h"
 #include "Texture.h"
+#include "WorldTile.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -139,34 +140,19 @@ int main(void)
             int extraQuads = 3;
             for (int x = startDrawX; x < startDrawX + amountToDrawX + extraQuads; x++) {
                 for (int y = startDrawY; y < startDrawY + amountToDrawY + extraQuads; y++) {
-                    renderer.AddQuad(0, size, x * size, y * size);
+                    renderer.AddQuad(1, size, x * size, y * size);
                 }
             }
 
-            double mousePosX = ((((input.GetMousePosX() / (WIDTH / 2)) * zoomedWidth) - zoomedWidth) - world.GetPosition().x )/size;
-            double mousePosY = -1*((((input.GetMousePosY() / (HEIGHT / 2)) * zoomedHeight) - zoomedHeight) + world.GetPosition().y) / size;
-
-            if (mousePosX < 0) mousePosX = floor(mousePosX);
-            else mousePosX = floor(mousePosX);
-            if (mousePosY < 0) mousePosY = floor(mousePosY);
-            else mousePosY = floor(mousePosY);
-
-            if (input.GetMouseDown())
-            {
-                // place block here
-                //std::cout << world.GetMousePosX() << " " << world.GetMousePosY() << std::endl;
-                renderer.AddQuad(3, size, mousePosX*size, mousePosY * size);
-                renderer.AddQuad(4, size, mousePosX*size, mousePosY * size);
-            }
-
             ImGui_ImplGlfwGL3_NewFrame();
-            if (beenOneSecond && printStuff)
-            {
-                std::cout << "Drawing " << renderer.GetAmountOfCurrentQuads() << "/" << renderer.GetMaxAmountOfQuads() 
-                    << " Quads: " << ((float)renderer.GetAmountOfCurrentQuads() / renderer.GetMaxAmountOfQuads()) * 100 << "% " << std::endl;
-            }
+            
 
             renderer.OnRender(WIDTH, HEIGHT, world);
+            if (beenOneSecond && printStuff)
+            {
+                std::cout << "Drawing " << renderer.GetAmountOfCurrentQuads() << "/" << renderer.GetMaxAmountOfQuads()
+                    << " Quads: " << ((float)renderer.GetAmountOfCurrentQuads() / renderer.GetMaxAmountOfQuads()) * 100 << "% " << std::endl;
+            }
 
             renderer.DeleteQuads();
 
