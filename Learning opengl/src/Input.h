@@ -2,13 +2,14 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h> 
 #include "glm/glm.hpp"
+#include "WorldTile.h"
 
 class Input
 {
 private:
 	
 	glm::vec3 m_Speed = glm::vec3(0.0f, 0.0f, 0.0f);
-	float ORIGINAL_MOVE_SPEED = 5.0f;
+	float ORIGINAL_MOVE_SPEED = 10.0f;
 	float ZOOM_CHANGE_BY = .02f;
 	float ROTATION_SPEED = .25f;
 
@@ -26,6 +27,7 @@ private:
 	bool m_MouseDown = false;
 	bool m_MouseUp = false;
 
+	Direction m_Direction = DirectionUp;
 	
 public:
 	GLFWwindow* m_Window;
@@ -45,6 +47,8 @@ public:
 	inline bool GetMouseUp() { return m_MouseUp; }
 	inline bool GetMouseDown() { return m_MouseDown; }
 	inline int GetLastNumPressed() { return m_LastNumPressed; }
+	inline int GetDirection() { return m_Direction; }
+	inline void ChangeDirection(){ m_Direction = (Direction)((int)m_Direction + 1); if (m_Direction == 4) m_Direction = (Direction)0; }
 	void SetMouseXandY(double x, double y);
 	void SetScrollOffset(double offset);
 };

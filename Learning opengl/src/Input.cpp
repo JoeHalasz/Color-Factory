@@ -15,11 +15,17 @@ static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     i->SetScrollOffset(yoffset);
 }
 
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) { i->ChangeDirection(); }
+}
+
 Input::Input(GLFWwindow* window, bool IS3D)
     :m_Window(window), IS3D(IS3D)
 {
     glfwSetCursorPosCallback(window, cursor_position_callback);
     glfwSetScrollCallback(window, scroll_callback);
+    glfwSetKeyCallback(window, key_callback);
     i = this;
 }
 
@@ -33,7 +39,7 @@ bool Input::KeyHeld(int key)
 bool Input::KeyPressed(int key)
 {
     int action = glfwGetKey(m_Window, key);
-    if (action == GLFW_RELEASE) return true;
+    if (action == GLFW_PRESS) return true;
     return false;
 }
 
@@ -51,6 +57,8 @@ void Input::CheckInputPresses()
     if (KeyHeld(GLFW_KEY_A)) m_Speed += glm::vec3(MOVE_SPEED, 0.0f, 0.0f);
     if (KeyHeld(GLFW_KEY_D)) m_Speed += glm::vec3(-1 * MOVE_SPEED, 0.0f, 0.0f);
 
+    
+
     if (KeyHeld(GLFW_KEY_1)) m_LastNumPressed = 1;
     if (KeyHeld(GLFW_KEY_2)) m_LastNumPressed = 2;
     if (KeyHeld(GLFW_KEY_3)) m_LastNumPressed = 3;
@@ -62,7 +70,7 @@ void Input::CheckInputPresses()
     if (KeyHeld(GLFW_KEY_9)) m_LastNumPressed = 9;
 
     if (KeyPressed(GLFW_KEY_SPACE)) changePos = true; m_NewPos = glm::vec3(0, 0, 0);
-
+     
     if (glfwGetMouseButton(m_Window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
     {
         m_MouseDown = true;

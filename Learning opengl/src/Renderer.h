@@ -1,6 +1,7 @@
 #pragma once
 
 #include <GL/glew.h>
+#include <unordered_map>
 
 #include "VertexArray.h"
 #include "IndexBuffer.h"
@@ -31,6 +32,7 @@ private:
     std::unique_ptr<Shader> m_Shader;
     std::unique_ptr<VertexBufferLayout> m_Layout;
     std::vector<std::unique_ptr<Texture>> m_Textures;
+
     unsigned int m_MAXNUMQUADS;
 public:
     Renderer();
@@ -38,7 +40,8 @@ public:
     void DeleteQuads();
     void Draw() const;
     void OnRender(int width, int height, World world);
-    void AddQuad(float textureID, float size, float x, float y, float z = 1.0f);
+    void DrawWorld(World world, int width, int height);
+    void AddQuad(float textureID, float size, Direction direction, float x, float y, float z = 1.0f);
     inline unsigned int GetAmountOfCurrentQuads() { return m_AllQuads.size(); }
     inline unsigned int GetMaxAmountOfQuads() { return m_MAXNUMQUADS; }
 };

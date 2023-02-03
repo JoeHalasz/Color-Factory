@@ -40,7 +40,7 @@ int main(void)
 
     int WIDTH, HEIGHT;
 
-    if (0) // fullscreen
+    if (1) // fullscreen
     {
         WIDTH = mode->width;
         HEIGHT = mode->height;
@@ -122,31 +122,9 @@ int main(void)
             }
             // inputs and update world
             world.OnUpdate(&input);
-            
-
-            // draw background
-            int size = world.GetBlockSize();
-
-            float zoomedWidth = (WIDTH / 2) + (world.GetZoomAmount() * (WIDTH/20));
-            float zoomedHeight = (HEIGHT / 2) + (world.GetZoomAmount() * (HEIGHT/20));
-            
-            // std::cout << world.GetZoomAmount() << std::endl;
-            int startDrawX = (-1 * ((world.GetPosition().x / size) + (zoomedWidth / size))) - 1;
-            int startDrawY = (-1 * ((world.GetPosition().y / size) + (zoomedHeight / size))) - 1;
-
-            int amountToDrawX = (zoomedWidth / size)*2;
-            int amountToDrawY = (zoomedHeight / size)*2;
-            
-            int extraQuads = 3;
-            for (int x = startDrawX; x < startDrawX + amountToDrawX + extraQuads; x++) {
-                for (int y = startDrawY; y < startDrawY + amountToDrawY + extraQuads; y++) {
-                    renderer.AddQuad(1, size, x * size, y * size);
-                }
-            }
 
             ImGui_ImplGlfwGL3_NewFrame();
             
-
             renderer.OnRender(WIDTH, HEIGHT, world);
             if (beenOneSecond && printStuff)
             {

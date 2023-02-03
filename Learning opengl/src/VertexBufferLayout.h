@@ -36,7 +36,7 @@ public:
 	template<typename T>
 	void Push(unsigned int count)
 	{
-		std::cout << "I should not be here" << std::endl;
+		
 	}
 
 	template <>

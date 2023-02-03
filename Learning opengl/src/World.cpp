@@ -27,14 +27,15 @@ World::~World()
 }
 
 
-bool World::AddBelt(TileType beltColor, glm::vec3 pos)
+bool World::AddBelt(TileType beltColor, glm::vec3 pos, Direction direction)
 {
-    WorldTile beltBack(TileTypeSingleBelt, pos, m_BlockSize);
-    WorldTile arrow(beltColor, pos, m_BlockSize);
-    if (!AddWorldTile(beltBack))
+    WorldTile beltBack(TileTypeStraightBelt, pos, m_BlockSize, direction);
+    WorldTile arrow(beltColor, pos, m_BlockSize, direction);
+    if (!AddWorldTileBelt(beltBack))
         return false;
-    if (!AddWorldTile(arrow))
+    if (!AddWorldTileBelt(arrow))
         return false;
+
     return true;
 }
 
@@ -49,20 +50,16 @@ void World::OnUpdate(Input* input)
     if (m_ZoomAmount <= ZOOM_MIN) 
         m_ZoomAmount = ZOOM_MIN;
     
-    m_Position += input->GetSpeed() + (input->GetSpeed() * (float)m_ZoomAmount);
-
+    m_Position += input->GetSpeed() + (input->GetSpeed() * ((float)m_ZoomAmount/10));
     m_Rotation += input->GetRotationChange();
     
-    
-    
+   
     int WIDTH, HEIGHT;
     glfwGetWindowSize(m_Window, &WIDTH, &HEIGHT);
     
-    
     float zoomedWidth = (WIDTH / 2) + (m_ZoomAmount * (WIDTH / 20));
     float zoomedHeight = (HEIGHT / 2) + (m_ZoomAmount * (HEIGHT / 20));
-    
-    
+
     double mousePosX = ((((input->GetMousePosX() / (WIDTH / 2)) * zoomedWidth) - zoomedWidth) - m_Position.x) / m_BlockSize;
     double mousePosY = -1 * ((((input->GetMousePosY() / (HEIGHT / 2)) * zoomedHeight) - zoomedHeight) + m_Position.y) / m_BlockSize;
 
@@ -74,9 +71,9 @@ void World::OnUpdate(Input* input)
     if (input->GetMouseDown())
     {
         switch (input->GetLastNumPressed()) {
-        case(1): AddBelt(TileTypeYellowArrow, glm::vec3(mousePosX * m_BlockSize, mousePosY * m_BlockSize, 1)); break;
-        case(2): AddBelt(TileTypeOrangeArrow, glm::vec3(mousePosX * m_BlockSize, mousePosY * m_BlockSize, 1)); break;
-        case(3): AddBelt(TileTypeRedArrow, glm::vec3(mousePosX * m_BlockSize, mousePosY * m_BlockSize, 1)); break;
+        case(1): AddBelt(TileTypeYellowArrow, glm::vec3(mousePosX, mousePosY, 1), (Direction)input->GetDirection()); break;
+        case(2): AddBelt(TileTypeOrangeArrow, glm::vec3(mousePosX, mousePosY, 1), (Direction)input->GetDirection()); break;
+        case(3): AddBelt(TileTypeRedArrow, glm::vec3(mousePosX, mousePosY, 1), (Direction)input->GetDirection()); break;
         default: std::cout << "No tile for that number yet" << std::endl;
         }
     }
@@ -87,6 +84,41 @@ void World::OnUpdate(Input* input)
 
 bool World::AddWorldTile(WorldTile tile)
 {
-    m_WorldTiles.push_back(tile);
-    return true;
+    std::vector<WorldTile> worldTiles = m_WorldTiles[tile.GetPos().x][tile.GetPos().y];
+    if (worldTiles.size() == 0) // if there is nothing on that tile
+    {
+        m_WorldTiles[tile.GetPos().x][tile.GetPos().y].push_back(tile);
+        return true;
+    }
+        
+    return false;
+}
+
+bool World::AddWorldTileBelt(WorldTile tile)
+{
+    std::vector<WorldTile> worldTiles = m_WorldTiles[tile.GetPos().x][tile.GetPos().y];
+
+    if (worldTiles.size() < 2) // there is no belt here already
+    {
+        m_WorldTiles[tile.GetPos().x][tile.GetPos().y].push_back(tile);
+        return true;
+    }
+
+    for (int i = 0; i < worldTiles.size(); i++)
+    {
+        if (worldTiles[i].GetType() != TileTypeStraightBelt && worldTiles[i].GetType() != TileTypeTurnBelt && 
+            worldTiles[i].GetType() != TileTypeYellowArrow && worldTiles[i].GetType() != TileTypeOrangeArrow && 
+            worldTiles[i].GetType() != TileTypeRedArrow)
+        {
+            return false; // this means there is something on this space other than a belt
+        }
+    }
+    if (worldTiles.size() >= 2) // there is no belt here already
+    {
+        m_WorldTiles[tile.GetPos().x][tile.GetPos().y].clear(); // remove the belt thats there already
+        m_WorldTiles[tile.GetPos().x][tile.GetPos().y].push_back(tile);
+        return true;
+    }
+
+    return false;
 }
