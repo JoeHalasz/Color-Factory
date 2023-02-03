@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h> 
 #include <stdio.h>
 #include <iostream>
+#include <cmath>
 
 #include "Renderer.h"
 #include "VertexBuffer.h"
@@ -19,12 +20,7 @@
 #include "imgui/imgui_impl_glfw_gl3.h"
 
 
-double mouseXpos = 0;
-double mouseYpos = 0;
-static void cursor_position_callback(GLFWwindow* window, double mouseXpos, double mouseYpos)
-{
-    glfwGetCursorPos(window, &mouseXpos, &mouseYpos);
-}
+
 
 int main(void)
 {
@@ -65,7 +61,6 @@ int main(void)
         glfwTerminate();
         return -1;
     }
-    glfwSetCursorPosCallback(window, cursor_position_callback);
     
 
     /* Make the window's context current */
@@ -91,6 +86,8 @@ int main(void)
 
         // set up world
         World world(window);
+        // set up inputs
+        Input input(window, world.IS3D);
 
         // renderer.AddQuad(1, 50, 200, 100);
         double lastTime = glfwGetTime();
@@ -107,9 +104,6 @@ int main(void)
                 // window was resized. HELP
                 std::cout << "window was resized. HELP" << std::endl;
             }
-            if (mouseXpos != 0 || mouseYpos != 0) {
-                std::cout << mouseXpos << " " << mouseYpos << std::endl;
-            }
             bool beenOneSecond = false;
             // Measure fps
             if (printStuff) {
@@ -125,33 +119,45 @@ int main(void)
                     counter++;
                 }
             }
-            
             // inputs and update world
-            world.OnUpdate();
+            world.OnUpdate(&input);
+            
 
             // draw background
-            int size = 75;
+            int size = world.GetBlockSize();
 
-            float zoomedWidth  = -1 * (-1 * (float)(WIDTH / 2) - ((WIDTH / 2) * world.GetZoomAmount()));
-            float zoomedHeight = -1 * (-1 * (float)(HEIGHT / 2) - ((HEIGHT / 2) * world.GetZoomAmount()));
-
+            float zoomedWidth = (WIDTH / 2) + (world.GetZoomAmount() * (WIDTH/20));
+            float zoomedHeight = (HEIGHT / 2) + (world.GetZoomAmount() * (HEIGHT/20));
+            
+            // std::cout << world.GetZoomAmount() << std::endl;
             int startDrawX = (-1 * ((world.GetPosition().x / size) + (zoomedWidth / size))) - 1;
             int startDrawY = (-1 * ((world.GetPosition().y / size) + (zoomedHeight / size))) - 1;
+
             int amountToDrawX = (zoomedWidth / size)*2;
             int amountToDrawY = (zoomedHeight / size)*2;
             
             int extraQuads = 3;
             for (int x = startDrawX; x < startDrawX + amountToDrawX + extraQuads; x++) {
                 for (int y = startDrawY; y < startDrawY + amountToDrawY + extraQuads; y++) {
-                    renderer.AddQuad(1, size, x * size, y * size);
+                    renderer.AddQuad(0, size, x * size, y * size);
                 }
             }
-            
-            renderer.AddQuad(0, size, 0, 0);
-            renderer.AddQuad(2, size, 0, 1 * size);
-            renderer.AddQuad(2, size, 0, 2 * size);
-            renderer.AddQuad(2, size, 0, 3 * size);
-            renderer.AddQuad(2, size, 0, 4 * size);
+
+            double mousePosX = ((((input.GetMousePosX() / (WIDTH / 2)) * zoomedWidth) - zoomedWidth) - world.GetPosition().x )/size;
+            double mousePosY = -1*((((input.GetMousePosY() / (HEIGHT / 2)) * zoomedHeight) - zoomedHeight) + world.GetPosition().y) / size;
+
+            if (mousePosX < 0) mousePosX = floor(mousePosX);
+            else mousePosX = floor(mousePosX);
+            if (mousePosY < 0) mousePosY = floor(mousePosY);
+            else mousePosY = floor(mousePosY);
+
+            if (input.GetMouseDown())
+            {
+                // place block here
+                //std::cout << world.GetMousePosX() << " " << world.GetMousePosY() << std::endl;
+                renderer.AddQuad(3, size, mousePosX*size, mousePosY * size);
+                renderer.AddQuad(4, size, mousePosX*size, mousePosY * size);
+            }
 
             ImGui_ImplGlfwGL3_NewFrame();
             if (beenOneSecond && printStuff)

@@ -75,6 +75,8 @@ Renderer::Renderer()
     m_Textures.push_back(std::make_unique<Texture>("res/textures/floortile.png"));
     m_Textures.push_back(std::make_unique<Texture>("res/textures/floortile dark.png"));
     m_Textures.push_back(std::make_unique<Texture>("res/textures/conveyor belt.png"));
+    m_Textures.push_back(std::make_unique<Texture>("res/textures/belts/round.png"));
+    m_Textures.push_back(std::make_unique<Texture>("res/textures/belts/yellow arrow.png"));
 
 
 }
@@ -121,10 +123,11 @@ void Renderer::OnRender(int width, int height, World world)
     m_VertexBuffer->Bind();
     GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(Vertex), vertices.data()));
 
-    float v1 = -1 * (float)(width/2) - ((width/2) * world.GetZoomAmount());
+    float v1 = -1 * (width/2) - (world.GetZoomAmount() * (width/20));
     float v2 = -1 * v1;
-    float v3 = -1 * (float)(height/2) - ((height/2) * world.GetZoomAmount());
+    float v3 = -1 * (height/2) - (world.GetZoomAmount() * (height/20));
     float v4 = -1 * v3;
+
 
     glm::mat4 proj = glm::ortho(v1, v2, v3, v4, -1.0f, 1.0f);
     glm::mat4 view = glm::translate(glm::mat4(1.0f), world.GetPosition());
@@ -133,8 +136,8 @@ void Renderer::OnRender(int width, int height, World world)
     for (unsigned int i = 0; i < m_Textures.size(); i++) {
         m_Textures[i]->Bind(i);
     }
-    int samplers[3] = { 0, 1, 2};
-    m_Shader->SetUniform1iv("u_Textures", 3, samplers);
+    int samplers[5] = { 0, 1, 2, 3, 4};
+    m_Shader->SetUniform1iv("u_Textures", 5, samplers);
 
     if (world.IS3D) {
         view = glm::rotate(view, glm::radians(world.GetRotation()), glm::vec3(1, 0, 0));
