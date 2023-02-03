@@ -101,6 +101,7 @@ Renderer::Renderer()
     m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/background/floortile dark.png"));
     m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/belts/straight belt.png"));
     m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/belts/turn belt.png"));
+    m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/belts/turn belt backwards.png"));
     m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/belts/yellow arrow.png"));
     m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/belts/orange arrow.png"));
     m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/belts/red arrow.png"));
@@ -200,8 +201,8 @@ void Renderer::OnRender(int width, int height, World world)
     for (unsigned int i = 0; i < m_Textures.size(); i++) {
         m_Textures[i]->Bind(i);
     }
-    int samplers[7] = { 0, 1, 2, 3, 4, 5, 6};
-    m_Shader->SetUniform1iv("u_Textures", 7, samplers);
+    int samplers[8] = { 0, 1, 2, 3, 4, 5, 6, 7};
+    m_Shader->SetUniform1iv("u_Textures", 8, samplers);
 
     if (world.IS3D) {
         view = glm::rotate(view, glm::radians(world.GetRotation()), glm::vec3(1, 0, 0));

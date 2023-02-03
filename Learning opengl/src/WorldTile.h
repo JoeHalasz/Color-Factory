@@ -9,6 +9,7 @@ enum TileType
 	TileTypeBackgroundDark,
 	TileTypeStraightBelt,
 	TileTypeTurnBelt,
+	TileTypeTurnBeltBackwards,
 	TileTypeYellowArrow,
 	TileTypeOrangeArrow,
 	TileTypeRedArrow,
@@ -38,11 +39,11 @@ public:
 	bool operator==(const WorldTile& other);
 
 	inline TileType GetType() const { return m_Type; }
-	inline TileType SetType(TileType type) { m_Type = type; }
+	inline void SetType(TileType type) { m_Type = type; }
 	inline glm::vec3 GetPos() const { return m_WorldPos; }
 	inline int GetSize() const { return m_Size; }
 	inline int GetConnectedCount() const { return m_ConnectedCount; }
 	inline void UpdateConnectedCount(int udpate)  { m_ConnectedCount += udpate; }
 	inline Direction GetDirection() { return m_Direction; }
-	inline Direction SetDirection(Direction direction) { m_Direction = direction; }
+	inline void SetDirection(Direction direction) { m_Direction = direction; }
 };

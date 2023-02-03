@@ -26,11 +26,85 @@ World::~World()
 {
 }
 
+int World::GetBeltDirectionAt(int x, int y)
+{
+    std::vector<WorldTile> tiles = m_WorldTiles[x][y];
+    for (int i = 0; i < tiles.size(); i++)
+    {
+        if (tiles[i].GetType() == TileTypeStraightBelt || tiles[i].GetType() == TileTypeTurnBelt || tiles[i].GetType() == TileTypeTurnBeltBackwards)
+            return tiles[i].GetDirection();
+    }
+    return -1;
+}
 
 bool World::AddBelt(TileType beltColor, glm::vec3 pos, Direction direction)
 {
+
     WorldTile beltBack(TileTypeStraightBelt, pos, m_BlockSize, direction);
     WorldTile arrow(beltColor, pos, m_BlockSize, direction);
+
+    if (direction == DirectionUp)
+    {
+        
+        int leftBelt = GetBeltDirectionAt(pos.x - 1, pos.y);
+        int rightBelt = GetBeltDirectionAt(pos.x + 1, pos.y);
+        if (leftBelt == DirectionRight)
+        {
+            beltBack.SetType(TileTypeTurnBelt);
+        }
+        else if (rightBelt == DirectionLeft)
+        {
+            beltBack.SetType(TileTypeTurnBeltBackwards);
+            beltBack.SetDirection(DirectionRight);
+        }
+    }
+    if (direction == DirectionRight)
+    {
+        std::cout << "here" << std::endl;
+        int upBelt = GetBeltDirectionAt(pos.x, pos.y + 1);
+        int downBelt = GetBeltDirectionAt(pos.x, pos.y - 1);
+        if (upBelt == DirectionDown)
+        {
+            beltBack.SetType(TileTypeTurnBelt);
+            beltBack.SetDirection(DirectionRight);
+        }
+        else if (downBelt == DirectionUp)
+        {
+            beltBack.SetType(TileTypeTurnBeltBackwards);
+            beltBack.SetDirection(DirectionDown);
+        }
+    }
+    if (direction == DirectionDown)
+    {
+        int rightBelt = GetBeltDirectionAt(pos.x + 1, pos.y);
+        int leftBelt = GetBeltDirectionAt(pos.x - 1, pos.y);
+        if (rightBelt == DirectionLeft)
+        {
+            beltBack.SetType(TileTypeTurnBelt);
+            beltBack.SetDirection(DirectionDown);
+        }
+        else if (leftBelt == DirectionRight)
+        {
+            beltBack.SetType(TileTypeTurnBeltBackwards);
+            beltBack.SetDirection(DirectionLeft);
+        }
+    }
+    if (direction == DirectionLeft)
+    {
+        int downBelt = GetBeltDirectionAt(pos.x, pos.y - 1);
+
+        int upBelt = GetBeltDirectionAt(pos.x, pos.y + 1);
+        if (downBelt == DirectionUp)
+        {
+            beltBack.SetType(TileTypeTurnBelt);
+            beltBack.SetDirection(DirectionLeft);
+        }
+        else if (upBelt == DirectionDown)
+        {
+            beltBack.SetType(TileTypeTurnBeltBackwards);
+        }
+    }
+    
     if (!AddWorldTileBelt(beltBack))
         return false;
     if (!AddWorldTileBelt(arrow))
@@ -110,7 +184,7 @@ bool World::AddWorldTileBelt(WorldTile tile)
 
     for (int i = 0; i < worldTiles.size(); i++)
     {
-        if (worldTiles[i].GetType() != TileTypeStraightBelt && worldTiles[i].GetType() != TileTypeTurnBelt && 
+        if (worldTiles[i].GetType() != TileTypeStraightBelt && worldTiles[i].GetType() != TileTypeTurnBelt && worldTiles[i].GetType() != TileTypeTurnBeltBackwards &&
             worldTiles[i].GetType() != TileTypeYellowArrow && worldTiles[i].GetType() != TileTypeOrangeArrow && 
             worldTiles[i].GetType() != TileTypeRedArrow)
         {

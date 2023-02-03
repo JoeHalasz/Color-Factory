@@ -11,5 +11,6 @@ void main()
 {
 	int index = int(v_TexIndex);
 	vec4 texColor = texture(u_Textures[index], v_TexCoord);
+	//color = index == 0 ? vec4(.5, .5, .1, 1.0) : texColor;
 	color = texColor;
 };
