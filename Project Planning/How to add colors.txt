@@ -1,0 +1,28 @@
+This is a "short" guide on how to add colors realistically 
+
+Using RGB doesnt work for things like adding blue and yellow.
+It should make green, but it makes grey. 0 0 1 + 1 1 0 = .5 .5 .5, not 0 .5 0
+
+Better way to do it is converting to CMYK
+
+cian magenta yellow black. It uses suptractive mixing instead of additive mixing
+
+This makes green out of yellow and cian(close enough to blue)
+0 0 1 0 + 1 0 0 0 = 1 0 1 0 which is green
+
+There is a very simple formula to convert from CYMK to RGB, and it should only ever
+have to go one way. 
+All the math and color mixing in game will happen in CYMK, and then 
+when it needs to be rendered it will be converted to RGB for openGL
+
+unfortunately, there is no "perfect" way of converting CYMK to RGB.
+This is because they are not in the same color gamut. 
+CMYK is smaller than RGB, but some of the values in the CMYK gamut
+are not inside of the RGB gamut. This means that when converting 
+those colors will be lost.
+This problem will also make most of the conversions look incorrect 
+when comparing the RGB to the CMYK.
+
+However, this may not be a problem for the game, because as long as the 
+colors are close enough so that the player can still logically figure out
+what two colors need to be mixed together to create it, they will never notice. 

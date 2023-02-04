@@ -55,23 +55,21 @@ bool World::AddBelt(TileType beltColor, glm::vec3 pos, Direction direction)
         else if (rightBelt == DirectionLeft)
         {
             beltBack.SetType(TileTypeTurnBeltBackwards);
-            beltBack.SetDirection(DirectionRight);
         }
     }
     if (direction == DirectionRight)
     {
-        std::cout << "here" << std::endl;
         int upBelt = GetBeltDirectionAt(pos.x, pos.y + 1);
         int downBelt = GetBeltDirectionAt(pos.x, pos.y - 1);
         if (upBelt == DirectionDown)
         {
-            beltBack.SetType(TileTypeTurnBelt);
+            beltBack.SetType(TileTypeTurnBeltBackwards);
             beltBack.SetDirection(DirectionRight);
         }
         else if (downBelt == DirectionUp)
         {
-            beltBack.SetType(TileTypeTurnBeltBackwards);
-            beltBack.SetDirection(DirectionDown);
+            beltBack.SetType(TileTypeTurnBelt);
+            beltBack.SetDirection(DirectionRight);
         }
     }
     if (direction == DirectionDown)
@@ -86,7 +84,6 @@ bool World::AddBelt(TileType beltColor, glm::vec3 pos, Direction direction)
         else if (leftBelt == DirectionRight)
         {
             beltBack.SetType(TileTypeTurnBeltBackwards);
-            beltBack.SetDirection(DirectionLeft);
         }
     }
     if (direction == DirectionLeft)
@@ -96,12 +93,12 @@ bool World::AddBelt(TileType beltColor, glm::vec3 pos, Direction direction)
         int upBelt = GetBeltDirectionAt(pos.x, pos.y + 1);
         if (downBelt == DirectionUp)
         {
-            beltBack.SetType(TileTypeTurnBelt);
+            beltBack.SetType(TileTypeTurnBeltBackwards);
             beltBack.SetDirection(DirectionLeft);
         }
         else if (upBelt == DirectionDown)
         {
-            beltBack.SetType(TileTypeTurnBeltBackwards);
+            beltBack.SetType(TileTypeTurnBelt);
         }
     }
     

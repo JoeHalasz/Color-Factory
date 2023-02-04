@@ -13,6 +13,7 @@
 #include "World.h"
 #include "Texture.h"
 #include "WorldTile.h"
+#include "PaintBlob.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -98,6 +99,9 @@ int main(void)
         bool printStuff = true;
         while (!glfwWindowShouldClose(window))
         {
+            PaintBlob b(glm::vec3(0.0f), glm::vec4(.7f, 1.0f, 0.0f, 0.0f));
+            std::cout << b.ConvertToRGB().r*255 << " " << b.ConvertToRGB().g * 255 << " " << b.ConvertToRGB().b * 255 << std::endl;
+
             int lastWidth = WIDTH;
             int lastHeight = HEIGHT;
             glfwGetWindowSize(window, &WIDTH, &HEIGHT);

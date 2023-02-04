@@ -11,16 +11,8 @@
 #include "Shader.h"
 #include "Texture.h"
 #include "World.h"
+#include "MathStuff.h"
 
-struct Vec3 { float x, y, z; };
-struct Vec2 { float x, y; };
-struct Vec4 { float x, y, z, w; };
-
-struct Vertex {
-    Vec3 Position;
-    Vec2 TexCoords;
-    float TexIndex;
-};
 
 class Renderer
 {
