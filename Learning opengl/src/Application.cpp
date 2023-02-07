@@ -68,9 +68,6 @@ int main(void)
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
 
-    
-    
-
     glfwSwapInterval(1);
 
     if (glewInit() != GLEW_OK) {
@@ -100,7 +97,7 @@ int main(void)
         while (!glfwWindowShouldClose(window))
         {
             PaintBlob b(glm::vec3(0.0f), glm::vec4(.7f, 1.0f, 0.0f, 0.0f));
-            std::cout << b.ConvertToRGB().r*255 << " " << b.ConvertToRGB().g * 255 << " " << b.ConvertToRGB().b * 255 << std::endl;
+            
 
             int lastWidth = WIDTH;
             int lastHeight = HEIGHT;
@@ -115,6 +112,7 @@ int main(void)
                 double currentTime = glfwGetTime();
                 nbFrames++;
                 if (currentTime - lastTime >= 1.0) { // If last prinf() was more than 1 sec ago
+                    std::cout << b.ConvertToRGB().r * 255 << " " << b.ConvertToRGB().g * 255 << " " << b.ConvertToRGB().b * 255 << std::endl;
                     std::cout << "\x1B[2J\x1B[H";
                     // printf and reset timer
                     beenOneSecond = true;

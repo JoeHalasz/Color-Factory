@@ -11,7 +11,6 @@ private:
 	glm::vec3 m_Pos;
 	glm::vec3 m_Speed = glm::vec3(0.0f);
 	
-	
 	glm::vec4 m_Color;
 
 public:

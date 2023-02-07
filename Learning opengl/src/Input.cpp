@@ -57,8 +57,6 @@ void Input::CheckInputPresses()
     if (KeyHeld(GLFW_KEY_A)) m_Speed += glm::vec3(MOVE_SPEED, 0.0f, 0.0f);
     if (KeyHeld(GLFW_KEY_D)) m_Speed += glm::vec3(-1 * MOVE_SPEED, 0.0f, 0.0f);
 
-    
-
     if (KeyHeld(GLFW_KEY_1)) m_LastNumPressed = 1;
     if (KeyHeld(GLFW_KEY_2)) m_LastNumPressed = 2;
     if (KeyHeld(GLFW_KEY_3)) m_LastNumPressed = 3;

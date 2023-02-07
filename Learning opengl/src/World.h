@@ -29,7 +29,8 @@ private:
 	//std::vector<WorldTile > m_WorldTiles;
 
 	bool AddBelt(TileType beltColor, glm::vec3 pos, Direction direction);
-	
+	bool AddPaintBlob(Vec4 BlobColor, glm::vec3 pos, float size);
+
 public:
 	bool IS3D = false; // Only works if there is only one texture
 	
@@ -38,6 +39,7 @@ public:
 	~World();
 	void OnUpdate(Input* input);
 	bool AddWorldTile(WorldTile tile);
+	bool AddWorldTileArrow(WorldTile tile);
 	bool AddWorldTileBelt(WorldTile tile);
 	void DeleteAllInTile(glm::vec3 pos);
 	int GetBeltDirectionAt(int x, int y);

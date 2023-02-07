@@ -8,4 +8,5 @@ struct Vertex {
     Vec3 Position;
     Vec2 TexCoords;
     float TexIndex;
+    Vec4 BlobColor;
 };

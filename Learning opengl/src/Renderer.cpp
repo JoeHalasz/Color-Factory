@@ -29,21 +29,27 @@ std::vector<unsigned int> makeIndices(int numQuads)
     return indices;
 }
 
-static std::vector<Vertex> CreateQuad(float textureID, float size, Direction direction, float x, float y, float z)
+static std::vector<Vertex> CreateQuad(float textureID, float size, Direction direction, int tileSize, float x, float y, float z, Vec4 color)
 {
     std::vector<Vertex> v(4);
+    x += (tileSize - size) / 2; // this makes textures smaller than the block size appear in the middle of the square
+    y += (tileSize - size) / 2;
 
-    v[0].Position = { x, y, z };
+    v[0].Position = { x, y , z };
     v[0].TexIndex = textureID;
+    v[0].BlobColor = color;
 
-    v[1].Position = { x + size, y, z };
+    v[1].Position = { x + size, y, z};
     v[1].TexIndex = textureID;
+    v[1].BlobColor = color;
 
     v[2].Position = { x + size, y + size, z };
     v[2].TexIndex = textureID;
+    v[2].BlobColor = color;
 
     v[3].Position = { x, y + size, z };
     v[3].TexIndex = textureID;
+    v[3].BlobColor = color;
 
     if (direction == DirectionUp)
     {
@@ -92,11 +98,13 @@ Renderer::Renderer()
     m_Layout->Push<float>(3);
     m_Layout->Push<float>(2);
     m_Layout->Push<float>(1);
+    m_Layout->Push<float>(4);
     m_VertexArray->AddBuffer(*m_VertexBuffer, *m_Layout);
 
     m_Shader = std::make_unique<Shader>("res/shaders/vertex.shader", "res/shaders/fragment.shader");
     m_Shader->Bind();
 
+    m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/paint blob/paint blob.png"));
     m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/background/floortile.png"));
     m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/background/floortile dark.png"));
     m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/belts/straight belt.png"));
@@ -121,9 +129,9 @@ void Renderer::Draw() const
     GLCall(glDrawElements(GL_TRIANGLES, m_IndexBuffer->GetCount(), GL_UNSIGNED_INT, nullptr));
 }
 
-void Renderer::AddQuad(float textureID, float size, Direction direction, float x, float y, float z)
+void Renderer::AddQuad(float textureID, float size, Direction direction, int tileSize, float x, float y, float z, Vec4 color)
 {
-    m_AllQuads.push_back(CreateQuad(textureID, size, direction, x, y, z));
+    m_AllQuads.push_back(CreateQuad(textureID, size, direction, tileSize, x, y, z, color));
 }
 
 void Renderer::DrawWorld(World world, int width, int height)
@@ -147,7 +155,7 @@ void Renderer::DrawWorld(World world, int width, int height)
     for (int x = startDrawX; x < startDrawX + amountToDrawX + extraQuads; x++) {
         for (int y = startDrawY; y < startDrawY + amountToDrawY + extraQuads; y++) {
             OnScreenPositions.push_back(glm::vec3(x, y, 1));
-            AddQuad(1, size, DirectionUp, x * size, y * size);
+            AddQuad(TileTypeBackgroundDark, size, DirectionUp, world.GetBlockSize(), x * size, y * size);
         }
     }
 
@@ -157,7 +165,7 @@ void Renderer::DrawWorld(World world, int width, int height)
         std::vector<WorldTile> worldTiles = world.GetWorldTilesAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
         for (int j = 0; j < worldTiles.size(); j++)
         {
-            AddQuad(worldTiles[j].GetType(), worldTiles[j].GetSize(), worldTiles[j].GetDirection(), worldTiles[j].GetPos().x * worldTiles[j].GetSize(), worldTiles[j].GetPos().y * worldTiles[j].GetSize(), worldTiles[j].GetPos().z);
+            AddQuad(worldTiles[j].GetType(), worldTiles[j].GetSize(), worldTiles[j].GetDirection(), world.GetBlockSize(), worldTiles[j].GetPos().x * world.GetBlockSize(), worldTiles[j].GetPos().y * world.GetBlockSize(), worldTiles[j].GetPos().z, worldTiles[j].GetColor());
         }
     }
 }
@@ -166,55 +174,63 @@ void Renderer::OnRender(int width, int height, World world)
 {
     DrawWorld(world, width, height);
 
-    
-    std::vector<unsigned int> indices = makeIndices(m_AllQuads.size());
-    m_IndexBuffer = std::make_unique<IndexBuffer>(indices.data(), indices.size());
-    Clear();
-    // set dynamic vertex buffer
-    std::vector<Vertex> vertices(m_AllQuads.size()*4);
-    if (m_MAXNUMQUADS < m_AllQuads.size())
-    {
-        std::cout << "TOO MANY QUADS" << std::endl;
-        std::cout << "Need " << m_AllQuads.size() << " Quads" << std::endl;
-        std::cout << "Max is " << m_MAXNUMQUADS << " Quads" << std::endl;
-    }
-    Vertex* buffer = vertices.data();
-
-    for (unsigned int i = 0; i < m_AllQuads.size(); i++)
-    {
-        memcpy(buffer + (m_AllQuads[i].size() * i), m_AllQuads[i].data(), m_AllQuads[i].size() * sizeof(Vertex));
-    }
-
-    m_VertexBuffer->Bind();
-    GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(Vertex), vertices.data()));
-
-    float v1 = -1 * (width/2) - (world.GetZoomAmount() * (width/20));
+    float v1 = -1 * (width / 2) - (world.GetZoomAmount() * (width / 20));
     float v2 = -1 * v1;
-    float v3 = -1 * (height/2) - (world.GetZoomAmount() * (height/20));
+    float v3 = -1 * (height / 2) - (world.GetZoomAmount() * (height / 20));
     float v4 = -1 * v3;
-
 
     glm::mat4 proj = glm::ortho(v1, v2, v3, v4, -1.0f, 1.0f);
     glm::mat4 view = glm::translate(glm::mat4(1.0f), world.GetPosition());
-    Clear();
-
-    for (unsigned int i = 0; i < m_Textures.size(); i++) {
-        m_Textures[i]->Bind(i);
-    }
-    int samplers[8] = { 0, 1, 2, 3, 4, 5, 6, 7};
-    m_Shader->SetUniform1iv("u_Textures", 8, samplers);
 
     if (world.IS3D) {
         view = glm::rotate(view, glm::radians(world.GetRotation()), glm::vec3(1, 0, 0));
-        proj = glm::perspective(glm::radians(90.0f), v2/v4, -1.0f, 1.0f);
+        proj = glm::perspective(glm::radians(90.0f), v2 / v4, -1.0f, 1.0f);
     }
+    glm::mat4 mvp = proj * view;
 
+    Clear();
+
+    std::vector<unsigned int> indices = makeIndices(m_AllQuads.size());
+    m_IndexBuffer = std::make_unique<IndexBuffer>(indices.data(), indices.size());
+    
+    
     {
-        glm::mat4 mvp = proj * view;
-        
+        // set dynamic vertex buffer
+        std::vector<Vertex> vertices(m_AllQuads.size() * 4);
+        if (m_MAXNUMQUADS < m_AllQuads.size())
+        {
+            std::cout << "TOO MANY QUADS" << std::endl;
+            std::cout << "Need " << m_AllQuads.size() << " Quads" << std::endl;
+            std::cout << "Max is " << m_MAXNUMQUADS << " Quads" << std::endl;
+        }
+
+        Vertex* buffer = vertices.data();
+
+        for (unsigned int i = 0; i < m_AllQuads.size(); i++)
+        {
+            memcpy(buffer + (m_AllQuads[i].size() * i), m_AllQuads[i].data(), m_AllQuads[i].size() * sizeof(Vertex));
+        }
+
+        m_VertexBuffer->Bind();
+        GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(Vertex), vertices.data()));
+
+        for (unsigned int i = 0; i < m_Textures.size(); i++) {
+            m_Textures[i]->Bind(i);
+        }
+
+        int numSamplers = m_Textures.size();
+        if (numSamplers > 32)
+            std::cout << "TOO MANY TEXTURES" << std::endl;
+
+        int* samplers = (int*)malloc(numSamplers * sizeof(int));
+        for (int i = 0; i < numSamplers; i++) { samplers[i] = i; }
+
+        m_Shader->SetUniform1iv("u_Textures", numSamplers, samplers);
+
         m_Shader->Bind();
         m_Shader->SetUniformMat4f("u_MVP", mvp);
         Draw();
+        free(samplers);
     }
 }
 
