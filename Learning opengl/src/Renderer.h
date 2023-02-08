@@ -31,9 +31,10 @@ public:
     void Clear() const;
     void DeleteQuads();
     void Draw() const;
-    void OnRender(int width, int height, World world);
-    void DrawWorld(World world, int width, int height);
-    void AddQuad(float textureID, float size, Direction direction, int tileSize, float x, float y, float z = 1.0f, Vec4 color = { 1.0f, 0.0f, 0.0f, 1.0f });
+    void OnRender(int width, int height, World& world);
+    void DrawWorld(World& world, int width, int height);
+    void AddQuad(GameObject gameObject, float tileSize);
+    void AddQuad(float textureID, float size, Direction direction, int tileSize, Vec3 pos, Vec4 color={0});
     inline unsigned int GetAmountOfCurrentQuads() { return m_AllQuads.size(); }
     inline unsigned int GetMaxAmountOfQuads() { return m_MAXNUMQUADS; }
 };

@@ -10,6 +10,9 @@
 #include "Input.h"
 #include "WorldTile.h"
 
+#include "GameObject.h"
+#include "Belt.h"
+
 class World
 {
 private:
@@ -25,11 +28,11 @@ private:
 	int m_MousePosX = 0;
 	int m_MousePosY = 0;
 
-	std::unordered_map<int, std::unordered_map<int, std::vector<WorldTile>>> m_WorldTiles;
-	//std::vector<WorldTile > m_WorldTiles;
+	std::unordered_map<int, std::unordered_map<int, std::vector<GameObject>>> m_GameObjects;
+	std::unordered_map<int, std::unordered_map<int, std::vector<Belt>>> m_Belts;
 
-	bool AddBelt(TileType beltColor, glm::vec3 pos, Direction direction);
-	bool AddPaintBlob(Vec4 BlobColor, glm::vec3 pos, float size);
+	bool AddBelt(BeltType beltColor, Vec3 pos, Direction direction);
+	bool AddPaintBlob(Vec4 BlobColor, Vec3 pos, float size);
 
 public:
 	bool IS3D = false; // Only works if there is only one texture
@@ -38,11 +41,12 @@ public:
 	World(GLFWwindow* window, glm::vec3 position);
 	~World();
 	void OnUpdate(Input* input);
-	bool AddWorldTile(WorldTile tile);
-	bool AddWorldTileArrow(WorldTile tile);
-	bool AddWorldTileBelt(WorldTile tile);
-	void DeleteAllInTile(glm::vec3 pos);
+	bool AddGameObject(GameObject newObject);
+	bool ReAddGameObject(GameObject& newObject);
+	bool AddBelt(Belt belt);
+	void DeleteAllAtPos(Vec3 pos);
 	int GetBeltDirectionAt(int x, int y);
+	void UpdateGameObjectPositionsAtPos(int x, int y);
 
 	inline glm::vec3 GetPosition() const { return m_Position; }
 	inline int GetZoomAmount() const { return (int)m_ZoomAmount;  }
@@ -50,7 +54,8 @@ public:
 	inline int GetBlockSize() { return m_BlockSize; }
 	inline int GetMousePosX() { return m_MousePosX; }
 	inline int GetMousePosY() { return m_MousePosY; }
-	inline std::vector<WorldTile> GetWorldTilesAtPos(int x, int y) { return m_WorldTiles[x][y]; }
+	inline std::vector<GameObject>& GetGameObjectsAtPos(int x, int y) { return m_GameObjects[x][y]; }
+	inline std::vector<Belt>& GetBeltsAtPos(int x, int y) { return m_Belts[x][y]; }
 
 
 };

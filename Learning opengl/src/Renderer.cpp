@@ -10,6 +10,9 @@
 #include <glm/gtc/quaternion.hpp> 
 #include <glm/gtx/quaternion.hpp>
 
+#include <algorithm>
+
+
 
 std::vector<unsigned int> makeIndices(int numQuads)
 {
@@ -29,9 +32,19 @@ std::vector<unsigned int> makeIndices(int numQuads)
     return indices;
 }
 
-static std::vector<Vertex> CreateQuad(float textureID, float size, Direction direction, int tileSize, float x, float y, float z, Vec4 color)
+static std::vector<Vertex> CreateQuad(float textureID, float size, Direction direction, int tileSize, Vec3 pos, Vec4 color, Vec3 onTileOffset)
 {
+    float x = pos.x;
+    float y = pos.y;
+    float z = pos.z;
+
     std::vector<Vertex> v(4);
+    if (textureID == 0)
+    {
+        x += (onTileOffset.x * tileSize) - (tileSize / 2);
+        y += (onTileOffset.y * tileSize) - (tileSize / 2);
+    }
+
     x += (tileSize - size) / 2; // this makes textures smaller than the block size appear in the middle of the square
     y += (tileSize - size) / 2;
 
@@ -79,7 +92,6 @@ static std::vector<Vertex> CreateQuad(float textureID, float size, Direction dir
         v[0].TexCoords = { 1.0f, 1.0f };
         v[3].TexCoords = { 0.0f, 1.0f };
     }
-    
     return v;
 
 }
@@ -129,12 +141,18 @@ void Renderer::Draw() const
     GLCall(glDrawElements(GL_TRIANGLES, m_IndexBuffer->GetCount(), GL_UNSIGNED_INT, nullptr));
 }
 
-void Renderer::AddQuad(float textureID, float size, Direction direction, int tileSize, float x, float y, float z, Vec4 color)
+void Renderer::AddQuad(GameObject gameObject, float tileSize)
 {
-    m_AllQuads.push_back(CreateQuad(textureID, size, direction, tileSize, x, y, z, color));
+    m_AllQuads.push_back(CreateQuad(gameObject.GetTile().GetType(), gameObject.GetSize(), gameObject.GetDirection(), tileSize, gameObject.GetPos()*tileSize, gameObject.GetTile().GetColor(), gameObject.GetOnTileOffset()));
 }
 
-void Renderer::DrawWorld(World world, int width, int height)
+void Renderer::AddQuad(float textureID, float size, Direction direction, int tileSize, Vec3 pos, Vec4 color)
+{
+    m_AllQuads.push_back(CreateQuad(textureID, size, direction, tileSize, pos, color, {0,0,0}));
+}
+
+
+void Renderer::DrawWorld(World& world, int width, int height)
 {
     // draw background
     int size = world.GetBlockSize();
@@ -152,25 +170,41 @@ void Renderer::DrawWorld(World world, int width, int height)
 
     int extraQuads = 3;
 
-    for (int x = startDrawX; x < startDrawX + amountToDrawX + extraQuads; x++) {
-        for (int y = startDrawY; y < startDrawY + amountToDrawY + extraQuads; y++) {
+    for (float x = startDrawX; x < startDrawX + amountToDrawX + extraQuads; x++) {
+        for (float y = startDrawY; y < startDrawY + amountToDrawY + extraQuads; y++) {
             OnScreenPositions.push_back(glm::vec3(x, y, 1));
-            AddQuad(TileTypeBackgroundDark, size, DirectionUp, world.GetBlockSize(), x * size, y * size);
+            AddQuad(TileTypeBackgroundDark, size, DirectionUp, world.GetBlockSize(), Vec3{ x * size, y * size, 1 });
         }
     }
 
     // draw world tiles
     for (int i = 0; i < OnScreenPositions.size(); i++)
     {
-        std::vector<WorldTile> worldTiles = world.GetWorldTilesAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
-        for (int j = 0; j < worldTiles.size(); j++)
+        // draw belt if it exists
+        std::vector<Belt> belts = world.GetBeltsAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
+        std::vector<GameObject>& gameObjects = world.GetGameObjectsAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
+
+        if (belts.size() != 0)
+        { // there is a belt on this square
+            Belt belt = belts[0];
+            bool needsUpdate = belt.Update(gameObjects);
+            if (needsUpdate) world.UpdateGameObjectPositionsAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
+            AddQuad(belt, world.GetBlockSize());
+            AddQuad(belt.GetArrowTile(), size, DirectionUp, world.GetBlockSize(), Vec3{ belt.GetArrowPos().x * size, belt.GetArrowPos().y * size, 1 });
+        }
+    }
+    for (int i = 0; i < OnScreenPositions.size(); i++){
+        std::vector<GameObject>& gameObjects = world.GetGameObjectsAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
+        // draw everything else
+        for (int j = 0; j < gameObjects.size(); j++)
         {
-            AddQuad(worldTiles[j].GetType(), worldTiles[j].GetSize(), worldTiles[j].GetDirection(), world.GetBlockSize(), worldTiles[j].GetPos().x * world.GetBlockSize(), worldTiles[j].GetPos().y * world.GetBlockSize(), worldTiles[j].GetPos().z, worldTiles[j].GetColor());
+            bool needsUpdate = gameObjects[j].Update();
+            AddQuad(gameObjects[j], world.GetBlockSize());
         }
     }
 }
 
-void Renderer::OnRender(int width, int height, World world)
+void Renderer::OnRender(int width, int height, World& world)
 {
     DrawWorld(world, width, height);
 
