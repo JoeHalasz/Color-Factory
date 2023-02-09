@@ -8,7 +8,6 @@
 #include "glm/glm.hpp"
 
 #include "Input.h"
-#include "WorldTile.h"
 
 #include "GameObject.h"
 #include "Belt.h"
@@ -42,11 +41,9 @@ public:
 	~World();
 	void OnUpdate(Input* input);
 	bool AddGameObject(GameObject newObject);
-	bool ReAddGameObject(GameObject& newObject);
 	bool AddBelt(Belt belt);
 	void DeleteAllAtPos(Vec3 pos);
 	int GetBeltDirectionAt(int x, int y);
-	void UpdateGameObjectPositionsAtPos(int x, int y);
 
 	inline glm::vec3 GetPosition() const { return m_Position; }
 	inline int GetZoomAmount() const { return (int)m_ZoomAmount;  }
@@ -54,8 +51,12 @@ public:
 	inline int GetBlockSize() { return m_BlockSize; }
 	inline int GetMousePosX() { return m_MousePosX; }
 	inline int GetMousePosY() { return m_MousePosY; }
-	inline std::vector<GameObject>& GetGameObjectsAtPos(int x, int y) { return m_GameObjects[x][y]; }
-	inline std::vector<Belt>& GetBeltsAtPos(int x, int y) { return m_Belts[x][y]; }
+
+	inline std::vector<GameObject>& GetGameObjectsAtPos(float x, float y) { return m_GameObjects[std::floor(x)][std::floor(y)]; }
+	inline void AddGameObjectAtPos(GameObject newObject, float x, float y) { return m_GameObjects[std::floor(x)][std::floor(y)].push_back(newObject); }
+	
+	inline std::vector<Belt>& GetBeltsAtPos(float x, float y) { return m_Belts[std::floor(x)][std::floor(y)]; }
+	inline void AddBeltAtPos(Belt newBelt, float x, float y) { return m_Belts[std::floor(x)][std::floor(y)].push_back(newBelt); }
 
 
 };

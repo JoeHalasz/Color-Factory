@@ -1,5 +1,8 @@
 #pragma once
 
+#include <algorithm>
+
+
 struct Vec3 
 { float x, y, z; 
     inline Vec3 operator*(float a) {
@@ -11,6 +14,9 @@ struct Vec3
     inline Vec3 operator+(Vec3 a) {
         return { x + a.x,y + a.y };
     }
+    inline void operator=(Vec3 a) {
+        { x = a.x; y = a.y; z = a.z; };
+    }
 };
 struct Vec2 { float x, y; };
 struct Vec4 { float x, y, z, w; };
@@ -21,3 +27,13 @@ struct Vertex {
     float TexIndex;
     Vec4 BlobColor;
 };
+
+inline const float checkHowClose(const float x, const float y)
+{
+    return std::abs(x - y);
+}
+
+inline const float checkHowClose(const Vec3 x, const Vec3 y)
+{
+    return std::max(std::abs(x.x - y.x), std::abs(x.y - y.y));
+}

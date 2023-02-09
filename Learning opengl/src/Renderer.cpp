@@ -10,8 +10,6 @@
 #include <glm/gtc/quaternion.hpp> 
 #include <glm/gtx/quaternion.hpp>
 
-#include <algorithm>
-
 
 
 std::vector<unsigned int> makeIndices(int numQuads)
@@ -32,21 +30,24 @@ std::vector<unsigned int> makeIndices(int numQuads)
     return indices;
 }
 
-static std::vector<Vertex> CreateQuad(float textureID, float size, Direction direction, int tileSize, Vec3 pos, Vec4 color, Vec3 onTileOffset)
+static std::vector<Vertex> CreateQuad(float textureID, float size, Direction direction, int tileSize, Vec3 pos, Vec4 color)
 {
     float x = pos.x;
     float y = pos.y;
     float z = pos.z;
 
     std::vector<Vertex> v(4);
+
     if (textureID == 0)
-    {
-        x += (onTileOffset.x * tileSize) - (tileSize / 2);
-        y += (onTileOffset.y * tileSize) - (tileSize / 2);
+    {   // if its a paint blob
+        x = (int)x;
+        y = (int)y;
+        float onTileOffsetX = abs(pos.x / tileSize - (int)pos.x / (float)tileSize);
+        float onTileOffsetY = abs(pos.y / tileSize - (int)pos.y / (float)tileSize);
+        x -= (size/2.0f);
+        y -= (size/2.0f);
     }
 
-    x += (tileSize - size) / 2; // this makes textures smaller than the block size appear in the middle of the square
-    y += (tileSize - size) / 2;
 
     v[0].Position = { x, y , z };
     v[0].TexIndex = textureID;
@@ -143,12 +144,12 @@ void Renderer::Draw() const
 
 void Renderer::AddQuad(GameObject gameObject, float tileSize)
 {
-    m_AllQuads.push_back(CreateQuad(gameObject.GetTile().GetType(), gameObject.GetSize(), gameObject.GetDirection(), tileSize, gameObject.GetPos()*tileSize, gameObject.GetTile().GetColor(), gameObject.GetOnTileOffset()));
+    m_AllQuads.push_back(CreateQuad(gameObject.GetTile()->GetType(), gameObject.GetSize(), gameObject.GetDirection(), tileSize, gameObject.GetPos()*tileSize, gameObject.GetTile()->GetColor()));
 }
 
 void Renderer::AddQuad(float textureID, float size, Direction direction, int tileSize, Vec3 pos, Vec4 color)
 {
-    m_AllQuads.push_back(CreateQuad(textureID, size, direction, tileSize, pos, color, {0,0,0}));
+    m_AllQuads.push_back(CreateQuad(textureID, size, direction, tileSize, pos, color));
 }
 
 
@@ -187,10 +188,9 @@ void Renderer::DrawWorld(World& world, int width, int height)
         if (belts.size() != 0)
         { // there is a belt on this square
             Belt belt = belts[0];
-            bool needsUpdate = belt.Update(gameObjects);
-            if (needsUpdate) world.UpdateGameObjectPositionsAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
             AddQuad(belt, world.GetBlockSize());
-            AddQuad(belt.GetArrowTile(), size, DirectionUp, world.GetBlockSize(), Vec3{ belt.GetArrowPos().x * size, belt.GetArrowPos().y * size, 1 });
+            if (belt.GetTile()->GetType() == TileTypeStraightBelt) // draw arrow if it is not a turn belt
+                AddQuad(belt.GetArrowTile(), size, belt.GetDirection(), world.GetBlockSize(), Vec3{belt.GetArrowPos().x * size, belt.GetArrowPos().y * size, 1});
         }
     }
     for (int i = 0; i < OnScreenPositions.size(); i++){
@@ -198,7 +198,6 @@ void Renderer::DrawWorld(World& world, int width, int height)
         // draw everything else
         for (int j = 0; j < gameObjects.size(); j++)
         {
-            bool needsUpdate = gameObjects[j].Update();
             AddQuad(gameObjects[j], world.GetBlockSize());
         }
     }

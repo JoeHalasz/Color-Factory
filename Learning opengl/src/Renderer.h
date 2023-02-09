@@ -11,7 +11,6 @@
 #include "Shader.h"
 #include "Texture.h"
 #include "World.h"
-#include "MathStuff.h"
 
 
 class Renderer

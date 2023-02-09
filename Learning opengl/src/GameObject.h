@@ -1,10 +1,10 @@
 #pragma once
 #include <GL/glew.h>
-#include <GLFW/glfw3.h> 
-#include "glm/glm.hpp"
-#include "MathStuff.h"
-#include "WorldTile.h"
+#include <GLFW/glfw3.h>
+#include <unordered_map>
 #include <iostream>
+#include "glm/glm.hpp"
+#include "WorldTile.h"
 
 enum Direction
 {
@@ -24,7 +24,6 @@ private:
 	WorldTile m_Tile;
 
 	Vec3 m_Speed = { 0,0,0 };
-	Vec3 m_OnTileOffset = {.5f,.5f,0};
 
 public:
 	~GameObject();
@@ -34,14 +33,16 @@ public:
 	bool operator==(const GameObject& other);
 
 	inline Vec3 GetPos() const { return m_WorldPos; }
+	inline void SetPos(Vec3 pos) { m_WorldPos = pos; }
 	inline int GetSize() const { return m_Size; }
 	inline Direction GetDirection() const { return m_Direction; }
 	inline void SetDirection(Direction direction) { m_Direction = direction; }
-	inline WorldTile GetTile() const { return m_Tile; }
+	inline WorldTile* GetTile() { return &m_Tile; }
+	inline WorldTile GetTileCopy() const { return m_Tile; }
 	inline Vec3 GetSpeed() const { return m_Speed; }
 	inline void SetSpeed(Vec3 speed) { m_Speed = speed; }
-	inline Vec3 GetOnTileOffset() const { return m_OnTileOffset; }
-	bool ChangeOnTileOffset(Vec3 change);
+
+	void MoveBy(Vec3 amount, std::unordered_map<int, std::unordered_map<int, std::vector<GameObject>>>& gameObjects);
 
 	bool Update();
 	void AddQuad(int WorldTileSize);

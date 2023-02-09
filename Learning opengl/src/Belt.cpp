@@ -9,17 +9,26 @@ Belt::Belt(WorldTile tile, Vec3 pos, int size, Direction direction, BeltType bel
 	
 }
 
-bool Belt::Update(std::vector<GameObject>& ObjectsOnSameSquare)
+void Belt::Update(std::unordered_map<int, std::unordered_map<int, std::vector<GameObject>>>& gameObjects)
 {	// move all the paint blobs by the belt speed
-	bool somethingChangedPos = false;
+	std::vector<GameObject>& ObjectsOnSameSquare = gameObjects[std::floor(GetPos().x)][std::floor(GetPos().y)];
 	for (int i = 0; i < ObjectsOnSameSquare.size(); i++)
 	{
-		if (ObjectsOnSameSquare[i].GetTile().GetType() == TileTypePaintBlob)
+		if (ObjectsOnSameSquare[i].GetTile()->GetType() == TileTypePaintBlob)
 		{
-			if (GetDirection() == DirectionUp) somethingChangedPos = ObjectsOnSameSquare[i].ChangeOnTileOffset({ 0, BELT_SPEED * (m_BeltType + 1),0 });
-			else if (GetDirection() == DirectionDown) somethingChangedPos = ObjectsOnSameSquare[i].ChangeOnTileOffset({ 0, -1 * BELT_SPEED * (m_BeltType + 1),0 });
-			else if (GetDirection() == DirectionRight) somethingChangedPos = ObjectsOnSameSquare[i].ChangeOnTileOffset({BELT_SPEED * (m_BeltType + 1), 0 ,0 });
-			else if (GetDirection() == DirectionLeft) somethingChangedPos = ObjectsOnSameSquare[i].ChangeOnTileOffset({ -1 * BELT_SPEED * (m_BeltType + 1), 0, 0 });
+			float xChange = 0, yChange = 0, xFix = 0, yFix = 0, direction = 0;
+			if (GetDirection() == DirectionUp) {
+				ObjectsOnSameSquare[i].MoveBy(Vec3{ 0, BELT_SPEED * (m_BeltType + 1), 0 }, gameObjects);
+			}
+			else if (GetDirection() == DirectionDown) {
+				ObjectsOnSameSquare[i].MoveBy(Vec3{ 0, -1 * BELT_SPEED * (m_BeltType + 1), 0 }, gameObjects);
+			}
+			else if (GetDirection() == DirectionRight) {
+				ObjectsOnSameSquare[i].MoveBy(Vec3{BELT_SPEED * (m_BeltType + 1), 0, 0 }, gameObjects);
+			}
+			else if (GetDirection() == DirectionLeft) {
+				ObjectsOnSameSquare[i].MoveBy(Vec3{ -1 * BELT_SPEED * (m_BeltType + 1), 0, 0 }, gameObjects);
+			}
 		}
 	}
 	
@@ -28,7 +37,6 @@ bool Belt::Update(std::vector<GameObject>& ObjectsOnSameSquare)
 	else if (GetDirection() == DirectionDown) m_ArrowOffset.y -= m_ArrowSpeed;
 	else if (GetDirection() == DirectionRight) m_ArrowOffset.x += m_ArrowSpeed;
 	else if (GetDirection() == DirectionLeft) m_ArrowOffset.x -= m_ArrowSpeed;*/
-	return somethingChangedPos;
 }
 
 Vec3 Belt::GetArrowPos() const

@@ -30,7 +30,7 @@ public:
 	WorldTile(TileType type, Vec4 color);
 	
 	inline TileType		GetType() const { return m_TileType; }
-	inline void			SetType(TileType type) { m_TileType = type; }
+	inline void			SetType(TileType Type) { m_TileType = Type; }
 
 	inline int			GetConnectedCount() const { return m_ConnectedCount; }
 	inline void			UpdateConnectedCount(int udpate)  { m_ConnectedCount += udpate; }

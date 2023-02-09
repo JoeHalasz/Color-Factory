@@ -1,7 +1,7 @@
 #pragma once
 #include "GameObject.h"
 #include <vector>
-
+#include <unordered_map>
 
 enum BeltType
 {
@@ -20,7 +20,7 @@ private:
 	float m_ArrowSpeed = 0;
 public:
 	Belt(WorldTile tile, Vec3 pos, int size, Direction direction, BeltType beltType);
-	bool Update(std::vector<GameObject>& ObjectsOnSameSquare);
+	void Update(std::unordered_map<int, std::unordered_map<int, std::vector<GameObject>>>& gameObjects);
 	inline TileType GetArrowTile() const { return m_ArrowTile; }
 	inline Vec3 GetArrowOffset() const { return m_ArrowOffset; }
 	
