@@ -147,6 +147,12 @@ void Renderer::AddQuad(GameObject gameObject, float tileSize)
     m_AllQuads.push_back(CreateQuad(gameObject.GetTile()->GetType(), gameObject.GetSize(), gameObject.GetDirection(), tileSize, gameObject.GetPos()*tileSize, gameObject.GetTile()->GetColor()));
 }
 
+void Renderer::AddQuad(Belt belt, float tileSize)
+{
+    m_AllQuads.push_back(CreateQuad(belt.GetTile()->GetType(), belt.GetSize(), belt.GetDirection(), tileSize, belt.GetPos() * tileSize, belt.GetTile()->GetColor()));
+}
+
+
 void Renderer::AddQuad(float textureID, float size, Direction direction, int tileSize, Vec3 pos, Vec4 color)
 {
     m_AllQuads.push_back(CreateQuad(textureID, size, direction, tileSize, pos, color));

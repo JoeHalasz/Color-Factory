@@ -6,6 +6,7 @@
 #include "glm/glm.hpp"
 #include "WorldTile.h"
 
+
 enum Direction
 {
 	DirectionUp = 0,
@@ -13,7 +14,6 @@ enum Direction
 	DirectionDown = 2,
 	DirectionLeft = 3,
 };
-
 
 class GameObject
 {
@@ -42,7 +42,7 @@ public:
 	inline Vec3 GetSpeed() const { return m_Speed; }
 	inline void SetSpeed(Vec3 speed) { m_Speed = speed; }
 
-	void MoveBy(Vec3 amount, std::unordered_map<int, std::unordered_map<int, std::vector<GameObject>>>& gameObjects);
+	bool MoveBy(Vec3 amount, std::unordered_map<int, std::unordered_map<int, std::vector<GameObject>>>& gameObjects);
 
 	bool Update();
 	void AddQuad(int WorldTileSize);

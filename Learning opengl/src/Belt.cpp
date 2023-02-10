@@ -1,7 +1,7 @@
 #include "Belt.h"
 
 Belt::Belt(WorldTile tile, Vec3 pos, int size, Direction direction, BeltType beltType)
-	:GameObject(tile, pos, size, direction), m_BeltType(beltType)
+	:m_Tile(tile), m_WorldPos(pos), m_Size(size), m_Direction(direction), m_BeltType(beltType)
 {
 	if (beltType == BeltTypeYellow) m_ArrowTile = TileType(TileTypeYellowArrow);
 	if (beltType == BeltTypeOrange) m_ArrowTile = TileType(TileTypeOrangeArrow);
@@ -12,23 +12,54 @@ Belt::Belt(WorldTile tile, Vec3 pos, int size, Direction direction, BeltType bel
 void Belt::Update(std::unordered_map<int, std::unordered_map<int, std::vector<GameObject>>>& gameObjects)
 {	// move all the paint blobs by the belt speed
 	std::vector<GameObject>& ObjectsOnSameSquare = gameObjects[std::floor(GetPos().x)][std::floor(GetPos().y)];
+	float offset, direction;
+	float xChange, yChange, xFix, yFix;
+	bool worked1 = true;
+	bool worked2 = true;
 	for (int i = 0; i < ObjectsOnSameSquare.size(); i++)
 	{
 		if (ObjectsOnSameSquare[i].GetTile()->GetType() == TileTypePaintBlob)
 		{
-			float xChange = 0, yChange = 0, xFix = 0, yFix = 0, direction = 0;
+			Vec3 oldPos = ObjectsOnSameSquare[i].GetPos();
+			xChange = 0, yChange = 0, xFix = 0, yFix = 0, direction = 0;
 			if (GetDirection() == DirectionUp) {
-				ObjectsOnSameSquare[i].MoveBy(Vec3{ 0, BELT_SPEED * (m_BeltType + 1), 0 }, gameObjects);
+				worked1 = ObjectsOnSameSquare[i].MoveBy(Vec3{ 0, BELT_SPEED * (m_BeltType + 1), 0 }, gameObjects);
+				offset = ObjectsOnSameSquare[i].GetPos().x - std::floor(ObjectsOnSameSquare[i].GetPos().x);
+				direction = .5f - offset;
+				direction /= std::abs(direction);
+				if (std::abs(offset) != .5f)
+					worked2 = ObjectsOnSameSquare[i].MoveBy(Vec3{ BELT_SPEED * (m_BeltType + 1) * direction, 0, 0}, gameObjects);
+
 			}
 			else if (GetDirection() == DirectionDown) {
-				ObjectsOnSameSquare[i].MoveBy(Vec3{ 0, -1 * BELT_SPEED * (m_BeltType + 1), 0 }, gameObjects);
+				worked1 = ObjectsOnSameSquare[i].MoveBy(Vec3{ 0, -1 * BELT_SPEED * (m_BeltType + 1), 0 }, gameObjects);
+				offset = ObjectsOnSameSquare[i].GetPos().x - std::floor(ObjectsOnSameSquare[i].GetPos().x);
+				direction = .5f - offset;
+				direction /= std::abs(direction);
+				if (std::abs(offset) != .5f)
+					worked2 = ObjectsOnSameSquare[i].MoveBy(Vec3{ BELT_SPEED * (m_BeltType + 1) * direction, 0, 0 }, gameObjects);
 			}
 			else if (GetDirection() == DirectionRight) {
-				ObjectsOnSameSquare[i].MoveBy(Vec3{BELT_SPEED * (m_BeltType + 1), 0, 0 }, gameObjects);
+				worked1 = ObjectsOnSameSquare[i].MoveBy(Vec3{BELT_SPEED * (m_BeltType + 1), 0, 0 }, gameObjects);
+				offset = ObjectsOnSameSquare[i].GetPos().y - std::floor(ObjectsOnSameSquare[i].GetPos().y);
+				direction = .5f - offset;
+				direction /= std::abs(direction);
+				if (std::abs(offset) != .5f)
+					worked2 = ObjectsOnSameSquare[i].MoveBy(Vec3{ 0, BELT_SPEED * (m_BeltType + 1) * direction, 0 }, gameObjects);
 			}
 			else if (GetDirection() == DirectionLeft) {
-				ObjectsOnSameSquare[i].MoveBy(Vec3{ -1 * BELT_SPEED * (m_BeltType + 1), 0, 0 }, gameObjects);
+				worked1 = ObjectsOnSameSquare[i].MoveBy(Vec3{ -1 * BELT_SPEED * (m_BeltType + 1), 0, 0 }, gameObjects);
+				offset = ObjectsOnSameSquare[i].GetPos().y - std::floor(ObjectsOnSameSquare[i].GetPos().y);
+				direction = .5f - offset;
+				direction /= std::abs(direction);
+				if (std::abs(offset) != .5f)
+					worked2 = ObjectsOnSameSquare[i].MoveBy(Vec3{ 0, BELT_SPEED * (m_BeltType + 1) * direction, 0 }, gameObjects);
 			}
+			if (!worked1 || !worked2)
+			{
+				ObjectsOnSameSquare[i].SetPos(oldPos); // if one of the moves didnt work then dont move at all
+			}
+
 		}
 	}
 	
@@ -42,8 +73,8 @@ void Belt::Update(std::unordered_map<int, std::unordered_map<int, std::vector<Ga
 Vec3 Belt::GetArrowPos() const
 {
 	return Vec3{
-		GameObject::GetPos().x + m_ArrowOffset.x,
-		GameObject::GetPos().y + m_ArrowOffset.y,
-		GameObject::GetPos().z + +m_ArrowOffset.z
+		GetPos().x + m_ArrowOffset.x,
+		GetPos().y + m_ArrowOffset.y,
+		GetPos().z + +m_ArrowOffset.z
 	};
 }

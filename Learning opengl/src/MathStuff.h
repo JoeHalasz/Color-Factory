@@ -1,6 +1,8 @@
 #pragma once
 
 #include <algorithm>
+#include <iostream>
+
 
 
 struct Vec3 
@@ -37,3 +39,6 @@ inline const float checkHowClose(const Vec3 x, const Vec3 y)
 {
     return std::max(std::abs(x.x - y.x), std::abs(x.y - y.y));
 }
+
+
+Vec3 roundVec3(Vec3 var);
