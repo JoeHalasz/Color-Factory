@@ -126,7 +126,6 @@ int main(void)
             world.OnUpdate(&input);
 
             ImGui_ImplGlfwGL3_NewFrame();
-            
             renderer.OnRender(WIDTH, HEIGHT, world);
             if (beenOneSecond && printStuff)
             {

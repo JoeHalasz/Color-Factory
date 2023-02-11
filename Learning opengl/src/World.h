@@ -40,8 +40,8 @@ public:
 	World(GLFWwindow* window, glm::vec3 position);
 	~World();
 	void OnUpdate(Input* input);
-	bool AddGameObject(GameObject newObject);
-	bool AddBelt(Belt belt);
+	bool AddGameObject(GameObject& newObject);
+	bool AddBeltToWorld(Belt& belt);
 	void DeleteAllAtPos(Vec3 pos);
 	int GetBeltDirectionAt(int x, int y);
 
@@ -53,10 +53,9 @@ public:
 	inline int GetMousePosY() { return m_MousePosY; }
 
 	inline std::vector<GameObject>& GetGameObjectsAtPos(float x, float y) { return m_GameObjects[std::floor(x)][std::floor(y)]; }
-	inline void AddGameObjectAtPos(GameObject newObject, float x, float y) { return m_GameObjects[std::floor(x)][std::floor(y)].push_back(newObject); }
+	inline GameObject AddGameObjectAtPos(GameObject& newObject, float x, float y) { m_GameObjects[std::floor(x)][std::floor(y)].emplace_back(newObject); return newObject; } // will return the object
 	
 	inline std::vector<Belt>& GetBeltsAtPos(float x, float y) { return m_Belts[std::floor(x)][std::floor(y)]; }
-	inline void AddBeltAtPos(Belt newBelt, float x, float y) { return m_Belts[std::floor(x)][std::floor(y)].push_back(newBelt); }
-
+	inline void AddBeltAtPos(Belt& newBelt, float x, float y) { return m_Belts[std::floor(x)][std::floor(y)].emplace_back(newBelt); }
 
 };

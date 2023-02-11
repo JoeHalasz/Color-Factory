@@ -36,7 +36,7 @@ int World::GetBeltDirectionAt(int x, int y)
     return -1;
 }
 
-bool World::AddGameObject(GameObject newObject)
+bool World::AddGameObject(GameObject& newObject)
 {
     std::vector<GameObject>& gameObjects = GetGameObjectsAtPos(newObject.GetPos().x, newObject.GetPos().y);
     if (gameObjects.size() == 0) // if there is nothing on that tile
@@ -58,11 +58,24 @@ bool World::AddPaintBlob(Vec4 BlobColor, Vec3 pos, float size)
             return false;
         }
     }
+
     // there is no blob there
     WorldTile tile(TileTypePaintBlob, BlobColor);
     GameObject paintBlob(tile, pos+.5f, size * m_BlockSize);
 
-    AddGameObjectAtPos(paintBlob, paintBlob.GetPos().x, paintBlob.GetPos().y);
+    if (GetBeltsAtPos(paintBlob.GetPos().x, paintBlob.GetPos().y).size() != 0)
+    {
+        if (GetBeltsAtPos(paintBlob.GetPos().x, paintBlob.GetPos().y)[0].GetAllowNewItem())
+        {
+            if (GetBeltsAtPos(paintBlob.GetPos().x, paintBlob.GetPos().y)[0].GetDirection() == DirectionUp || GetBeltsAtPos(paintBlob.GetPos().x, paintBlob.GetPos().y)[0].GetDirection() == DirectionDown)
+                paintBlob.SetPos(paintBlob.GetPos() + Vec3{ 0.0f, -.5f, 0.0f });
+            else
+                paintBlob.SetPos(paintBlob.GetPos() + Vec3{ -.5f, 0.0f, 0.0f });
+            GetBeltsAtPos(paintBlob.GetPos().x, paintBlob.GetPos().y)[0].AddObject(paintBlob); // dont add to gameObj list if its in a belt
+        }
+    }
+    else AddGameObjectAtPos(paintBlob, paintBlob.GetPos().x, paintBlob.GetPos().y);
+
     return true;
     
     
@@ -70,7 +83,7 @@ bool World::AddPaintBlob(Vec4 BlobColor, Vec3 pos, float size)
 
 bool World::AddBelt(BeltType beltColor, Vec3 pos, Direction direction)
 {
-    Belt belt(WorldTile(TileTypeStraightBelt), pos, m_BlockSize, direction, beltColor);
+    Belt belt(WorldTile(TileTypeStraightBelt), pos, m_BlockSize, direction, beltColor, m_Belts);
 
     if (direction == DirectionUp)
     {
@@ -97,8 +110,6 @@ bool World::AddBelt(BeltType beltColor, Vec3 pos, Direction direction)
         else if (downBelt == DirectionUp)
         {
             belt.GetTile()->SetType(TileTypeTurnBelt);
-            std::cout << belt.GetTile()->GetType() << " = " << TileTypeTurnBelt << std::endl;
-
             belt.SetDirection(DirectionRight);
         }
     }
@@ -131,8 +142,9 @@ bool World::AddBelt(BeltType beltColor, Vec3 pos, Direction direction)
             belt.GetTile()->SetType(TileTypeTurnBelt);
         }
     }
+
     
-    if (!AddBelt(belt))
+    if (!AddBeltToWorld(belt))
         return false;
 
     return true;
@@ -196,7 +208,8 @@ void World::OnUpdate(Input* input)
             std::vector<Belt>& belts = col.second;
             for (int i = 0; i < belts.size(); i++)
             {
-                belts[i].Update(m_GameObjects);
+                if (belts[i].GetNextBelt() == nullptr)
+                    belts[i].Update(); // this will call all the belts in the chain to update
             }
         }
     }
@@ -221,7 +234,7 @@ void World::OnUpdate(Input* input)
 }
 
 
-bool World::AddBelt(Belt belt)
+bool World::AddBeltToWorld(Belt& belt)
 {
     std::vector<Belt>& belts = GetBeltsAtPos(belt.GetPos().x, belt.GetPos().y);
     std::vector<GameObject>& gameObjects = GetGameObjectsAtPos(belt.GetPos().x, belt.GetPos().y);
@@ -241,10 +254,13 @@ bool World::AddBelt(Belt belt)
     }
 
     {
-        // remove what ever is there and add belt
-        m_Belts[std::floor(belt.GetPos().x)][std::floor(belt.GetPos().y)].clear();
-        AddBeltAtPos(belt, belt.GetPos().x, belt.GetPos().y);
-        return true;
+        // remove what ever is there and add belt if it is not the same
+        if ( !(belt == m_Belts[std::floor(belt.GetPos().x)][std::floor(belt.GetPos().y)][0]) )
+        {
+            m_Belts[std::floor(belt.GetPos().x)][std::floor(belt.GetPos().y)].clear();
+            AddBeltAtPos(belt, belt.GetPos().x, belt.GetPos().y);
+            return true;
+        }
     }
 
     return false;

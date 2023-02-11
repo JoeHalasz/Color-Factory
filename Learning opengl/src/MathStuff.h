@@ -19,6 +19,9 @@ struct Vec3
     inline void operator=(Vec3 a) {
         { x = a.x; y = a.y; z = a.z; };
     }
+    inline bool operator==(Vec3 a) {
+        { return x == a.x && y == a.y && z == a.z; };
+    }
 };
 struct Vec2 { float x, y; };
 struct Vec4 { float x, y, z, w; };

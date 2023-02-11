@@ -142,12 +142,12 @@ void Renderer::Draw() const
     GLCall(glDrawElements(GL_TRIANGLES, m_IndexBuffer->GetCount(), GL_UNSIGNED_INT, nullptr));
 }
 
-void Renderer::AddQuad(GameObject gameObject, float tileSize)
+void Renderer::AddQuad(GameObject& gameObject, float tileSize)
 {
     m_AllQuads.push_back(CreateQuad(gameObject.GetTile()->GetType(), gameObject.GetSize(), gameObject.GetDirection(), tileSize, gameObject.GetPos()*tileSize, gameObject.GetTile()->GetColor()));
 }
 
-void Renderer::AddQuad(Belt belt, float tileSize)
+void Renderer::AddQuad(Belt& belt, float tileSize)
 {
     m_AllQuads.push_back(CreateQuad(belt.GetTile()->GetType(), belt.GetSize(), belt.GetDirection(), tileSize, belt.GetPos() * tileSize, belt.GetTile()->GetColor()));
 }
@@ -168,7 +168,6 @@ void Renderer::DrawWorld(World& world, int width, int height)
     float zoomedWidth = (width / 2) + (world.GetZoomAmount() * (width / 20));
     float zoomedHeight = (height / 2) + (world.GetZoomAmount() * (height / 20));
 
-    // std::cout << world.GetZoomAmount() << std::endl;
     int startDrawX = (-1 * ((world.GetPosition().x / size) + (zoomedWidth / size))) - 1;
     int startDrawY = (-1 * ((world.GetPosition().y / size) + (zoomedHeight / size))) - 1;
 
@@ -188,15 +187,20 @@ void Renderer::DrawWorld(World& world, int width, int height)
     for (int i = 0; i < OnScreenPositions.size(); i++)
     {
         // draw belt if it exists
-        std::vector<Belt> belts = world.GetBeltsAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
+        std::vector<Belt>& belts = world.GetBeltsAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
         std::vector<GameObject>& gameObjects = world.GetGameObjectsAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
 
         if (belts.size() != 0)
         { // there is a belt on this square
-            Belt belt = belts[0];
+            Belt& belt = belts[0];
             AddQuad(belt, world.GetBlockSize());
             if (belt.GetTile()->GetType() == TileTypeStraightBelt) // draw arrow if it is not a turn belt
                 AddQuad(belt.GetArrowTile(), size, belt.GetDirection(), world.GetBlockSize(), Vec3{belt.GetArrowPos().x * size, belt.GetArrowPos().y * size, 1});
+            // draw objects on the belt
+            for (int j = 0; j < belt.GetAllObjects().size(); j++)
+            {
+                AddQuad(belt.GetAllObjects()[j], world.GetBlockSize());
+            }
         }
     }
     for (int i = 0; i < OnScreenPositions.size(); i++){

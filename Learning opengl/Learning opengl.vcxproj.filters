@@ -75,10 +75,13 @@
     <ClCompile Include="src\GameObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Belt.cpp">
+    <ClCompile Include="src\BeltOLD.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\MathStuff.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Belt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1432,6 +1435,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\GameObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BeltOLD.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Belt.h">
