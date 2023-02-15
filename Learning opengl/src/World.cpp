@@ -65,7 +65,7 @@ bool World::AddPaintBlob(Vec4 BlobColor, Vec3 pos, float size)
 
     if (GetBeltsAtPos(pos.x, pos.y).size() != 0)
     {
-        if (GetBeltsAtPos(pos.x, pos.y)[0]->GetAllowNewItem())
+        if (GetBeltsAtPos(pos.x, pos.y)[0]->AllowNewItem(true))
         {
             // set steps to half
             GetBeltsAtPos(paintBlob.GetPos().x, paintBlob.GetPos().y)[0]->AddObject(paintBlob, true); // dont add to gameObj list if its in a belt
@@ -149,6 +149,7 @@ bool World::AddBelt(BeltType beltColor, Vec3 pos, Direction direction)
         m_Belts[std::floor(belt->GetPos().x)][std::floor(belt->GetPos().y)].clear();
     }
     AddBeltAtPos(belt, belt->GetPos().x, belt->GetPos().y);
+    belt->SetUpNextAndLastBelt();
 
     return true;
 }
@@ -201,7 +202,9 @@ void World::OnUpdate(Input* input)
         DeleteAllAtPos(Vec3{ mousePosX, mousePosY, 1 });
     }
 
-    // update all the belts
+    std::vector<std::shared_ptr<Belt>> heads;
+
+    // find all the belts that have a head and reset UpdatedThisFrame
     for (auto& row : m_Belts)
     {
         int x = row.first;
@@ -211,7 +214,31 @@ void World::OnUpdate(Input* input)
             std::vector<std::shared_ptr<Belt>>& belts = col.second;
             for (int i = 0; i < belts.size(); i++)
             {
-                if (belts[i]->GetNextBelt() == nullptr)
+                if (belts[i]->GetNextBelt() == NULL)
+                    heads.push_back(belts[i]);
+                belts[i]->UpdatedThisFrame = false;
+            }
+        }
+    }
+
+    // update the heads. This will update every belt in that chain
+    for (int i = 0; i < heads.size(); i++)
+    {
+        if (heads[i]->GetNextBelt() == NULL)
+            heads[i]->Update(); // this will call all the belts in the chain to update
+    }
+
+    // update all the belts that dont have a head
+    for (auto& row : m_Belts)
+    {
+        int x = row.first;
+        for (auto& col : row.second)
+        {
+            int y = col.first;
+            std::vector<std::shared_ptr<Belt>>& belts = col.second;
+            for (int i = 0; i < belts.size(); i++)
+            {
+                if (!belts[i]->UpdatedThisFrame)
                     belts[i]->Update(); // this will call all the belts in the chain to update
             }
         }

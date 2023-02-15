@@ -183,6 +183,7 @@ void Renderer::DrawWorld(World& world, int width, int height)
         }
     }
 
+    std::vector<GameObject> blobsOnBelts;
     // draw world tiles
     for (int i = 0; i < OnScreenPositions.size(); i++)
     {
@@ -196,12 +197,14 @@ void Renderer::DrawWorld(World& world, int width, int height)
             AddQuad(belt.get()[0], world.GetBlockSize());
             if (belt.get()[0].GetTile()->GetType() == TileTypeStraightBelt) // draw arrow if it is not a turn belt
                 AddQuad(belt->GetArrowTile(), size, belt->GetDirection(), world.GetBlockSize(), Vec3{belt->GetArrowPos().x * size, belt->GetArrowPos().y * size, 1});
-            // draw objects on the belt
-            for (int j = 0; j < belt->GetAllObjects().size(); j++)
-            {
-                AddQuad(belt->GetAllObjects()[j], world.GetBlockSize());
-            }
+            
+            // add objects on the belt to draw to the list of things to draw
+            blobsOnBelts.insert(blobsOnBelts.end(), belt->GetAllObjects().begin(), belt->GetAllObjects().end());
         }
+    }
+    for (int i = 0; i < blobsOnBelts.size(); i++)
+    {
+        AddQuad(blobsOnBelts[i], world.GetBlockSize());
     }
     for (int i = 0; i < OnScreenPositions.size(); i++){
         std::vector<GameObject>& gameObjects = world.GetGameObjectsAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
