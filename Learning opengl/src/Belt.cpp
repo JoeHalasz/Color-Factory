@@ -1,22 +1,24 @@
 #include "Belt.h"
-
+#include <memory>
 
 
 Belt::Belt(WorldTile tile, Vec3 pos, int size, Direction direction, BeltType beltType, 
-	std::unordered_map<int, std::unordered_map<int, std::vector<Belt>>>& AllOtherBelts)
+	std::unordered_map<int, std::unordered_map<int, std::vector<std::shared_ptr<Belt>>>>& AllOtherBelts)
 	:m_Tile(tile), m_Pos(pos), m_Size(size), m_Direction(direction), m_BeltType(beltType)
 {
 	m_NextBelt = GetNextOrLastBelt(pos, direction, false, AllOtherBelts);
-	m_LastBelt = GetNextOrLastBelt(pos, direction, true,  AllOtherBelts);
+	m_LastBelt = GetNextOrLastBelt(pos, direction, true, AllOtherBelts);
 
-	if (m_NextBelt != nullptr)
-		m_NextBelt->m_LastBelt = this;
+	std::cout << "THESE SHOULD BE THE SAME" << this << "=" << &AllOtherBelts[GetPos().x][GetPos().y][0] << std::endl;
 
-	if (m_LastBelt != nullptr) {
-		m_LastBelt->m_NextBelt = this;
+	if (m_NextBelt != NULL) {
+		m_NextBelt->m_LastBelt = this->shared_from_this();
+		std::cout << m_NextBelt->m_LastBelt << " This needs to be something" << std::endl;
+	}
+	if (m_LastBelt != NULL) {
+		m_LastBelt->m_NextBelt = this->shared_from_this();
 		std::cout << "Next belt is " << m_LastBelt->m_NextBelt << "also this is " << this << std::endl;
 	}
-
 
 	if (beltType == BeltTypeYellow) m_ArrowTile = TileType(TileTypeYellowArrow);
 	if (beltType == BeltTypeOrange) m_ArrowTile = TileType(TileTypeOrangeArrow);
@@ -26,32 +28,31 @@ Belt::Belt(WorldTile tile, Vec3 pos, int size, Direction direction, BeltType bel
 	m_MaxItemMoves = FramesTillMovedFullTile / (m_BeltType + 1);
 }
 
+
 Belt::~Belt()
 {
 	std::cout << " DESTROYING BELT " << std::endl;
-	if (m_NextBelt != nullptr)
-		m_NextBelt->m_LastBelt = nullptr;
-	if (m_LastBelt != nullptr)
-		m_LastBelt->m_NextBelt = nullptr;
+	if (m_NextBelt != NULL)
+		m_NextBelt->m_LastBelt = NULL;
+	if (m_LastBelt != NULL)
+		m_LastBelt->m_NextBelt = NULL;
 }
 
 
 void Belt::Update()
 {
-	if (m_NextBelt == nullptr)
+	if (m_NextBelt == NULL)
 		m_LastItemMoved = true;
 
 	for (int i = 0; i < m_ObjectsOnBelt.size(); i++)
 	{
+		std::cout << GetPos().x << ", " << GetPos().y << " has something on it! " << m_ObjectNumMoves[i] << std::endl;
 		if (m_ObjectNumMoves[i] == m_MaxItemMoves) // this can only happen with the first element
 		{
-			std::cout << m_NextBelt << std::endl;
-			if (m_NextBelt != nullptr)
+			if (m_NextBelt != NULL)
 			{
-			std::cout << " HERE " << std::endl;
 				if (m_NextBelt->allowNewItem) // move it from this belt to the next belt
 				{
-					std::cout << " HERE 2 " << std::endl;
 					m_NextBelt->m_ObjectsOnBelt.push_back(m_ObjectsOnBelt[i]);
 					m_NextBelt->m_ObjectNumMoves.push_back(0);
 					MoveGameObject(i);
@@ -62,6 +63,7 @@ void Belt::Update()
 			}
 			else {
 				m_LastItemMoved = false;
+				std::cout << "No next belt found" << std::endl;
 			}
 		}
 		else
@@ -83,11 +85,11 @@ void Belt::Update()
 	else
 		allowNewItem = false;
 	// update next in chain
-	if (m_LastBelt != nullptr)
+	if (m_LastBelt != NULL)
 		m_LastBelt->Update();
 }
 
-Belt* Belt::GetNextOrLastBelt(Vec3 pos, Direction direction, bool isLastBelt, std::unordered_map<int, std::unordered_map<int, std::vector<Belt>>>& AllOtherBelts)
+std::shared_ptr<Belt> Belt::GetNextOrLastBelt(Vec3 pos, Direction direction, bool isLastBelt, std::unordered_map<int, std::unordered_map<int, std::vector<std::shared_ptr<Belt>>>>& AllOtherBelts)
 {
 	float xPos = pos.x;
 	float yPos = pos.y;
@@ -105,14 +107,17 @@ Belt* Belt::GetNextOrLastBelt(Vec3 pos, Direction direction, bool isLastBelt, st
 	else if (direction == DirectionRight)
 		xPos += 1 * signFlip;
 
+	std::unique_ptr<Belt> fake;
+
 	if (AllOtherBelts[xPos][yPos].size() == 0)
-		return nullptr;
-	Belt* possibleNextBelt = &AllOtherBelts[xPos][yPos][0];
+		return fake;
 
-	if (possibleNextBelt->m_Direction != direction)
-		return nullptr;
+	std::shared_ptr<Belt> possibleNextBelt = AllOtherBelts[xPos][yPos][0];
 
-	return &AllOtherBelts[xPos][yPos][0];
+	if (possibleNextBelt->m_Direction != direction) 
+		return fake;
+
+	return AllOtherBelts[xPos][yPos][0];
 }
 
 

@@ -26,6 +26,8 @@ private:
 	Vec4 m_Color;
 
 public:
+
+	WorldTile() {}
 	WorldTile(TileType type);
 	WorldTile(TileType type, Vec4 color);
 	

@@ -187,19 +187,19 @@ void Renderer::DrawWorld(World& world, int width, int height)
     for (int i = 0; i < OnScreenPositions.size(); i++)
     {
         // draw belt if it exists
-        std::vector<Belt>& belts = world.GetBeltsAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
+        std::vector<std::shared_ptr<Belt>>& belts = world.GetBeltsAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
         std::vector<GameObject>& gameObjects = world.GetGameObjectsAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
 
         if (belts.size() != 0)
         { // there is a belt on this square
-            Belt& belt = belts[0];
-            AddQuad(belt, world.GetBlockSize());
-            if (belt.GetTile()->GetType() == TileTypeStraightBelt) // draw arrow if it is not a turn belt
-                AddQuad(belt.GetArrowTile(), size, belt.GetDirection(), world.GetBlockSize(), Vec3{belt.GetArrowPos().x * size, belt.GetArrowPos().y * size, 1});
+            std::shared_ptr<Belt> belt = belts[0];
+            AddQuad(belt.get()[0], world.GetBlockSize());
+            if (belt.get()[0].GetTile()->GetType() == TileTypeStraightBelt) // draw arrow if it is not a turn belt
+                AddQuad(belt->GetArrowTile(), size, belt->GetDirection(), world.GetBlockSize(), Vec3{belt->GetArrowPos().x * size, belt->GetArrowPos().y * size, 1});
             // draw objects on the belt
-            for (int j = 0; j < belt.GetAllObjects().size(); j++)
+            for (int j = 0; j < belt->GetAllObjects().size(); j++)
             {
-                AddQuad(belt.GetAllObjects()[j], world.GetBlockSize());
+                AddQuad(belt->GetAllObjects()[j], world.GetBlockSize());
             }
         }
     }

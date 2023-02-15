@@ -11,6 +11,7 @@
 
 #include "GameObject.h"
 #include "Belt.h"
+#include <memory>
 
 class World
 {
@@ -28,7 +29,7 @@ private:
 	int m_MousePosY = 0;
 
 	std::unordered_map<int, std::unordered_map<int, std::vector<GameObject>>> m_GameObjects;
-	std::unordered_map<int, std::unordered_map<int, std::vector<Belt>>> m_Belts;
+	std::unordered_map<int, std::unordered_map<int, std::vector<std::shared_ptr<Belt>>>> m_Belts;
 
 	bool AddBelt(BeltType beltColor, Vec3 pos, Direction direction);
 	bool AddPaintBlob(Vec4 BlobColor, Vec3 pos, float size);
@@ -41,7 +42,7 @@ public:
 	~World();
 	void OnUpdate(Input* input);
 	bool AddGameObject(GameObject& newObject);
-	bool AddBeltToWorld(Belt& belt);
+	bool BeltCanBeMade(Vec3 pos, BeltType beltColor, Direction direction);
 	void DeleteAllAtPos(Vec3 pos);
 	int GetBeltDirectionAt(int x, int y);
 
@@ -55,7 +56,9 @@ public:
 	inline std::vector<GameObject>& GetGameObjectsAtPos(float x, float y) { return m_GameObjects[std::floor(x)][std::floor(y)]; }
 	inline GameObject AddGameObjectAtPos(GameObject& newObject, float x, float y) { m_GameObjects[std::floor(x)][std::floor(y)].emplace_back(newObject); return newObject; } // will return the object
 	
-	inline std::vector<Belt>& GetBeltsAtPos(float x, float y) { return m_Belts[std::floor(x)][std::floor(y)]; }
-	inline void AddBeltAtPos(Belt& newBelt, float x, float y) { return m_Belts[std::floor(x)][std::floor(y)].emplace_back(newBelt); }
+	inline std::vector<std::shared_ptr<Belt>>& GetBeltsAtPos(float x, float y) { return m_Belts[std::floor(x)][std::floor(y)]; }
+	inline void AddBeltAtPos(std::shared_ptr <Belt> newBelt, float x, float y) {
+		m_Belts[std::floor(x)][std::floor(y)].push_back(newBelt); 
+	}
 
 };
