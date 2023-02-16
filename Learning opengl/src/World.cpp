@@ -83,7 +83,7 @@ bool World::AddBelt(BeltType beltColor, Vec3 pos, Direction direction)
     if (!BeltCanBeMade(pos, beltColor, direction))
         return false;
 
-    std::shared_ptr<Belt> belt(new Belt(WorldTile(TileTypeStraightBelt), pos, m_BlockSize, direction, beltColor, m_Belts));
+    std::shared_ptr<Belt> belt(new Belt(WorldTile(TileTypeStraightBelt), pos, m_BlockSize, direction, beltColor));
 
     if (direction == DirectionUp)
     {
@@ -149,7 +149,7 @@ bool World::AddBelt(BeltType beltColor, Vec3 pos, Direction direction)
         m_Belts[std::floor(belt->GetPos().x)][std::floor(belt->GetPos().y)].clear();
     }
     AddBeltAtPos(belt, belt->GetPos().x, belt->GetPos().y);
-    belt->SetUpNextAndLastBelt();
+    belt->SetUpNextAndLastBelt(m_Belts);
 
     return true;
 }

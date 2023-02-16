@@ -3,12 +3,9 @@
 
 
 // this function will not deal with connecting the other belts to this belt 
-Belt::Belt(WorldTile tile, Vec3 pos, int size, Direction direction, BeltType beltType, 
-	std::unordered_map<int, std::unordered_map<int, std::vector<std::shared_ptr<Belt>>>>& AllOtherBelts)
+Belt::Belt(WorldTile tile, Vec3 pos, int size, Direction direction, BeltType beltType)
 	:m_Tile(tile), m_Pos(pos), m_Size(size), m_Direction(direction), m_BeltType(beltType)
 {
-	m_NextBelt = GetNextOrLastBelt(pos, direction, false, AllOtherBelts);
-	m_LastBelt = GetNextOrLastBelt(pos, direction, true, AllOtherBelts);
 
 	if (beltType == BeltTypeYellow) m_ArrowTile = TileType(TileTypeYellowArrow);
 	if (beltType == BeltTypeOrange) m_ArrowTile = TileType(TileTypeOrangeArrow);
@@ -18,8 +15,11 @@ Belt::Belt(WorldTile tile, Vec3 pos, int size, Direction direction, BeltType bel
 	m_MaxItemMoves = FramesTillMovedFullTile / (m_BeltType + 1);
 }
 
-void Belt::SetUpNextAndLastBelt()
+void Belt::SetUpNextAndLastBelt(std::unordered_map<int, std::unordered_map<int, std::vector<std::shared_ptr<Belt>>>>& AllOtherBelts)
 {
+	m_NextBelt = GetNextOrLastBelt(false, AllOtherBelts);
+	m_LastBelt = GetNextOrLastBelt(true, AllOtherBelts);
+
 	if (m_NextBelt != NULL) {
 		m_NextBelt->m_LastBelt = this->shared_from_this(); // this doesnt exist yet :(
 	}
@@ -40,6 +40,8 @@ Belt::~Belt()
 
 void Belt::Update()
 {
+	if (UpdatedThisFrame)
+		return;
 	UpdatedThisFrame = true;
 	if (m_NextBelt == NULL)
 		m_LastItemMoved = true;
@@ -53,7 +55,10 @@ void Belt::Update()
 				if (m_NextBelt->AllowNewItem()) // move it from this belt to the next belt
 				{
 					m_NextBelt->m_ObjectsOnBelt.push_back(m_ObjectsOnBelt[i]);
-					m_NextBelt->m_ObjectNumMoves.push_back(0);
+					if (m_NextBelt->GetTile()->GetType() == TileTypeTurnBelt || m_NextBelt->GetTile()->GetType() == TileTypeTurnBeltBackwards)
+						m_NextBelt->m_ObjectNumMoves.push_back(FramesTillMovedFullTile / 2);
+					else
+						m_NextBelt->m_ObjectNumMoves.push_back(0);
 					MoveGameObject(i);
 					m_ObjectsOnBelt.erase(m_ObjectsOnBelt.begin() + i);
 					m_ObjectNumMoves.erase(m_ObjectNumMoves.begin() + i);
@@ -91,48 +96,104 @@ bool Belt::AllowNewItem(bool StartAtHalf) const
 {
 	if (m_ObjectsOnBelt.size() == 0)
 		return true;
-	int spot = m_MinSpaceBetween + 1;
+	int spot = m_MinSpaceBetween;
 	if (StartAtHalf)
 		spot += FramesTillMovedFullTile / 2;
-	if (m_ObjectNumMoves[m_ObjectNumMoves.size() - 1] > spot)
+	if (m_ObjectNumMoves[m_ObjectNumMoves.size() - 1] >= spot)
 		return true;
 	return false;
 }
 
-std::shared_ptr<Belt> Belt::GetNextOrLastBelt(Vec3 pos, Direction direction, bool isLastBelt, std::unordered_map<int, std::unordered_map<int, std::vector<std::shared_ptr<Belt>>>>& AllOtherBelts)
+std::shared_ptr<Belt> Belt::GetNextOrLastBelt(bool isLastBelt, std::unordered_map<int, std::unordered_map<int, std::vector<std::shared_ptr<Belt>>>>& AllOtherBelts)
 {
-	std::cout << "Before" << std::endl;
-	float xPos = pos.x;
-	float yPos = pos.y;
-	int signFlip = 1;
-
-	if (isLastBelt)
-		signFlip = -1;
-
-	if (direction == DirectionUp)
-		yPos += 1 * signFlip;
-	else if (direction == DirectionDown)
-		yPos += -1 * signFlip;
-	else if (direction == DirectionLeft)
-		xPos += -1 * signFlip;
-	else if (direction == DirectionRight)
-		xPos += 1 * signFlip;
-
+	float xPos = GetPos().x;
+	float yPos = GetPos().y;
 	std::unique_ptr<Belt> fake;
 
-	if (AllOtherBelts[xPos][yPos].size() == 0)
-		return fake;
+	if (GetTile()->GetType() == TileTypeStraightBelt || !isLastBelt) // do this if we are a straight belt or looking for the next belt
+	{
+		int signFlip = 1;
+		if (isLastBelt)
+			signFlip = -1;
 
-	std::shared_ptr<Belt> possibleNextBelt = AllOtherBelts[xPos][yPos][0];
+		if (GetDirection() == DirectionUp)
+			yPos += 1 * signFlip;
+		else if (GetDirection() == DirectionDown)
+			yPos += -1 * signFlip;
+		else if (GetDirection() == DirectionLeft)
+			xPos += -1 * signFlip;
+		else if (GetDirection() == DirectionRight)
+			xPos += 1 * signFlip;
 
+		
+		// if there isnt a belt there 
+		if (AllOtherBelts[xPos][yPos].size() == 0)
+			return fake;
 
-	if (possibleNextBelt->GetTile()->GetType() != TileTypeTurnBelt && possibleNextBelt->GetTile()->GetType() != TileTypeTurnBeltBackwards)
-		if (GetTile()->GetType() != TileTypeTurnBelt && GetTile()->GetType() != TileTypeTurnBeltBackwards)
-			if (possibleNextBelt->m_Direction != direction)
+		std::shared_ptr<Belt> possibleNextBelt = AllOtherBelts[xPos][yPos][0];
+
+		if (possibleNextBelt->GetTile()->GetType() != TileTypeTurnBelt && possibleNextBelt->GetTile()->GetType() != TileTypeTurnBeltBackwards)
+			if (possibleNextBelt->m_Direction != GetDirection())
 				return fake;
 
-	std::cout << "After" << std::endl;
-	return AllOtherBelts[xPos][yPos][0];
+		return AllOtherBelts[xPos][yPos][0];
+	}
+	else // if we are a turn belt and we are looking for the last belt
+	{
+		Direction wantedDirection;
+		std::cout << "there  is a turn belt" << std::endl;
+		if (GetTile()->GetType() == TileTypeTurnBelt)
+		{
+			std::cout << "normal turn belt" << std::endl;
+			if (GetDirection() == DirectionUp) {
+				xPos += -1;
+				wantedDirection = DirectionRight;
+			}
+			else if (GetDirection() == DirectionDown) {
+				xPos += 1;
+				wantedDirection = DirectionLeft;
+			}
+			else if (GetDirection() == DirectionLeft) {
+				yPos += 1;
+				wantedDirection = DirectionDown;
+			}
+			else if (GetDirection() == DirectionRight) {
+				yPos += -1;
+				wantedDirection = DirectionUp;
+			}
+		}
+		else // turn belt backwards
+		{
+			std::cout << "backwards turn belt" << std::endl;
+			if (GetDirection() == DirectionUp) {
+				xPos += 1;
+				wantedDirection = DirectionLeft;
+			}
+			else if (GetDirection() == DirectionDown) {
+				xPos += -1;
+				wantedDirection = DirectionRight;
+			}
+			else if (GetDirection() == DirectionLeft) {
+				yPos += -1;
+				wantedDirection = DirectionUp;
+			}
+			else if (GetDirection() == DirectionRight) {
+				yPos += 1;
+				wantedDirection = DirectionDown;
+			}
+		}
+
+		// if there isnt a belt there 
+		if (AllOtherBelts[xPos][yPos].size() == 0)
+			return fake;
+
+		std::shared_ptr<Belt> possibleNextBelt = AllOtherBelts[xPos][yPos][0];
+
+		if (possibleNextBelt->GetDirection() != wantedDirection)
+			return fake;
+
+		return AllOtherBelts[xPos][yPos][0];
+	}
 }
 
 
