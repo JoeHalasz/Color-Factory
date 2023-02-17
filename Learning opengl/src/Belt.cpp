@@ -19,12 +19,21 @@ void Belt::SetUpNextAndLastBelt(std::unordered_map<int, std::unordered_map<int, 
 {
 	m_NextBelt = GetNextOrLastBelt(false, AllOtherBelts);
 	m_LastBelt = GetNextOrLastBelt(true, AllOtherBelts);
-
+	int here = 0;
 	if (m_NextBelt != NULL) {
-		m_NextBelt->m_LastBelt = this->shared_from_this(); // this doesnt exist yet :(
+		while (m_NextBelt->m_LastBelt == NULL || m_NextBelt->m_LastBelt != this->shared_from_this()) { // not sure why this needs to happen more than once, but it does. Sometimes will not set it correctly
+			m_NextBelt->m_LastBelt = this->shared_from_this();
+			if (here++ >= 10)
+				std::cout << "Im stuck help2" << std::endl; // keep this here
+		}
 	}
 	if (m_LastBelt != NULL) {
-		m_LastBelt->m_NextBelt = this->shared_from_this();// this doesnt exist yet :(
+		while (m_LastBelt->m_NextBelt == NULL || m_LastBelt->m_NextBelt != this->shared_from_this()) {
+			m_LastBelt->m_NextBelt = this->shared_from_this();
+			if (here++ >= 10)
+				std::cout << "Im stuck help2" << std::endl; // keep this here
+		}
+		
 	}
 }
 
@@ -52,6 +61,7 @@ void Belt::Update()
 		{
 			if (m_NextBelt != NULL)
 			{
+				bool nextItemAllowed = m_NextBelt->AllowNewItem();
 				if (m_NextBelt->AllowNewItem()) // move it from this belt to the next belt
 				{
 					m_NextBelt->m_ObjectsOnBelt.push_back(m_ObjectsOnBelt[i]);
@@ -59,7 +69,7 @@ void Belt::Update()
 						m_NextBelt->m_ObjectNumMoves.push_back(m_MaxItemMoves / 2);
 					else
 						m_NextBelt->m_ObjectNumMoves.push_back(0);
-					MoveGameObject(i);
+					MovePaintBlob(i);
 					m_ObjectsOnBelt.erase(m_ObjectsOnBelt.begin() + i);
 					m_ObjectNumMoves.erase(m_ObjectNumMoves.begin() + i);
 					i--;
@@ -74,15 +84,15 @@ void Belt::Update()
 		}
 		else
 		{
-			if (i == 0) MoveGameObject(i);
-			else if (m_LastItemMoved) MoveGameObject(i);
+			if (i == 0) MovePaintBlob(i);
+			else if (m_LastItemMoved) MovePaintBlob(i);
 			else
 			{
 				// if move will make it too close to next then dont move
 				if (m_ObjectNumMoves[i - 1] - m_ObjectNumMoves[i] < m_MinSpaceBetween) // then it will be too close
 					m_LastItemMoved = false;
 				else 
-					MoveGameObject(i);
+					MovePaintBlob(i);
 			}
 		}
 	}
@@ -92,12 +102,12 @@ void Belt::Update()
 		m_LastBelt->Update();
 }
 
-bool Belt::AllowNewItem(bool StartAtHalf) const
+bool Belt::AllowNewItem(bool StartAtHalf)
 {
 	if (m_ObjectsOnBelt.size() == 0)
 		return true;
 	int spot = m_MinSpaceBetween;
-	if (StartAtHalf)
+	if (StartAtHalf || GetTile()->GetType() == TileTypeTurnBelt || GetTile()->GetType() == TileTypeTurnBeltBackwards)
 		spot += m_MaxItemMoves / 2;
 	if (m_ObjectNumMoves[m_ObjectNumMoves.size() - 1] >= spot)
 		return true;
@@ -141,10 +151,8 @@ std::shared_ptr<Belt> Belt::GetNextOrLastBelt(bool isLastBelt, std::unordered_ma
 	else // if we are a turn belt and we are looking for the last belt
 	{
 		Direction wantedDirection;
-		std::cout << "there  is a turn belt" << std::endl;
 		if (GetTile()->GetType() == TileTypeTurnBelt)
 		{
-			std::cout << "normal turn belt" << std::endl;
 			if (GetDirection() == DirectionUp) {
 				xPos += -1;
 				wantedDirection = DirectionRight;
@@ -164,7 +172,6 @@ std::shared_ptr<Belt> Belt::GetNextOrLastBelt(bool isLastBelt, std::unordered_ma
 		}
 		else // turn belt backwards
 		{
-			std::cout << "backwards turn belt" << std::endl;
 			if (GetDirection() == DirectionUp) {
 				xPos += 1;
 				wantedDirection = DirectionLeft;
@@ -197,7 +204,7 @@ std::shared_ptr<Belt> Belt::GetNextOrLastBelt(bool isLastBelt, std::unordered_ma
 }
 
 
-void Belt::MoveGameObject(int pos)
+void Belt::MovePaintBlob(int pos)
 {
 	m_LastItemMoved = true;
 	m_ObjectNumMoves[pos]++;
@@ -214,54 +221,26 @@ void Belt::MoveGameObject(int pos)
 		moveTo.x = -1 * BELT_SPEED * (m_BeltType + 1);	
 	
 
-	m_ObjectsOnBelt[pos].SetPos(m_ObjectsOnBelt[pos].GetPos() + moveTo);
 	// move to middle of the belt on turns 
 
 	float toCheck = .5;
 	if (m_Direction == DirectionUp || m_Direction == DirectionDown)
 	{
-		if (m_ObjectsOnBelt[pos].GetPos().x < 0)
-			toCheck *= -1;
-		offset = round((m_ObjectsOnBelt[pos].GetPos().x - int(m_ObjectsOnBelt[pos].GetPos().x)) * 100) / 100;
+		offset = round((m_ObjectsOnBelt[pos].GetPos().x - int(GetPos().x)) * 100) / 100;
 		if (offset < toCheck)
 			moveTo.x = BELT_SPEED * (m_BeltType + 1);
-		else
+		else if (offset > toCheck)
 			moveTo.x = -1 * BELT_SPEED * (m_BeltType + 1);
 	}
 	else
 	{
-		if (m_ObjectsOnBelt[pos].GetPos().y < 0)
-			toCheck *= -1;
-		offset = round((m_ObjectsOnBelt[pos].GetPos().y - int(m_ObjectsOnBelt[pos].GetPos().y)) * 100) / 100;
+		offset = round((m_ObjectsOnBelt[pos].GetPos().y - int(GetPos().y)) * 100) / 100;
 		if (offset < toCheck)
 			moveTo.y = BELT_SPEED * (m_BeltType + 1);
-		else
+		else if (offset > toCheck)
 			moveTo.y = -1 * BELT_SPEED * (m_BeltType + 1);
 	}
 
-
-	//if (m_Direction == DirectionUp || m_Direction == DirectionDown)
-	//{
-	//	offset = m_ObjectsOnBelt[pos].GetPos().x - std::floor(m_ObjectsOnBelt[pos].GetPos().x);
-	//	std::cout << offset << " " << m_ObjectsOnBelt[pos].GetPos().x << " " << std::floor(m_ObjectsOnBelt[pos].GetPos().x) << std::endl;
-	//	if (std::abs(offset) != .5f) {
-	//		/*direction = .5f - offset;
-	//		direction /= std::abs(direction);
-	//		moveTo.x = BELT_SPEED * (m_BeltType + 1) * direction;*/
-	//		m_ObjectsOnBelt[pos].SetPos(m_ObjectsOnBelt[pos].GetPos() + Vec3{ .5f, 0,0 });
-	//	}
-	//}
-	//else
-	//{
-	//	offset = m_ObjectsOnBelt[pos].GetPos().y - std::floor(m_ObjectsOnBelt[pos].GetPos().y);
-	//	std::cout << offset << " " << m_ObjectsOnBelt[pos].GetPos().y << " " << std::floor(m_ObjectsOnBelt[pos].GetPos().y) << std::endl;
-	//	if (std::abs(offset) != .5f) {
-	//		/*direction = .5f - offset;
-	//		direction /= std::abs(direction);
-	//		moveTo.y = BELT_SPEED * (m_BeltType + 1) * direction;*/
-	//		m_ObjectsOnBelt[pos].SetPos(GetPos() + Vec3{ 0,.5f,0 });
-	//	}
-	//}
-
+	m_ObjectsOnBelt[pos].SetPos(m_ObjectsOnBelt[pos].GetPos() + moveTo);
 
 }

@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-#include "GameObject.h"
+#include "PaintBlob.h"
 #include <cmath>
 #include <cstdlib>
 
@@ -16,7 +16,7 @@ class Belt : public std::enable_shared_from_this <Belt>
 private:
 	std::shared_ptr<Belt> m_NextBelt;
 	std::shared_ptr<Belt> m_LastBelt;
-	std::vector<GameObject> m_ObjectsOnBelt;
+	std::vector<PaintBlob> m_ObjectsOnBelt;
 	std::vector<int> m_ObjectNumMoves;
 	
 	WorldTile m_Tile;
@@ -42,10 +42,10 @@ public:
 	~Belt();
 
 	void Update();
-	void MoveGameObject(int pos);
+	void MovePaintBlob(int pos);
 	std::shared_ptr<Belt> GetNextOrLastBelt(bool isLastBelt, std::unordered_map<int, std::unordered_map<int, std::vector<std::shared_ptr<Belt>>>>& AllOtherBelts);
 	void SetUpNextAndLastBelt(std::unordered_map<int, std::unordered_map<int, std::vector<std::shared_ptr<Belt>>>>& AllOtherBelts);
-	bool AllowNewItem(bool StartAtHalf = false) const;
+	bool AllowNewItem(bool StartAtHalf = false);
 
 
 	bool operator==(Belt& other) {
@@ -65,15 +65,15 @@ public:
 	inline BeltType GetBeltType() const { return m_BeltType; }
 
 	inline void SetDirection(Direction direction) { m_Direction = direction; }
-	inline void AddObject(GameObject& object, bool StartAtHalf = false) {
+	inline void AddObject(PaintBlob& object, bool StartAtHalf = false) {
 		m_ObjectsOnBelt.emplace_back(object);
 		if (StartAtHalf)
 			m_ObjectNumMoves.push_back(FramesTillMovedFullTile / 2);
 		else
 			m_ObjectNumMoves.push_back(0);
 	}
-	inline GameObject& GetObjectAt(int pos) { return m_ObjectsOnBelt[pos]; }
-	inline std::vector<GameObject>& GetAllObjects() { return m_ObjectsOnBelt; }
+	inline PaintBlob& GetObjectAt(int pos) { return m_ObjectsOnBelt[pos]; }
+	inline std::vector<PaintBlob>& GetAllObjects() { return m_ObjectsOnBelt; }
 	inline unsigned int GetNumObjects() { return m_ObjectsOnBelt.size(); }
 
 };

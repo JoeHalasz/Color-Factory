@@ -41,7 +41,7 @@ int main(void)
 
     int WIDTH, HEIGHT;
 
-    if (1) // fullscreen
+    if (0) // fullscreen
     {
         WIDTH = mode->width;
         HEIGHT = mode->height;
@@ -93,10 +93,10 @@ int main(void)
         int nbFrames = 0;
         int counter = 1;
 
-        bool printStuff = true;
+        bool printStuff = false;
         while (!glfwWindowShouldClose(window))
         {
-            PaintBlob b(glm::vec3(0.0f), glm::vec4(.7f, 1.0f, 0.0f, 0.0f));
+            // PaintBlob b(glm::vec3(0.0f), glm::vec4(.7f, 1.0f, 0.0f, 0.0f));
             
 
             int lastWidth = WIDTH;
@@ -112,7 +112,7 @@ int main(void)
                 double currentTime = glfwGetTime();
                 nbFrames++;
                 if (currentTime - lastTime >= 1.0) { // If last prinf() was more than 1 sec ago
-                    std::cout << b.ConvertToRGB().r * 255 << " " << b.ConvertToRGB().g * 255 << " " << b.ConvertToRGB().b * 255 << std::endl;
+                    //std::cout << b.ConvertToRGB().r * 255 << " " << b.ConvertToRGB().g * 255 << " " << b.ConvertToRGB().b * 255 << std::endl;
                     std::cout << "\x1B[2J\x1B[H";
                     // printf and reset timer
                     beenOneSecond = true;

@@ -27,7 +27,7 @@ struct Vec3
     }
 };
 struct Vec2 { float x, y; };
-struct Vec4 { float x, y, z, w; };
+struct Vec4 { float c, m, y, k; };
 
 struct Vertex {
     Vec3 Position;

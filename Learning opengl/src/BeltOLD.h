@@ -1,5 +1,5 @@
 //#pragma once
-//#include "GameObject.h"
+//#include "PaintBlob.h"
 //#include <vector>
 //#include <unordered_map>
 //
@@ -27,7 +27,7 @@
 //	float m_ArrowSpeed = 0;
 //public:
 //	Belt(WorldTile tile, Vec3 pos, int size, Direction direction, BeltType beltType);
-//	void Update(std::unordered_map<int, std::unordered_map<int, std::vector<GameObject>>>& gameObjects);
+//	void Update(std::unordered_map<int, std::unordered_map<int, std::vector<PaintBlob>>>& PaintBlobs);
 //	inline TileType GetArrowTile() const { return m_ArrowTile; }
 //	inline Vec3 GetArrowOffset() const { return m_ArrowOffset; }
 //

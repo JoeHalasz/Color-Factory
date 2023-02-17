@@ -143,9 +143,9 @@ void Renderer::Draw() const
     GLCall(glDrawElements(GL_TRIANGLES, m_IndexBuffer->GetCount(), GL_UNSIGNED_INT, nullptr));
 }
 
-void Renderer::AddQuad(GameObject& gameObject, float tileSize)
+void Renderer::AddQuad(PaintBlob& PaintBlob, float tileSize)
 {
-    m_AllQuads.push_back(CreateQuad(gameObject.GetTile()->GetType(), gameObject.GetSize(), gameObject.GetDirection(), tileSize, gameObject.GetPos()*tileSize, gameObject.GetTile()->GetColor()));
+    m_AllQuads.push_back(CreateQuad(PaintBlob.GetTile()->GetType(), PaintBlob.GetSize(), PaintBlob.GetDirection(), tileSize, PaintBlob.GetPos()*tileSize, PaintBlob.GetTile()->GetColor()));
 }
 
 void Renderer::AddQuad(Belt& belt, float tileSize)
@@ -184,13 +184,13 @@ void Renderer::DrawWorld(World& world, int width, int height)
         }
     }
 
-    std::vector<GameObject> blobsOnBelts;
+    std::vector<PaintBlob> blobsOnBelts;
     // draw world tiles
     for (int i = 0; i < OnScreenPositions.size(); i++)
     {
         // draw belt if it exists
         std::vector<std::shared_ptr<Belt>>& belts = world.GetBeltsAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
-        std::vector<GameObject>& gameObjects = world.GetGameObjectsAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
+        std::vector<PaintBlob>& PaintBlobs = world.GetPaintBlobsAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
 
         if (belts.size() != 0)
         { // there is a belt on this square
@@ -212,16 +212,16 @@ void Renderer::DrawWorld(World& world, int width, int height)
         blobsOnBelts[i].GetTile()->SetType(TileTypePaintBlob);
     }
     for (int i = 0; i < OnScreenPositions.size(); i++){
-        std::vector<GameObject>& gameObjects = world.GetGameObjectsAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
+        std::vector<PaintBlob>& PaintBlobs = world.GetPaintBlobsAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
         // draw everything else
-        for (int j = 0; j < gameObjects.size(); j++)
+        for (int j = 0; j < PaintBlobs.size(); j++)
         {
-            AddQuad(gameObjects[j], world.GetBlockSize());
-            if (gameObjects[j].GetTile()->GetType() == TileTypePaintBlob)
+            AddQuad(PaintBlobs[j], world.GetBlockSize());
+            if (PaintBlobs[j].GetTile()->GetType() == TileTypePaintBlob)
             {
-                gameObjects[j].GetTile()->SetType(TileTypePaintBlobShading);
-                AddQuad(gameObjects[j], world.GetBlockSize());
-                gameObjects[j].GetTile()->SetType(TileTypePaintBlob);
+                PaintBlobs[j].GetTile()->SetType(TileTypePaintBlobShading);
+                AddQuad(PaintBlobs[j], world.GetBlockSize());
+                PaintBlobs[j].GetTile()->SetType(TileTypePaintBlob);
             }
         }
     }

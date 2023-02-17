@@ -72,9 +72,6 @@
     <ClCompile Include="src\PaintBlob.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\GameObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\BeltOLD.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1429,13 +1426,10 @@
     <ClInclude Include="src\WorldTile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\PaintBlob.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\MathStuff.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\GameObject.h">
+    <ClInclude Include="src\PaintBlob.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\BeltOLD.h">

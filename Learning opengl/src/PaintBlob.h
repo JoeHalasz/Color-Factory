@@ -1,29 +1,53 @@
 #pragma once
 #include <GL/glew.h>
-#include <GLFW/glfw3.h> 
+#include <GLFW/glfw3.h>
+#include <unordered_map>
+#include <iostream>
 #include "glm/glm.hpp"
-#include "MathStuff.h"
+#include "WorldTile.h"
 
+
+enum Direction
+{
+	DirectionUp = 0,
+	DirectionRight = 1,
+	DirectionDown = 2,
+	DirectionLeft = 3,
+};
 
 class PaintBlob
 {
 private:
-	glm::vec3 m_Pos;
-	glm::vec3 m_Speed = glm::vec3(0.0f);
-	
-	glm::vec4 m_Color;
+	Vec3 m_WorldPos = {0,0,0};
+	int m_Size;
+	Direction m_Direction;
+	WorldTile m_Tile;
+
+	Vec3 m_Speed = { 0,0,0 };
 
 public:
-	PaintBlob(glm::vec3 pos, glm::vec4 color);
-	PaintBlob(glm::vec3 pos, glm::vec4 color, glm::vec3 speed);
+	~PaintBlob();
+	PaintBlob(Vec3 pos, int size, Vec4 color=Vec4{0,0,0,1}, Direction direction=DirectionUp);
+
+	bool operator==(const PaintBlob& other);
+
+	inline Vec3 GetPos() { return m_WorldPos; }
+	inline Vec3 GetPosConst() const { return m_WorldPos; }
+	inline void SetPos(Vec3 pos) { m_WorldPos = pos; }
+	inline int GetSize() const { return m_Size; }
+	inline Direction GetDirection() const { return m_Direction; }
+	inline void SetDirection(Direction direction) { m_Direction = direction; }
+	inline WorldTile* GetTile() { return &m_Tile; }
+	inline WorldTile GetTileCopy() const { return m_Tile; }
+	inline Vec3 GetSpeed() const { return m_Speed; }
+	inline void SetSpeed(Vec3 speed) { m_Speed = speed; }
+	inline Vec4 GetColor() const { return m_Tile.GetColor(); }
+	inline void SetColor(Vec4 color) { m_Tile.SetColor(color); }
+
+	bool MoveBy(Vec3 amount, std::unordered_map<int, std::unordered_map<int, std::vector<PaintBlob>>>& PaintBlobs);
+
+	bool Update();
 
 	void CombineColor(glm::vec4 otherColor);
 	glm::vec4 ConvertToRGB();
-
-	inline void SetSpeed(glm::vec3 speed) { m_Speed = speed; }
-	inline void SetColor(glm::vec4 color) { m_Color = color; }
-
-	inline glm::vec3 GetPos() const { return m_Pos; }
-	inline glm::vec3 GetSpeed() const { return m_Speed; }
-
 };

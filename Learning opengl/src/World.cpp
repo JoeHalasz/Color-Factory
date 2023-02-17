@@ -36,12 +36,12 @@ int World::GetBeltDirectionAt(int x, int y)
     return -1;
 }
 
-bool World::AddGameObject(GameObject& newObject)
+bool World::AddPaintBlob(PaintBlob& newObject)
 {
-    std::vector<GameObject>& gameObjects = GetGameObjectsAtPos(newObject.GetPos().x, newObject.GetPos().y);
-    if (gameObjects.size() == 0) // if there is nothing on that tile
+    std::vector<PaintBlob>& PaintBlobs = GetPaintBlobsAtPos(newObject.GetPos().x, newObject.GetPos().y);
+    if (PaintBlobs.size() == 0) // if there is nothing on that tile
     {
-        m_GameObjects[newObject.GetPos().x][newObject.GetPos().y].push_back(newObject);
+        m_PaintBlobs[newObject.GetPos().x][newObject.GetPos().y].push_back(newObject);
         return true;
     }
 
@@ -50,18 +50,17 @@ bool World::AddGameObject(GameObject& newObject)
 
 bool World::AddPaintBlob(Vec4 BlobColor, Vec3 pos, float size)
 {
-    std::vector<GameObject>& gameObjects = GetGameObjectsAtPos(pos.x, pos.y);
-    for (int i = 0; i < gameObjects.size(); i++)
+    std::vector<PaintBlob>& PaintBlobs = GetPaintBlobsAtPos(pos.x, pos.y);
+    for (int i = 0; i < PaintBlobs.size(); i++)
     {
-        if (gameObjects[i].GetTile()->GetType() == 0) // there is a blob there already
+        if (PaintBlobs[i].GetTile()->GetType() == 0) // there is a blob there already
         {
             return false;
         }
     }
 
     // there is no blob there
-    WorldTile tile(TileTypePaintBlob, BlobColor);
-    GameObject paintBlob(tile, pos+.5f, size * m_BlockSize);
+    PaintBlob paintBlob(pos+.5f, size * m_BlockSize, BlobColor);
 
     if (GetBeltsAtPos(pos.x, pos.y).size() != 0)
     {
@@ -71,7 +70,7 @@ bool World::AddPaintBlob(Vec4 BlobColor, Vec3 pos, float size)
             GetBeltsAtPos(paintBlob.GetPos().x, paintBlob.GetPos().y)[0]->AddObject(paintBlob, true); // dont add to gameObj list if its in a belt
         }
     }
-    else AddGameObjectAtPos(paintBlob, paintBlob.GetPos().x, paintBlob.GetPos().y);
+    else AddPaintBlobAtPos(paintBlob, paintBlob.GetPos().x, paintBlob.GetPos().y);
 
     return true;
     
@@ -147,6 +146,10 @@ bool World::AddBelt(BeltType beltColor, Vec3 pos, Direction direction)
     if (m_Belts[std::floor(belt->GetPos().x)][std::floor(belt->GetPos().y)].size() != 0)
     {
         m_Belts[std::floor(belt->GetPos().x)][std::floor(belt->GetPos().y)].clear();
+    }
+    if (m_PaintBlobs[std::floor(belt->GetPos().x)][std::floor(belt->GetPos().y)].size() != 0)
+    {
+        m_PaintBlobs[std::floor(belt->GetPos().x)][std::floor(belt->GetPos().y)].clear();// this will only be blobs because of check at beginning of func
     }
     AddBeltAtPos(belt, belt->GetPos().x, belt->GetPos().y);
     belt->SetUpNextAndLastBelt(m_Belts);
@@ -245,16 +248,16 @@ void World::OnUpdate(Input* input)
     }
 
     // update all the game objects
-    for (auto& row : m_GameObjects)
+    for (auto& row : m_PaintBlobs)
     {
         int x = row.first;
         for (auto& col : row.second)
         {
             int y = col.first;
-            std::vector<GameObject>& gameObjects = col.second;
-            for (int i = 0; i < gameObjects.size(); i++)
+            std::vector<PaintBlob>& PaintBlobs = col.second;
+            for (int i = 0; i < PaintBlobs.size(); i++)
             {
-                gameObjects[i].Update();
+                PaintBlobs[i].Update();
             }
 
         }
@@ -267,16 +270,16 @@ void World::OnUpdate(Input* input)
 bool World::BeltCanBeMade(Vec3 pos, BeltType beltColor, Direction direction)
 {
     std::vector<std::shared_ptr<Belt>>& belts = GetBeltsAtPos(pos.x, pos.y);
-    std::vector<GameObject>& gameObjects = GetGameObjectsAtPos(pos.x, pos.y);
+    std::vector<PaintBlob>& PaintBlobs = GetPaintBlobsAtPos(pos.x, pos.y);
 
     if (belts.size() == 0) // there is no belt here already
     {
         return true;
     }
 
-    for (int i = 0; i < gameObjects.size(); i++)
+    for (int i = 0; i < PaintBlobs.size(); i++)
     {
-        if (gameObjects[i].GetTile()->GetType() > TileTypeRedArrow)
+        if (PaintBlobs[i].GetTile()->GetType() > TileTypeRedArrow)
         {
             return false; // this means there is something on this space other than a belt
         }
@@ -292,6 +295,6 @@ bool World::BeltCanBeMade(Vec3 pos, BeltType beltColor, Direction direction)
 
 void World::DeleteAllAtPos(Vec3 pos)
 {
-    m_GameObjects[std::floor(pos.x)][std::floor(pos.y)].clear();
+    m_PaintBlobs[std::floor(pos.x)][std::floor(pos.y)].clear();
     m_Belts[std::floor(pos.x)][std::floor(pos.y)].clear();
 }

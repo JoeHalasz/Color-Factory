@@ -39,6 +39,6 @@ public:
 	inline void			UpdateConnectedCount(int udpate)  { m_ConnectedCount += udpate; }
 	
 	inline Vec4			GetColor() const { return m_Color; }
-
+	inline void			SetColor(Vec4 color) { m_Color = color; } 
 
 };
