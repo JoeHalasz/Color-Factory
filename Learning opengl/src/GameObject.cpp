@@ -29,9 +29,9 @@ bool GameObject::Update()
 bool equals(const GameObject& lhs, const GameObject& rhs)
 {
 	if (lhs.GetTileCopy().GetType() == rhs.GetTileCopy().GetType() &&
-		lhs.GetPos().x == rhs.GetPos().x &&
-		lhs.GetPos().y == rhs.GetPos().y &&
-		lhs.GetPos().z == rhs.GetPos().z &&
+		lhs.GetPosConst().x == rhs.GetPosConst().x &&
+		lhs.GetPosConst().y == rhs.GetPosConst().y &&
+		lhs.GetPosConst().z == rhs.GetPosConst().z &&
 		lhs.GetSize() == rhs.GetSize())
 	{
 		return true;

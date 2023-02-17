@@ -23,7 +23,7 @@ private:
 
 	float m_Rotation = 0;
 	float ZOOM_MAX = 25;
-	float ZOOM_MIN = 0;
+	float ZOOM_MIN = 1;
 
 	int m_MousePosX = 0;
 	int m_MousePosY = 0;

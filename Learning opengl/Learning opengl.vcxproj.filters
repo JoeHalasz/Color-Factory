@@ -505,6 +505,7 @@
     <None Include="src\vendor\glm\gtx\wrap.inl">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="src\Helper.py" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Renderer.h">

@@ -32,7 +32,8 @@ public:
 
 	bool operator==(const GameObject& other);
 
-	inline Vec3 GetPos() const { return m_WorldPos; }
+	inline Vec3 GetPos() { return m_WorldPos; }
+	inline Vec3 GetPosConst() const { return m_WorldPos; }
 	inline void SetPos(Vec3 pos) { m_WorldPos = pos; }
 	inline int GetSize() const { return m_Size; }
 	inline Direction GetDirection() const { return m_Direction; }

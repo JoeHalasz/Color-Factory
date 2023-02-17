@@ -7,6 +7,7 @@
 enum TileType
 {
 	TileTypePaintBlob,
+	TileTypePaintBlobShading,
 	TileTypeBackground,
 	TileTypeBackgroundDark,
 	TileTypeStraightBelt,

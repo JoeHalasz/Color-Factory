@@ -167,6 +167,7 @@
   <ItemGroup>
     <None Include="res\shaders\fragment.shader" />
     <None Include="res\shaders\vertex.shader" />
+    <None Include="src\Helper.py" />
     <None Include="src\vendor\glm\detail\func_common.inl" />
     <None Include="src\vendor\glm\detail\func_common_simd.inl" />
     <None Include="src\vendor\glm\detail\func_exponential.inl" />

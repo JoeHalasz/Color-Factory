@@ -38,7 +38,7 @@ static std::vector<Vertex> CreateQuad(float textureID, float size, Direction dir
 
     std::vector<Vertex> v(4);
 
-    if (textureID == 0)
+    if (textureID == TileTypePaintBlob || textureID == TileTypePaintBlobShading)
     {   // if its a paint blob
         x = (int)x;
         y = (int)y;
@@ -118,6 +118,7 @@ Renderer::Renderer()
     m_Shader->Bind();
 
     m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/paint blob/paint blob.png"));
+    m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/paint blob/paint blob shading.png"));
     m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/background/floortile.png"));
     m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/background/floortile dark.png"));
     m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/belts/straight belt.png"));
@@ -202,9 +203,13 @@ void Renderer::DrawWorld(World& world, int width, int height)
             blobsOnBelts.insert(blobsOnBelts.end(), belt->GetAllObjects().begin(), belt->GetAllObjects().end());
         }
     }
+    // draw all the blobs
     for (int i = 0; i < blobsOnBelts.size(); i++)
     {
         AddQuad(blobsOnBelts[i], world.GetBlockSize());
+        blobsOnBelts[i].GetTile()->SetType(TileTypePaintBlobShading);
+        AddQuad(blobsOnBelts[i], world.GetBlockSize());
+        blobsOnBelts[i].GetTile()->SetType(TileTypePaintBlob);
     }
     for (int i = 0; i < OnScreenPositions.size(); i++){
         std::vector<GameObject>& gameObjects = world.GetGameObjectsAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
@@ -212,6 +217,12 @@ void Renderer::DrawWorld(World& world, int width, int height)
         for (int j = 0; j < gameObjects.size(); j++)
         {
             AddQuad(gameObjects[j], world.GetBlockSize());
+            if (gameObjects[j].GetTile()->GetType() == TileTypePaintBlob)
+            {
+                gameObjects[j].GetTile()->SetType(TileTypePaintBlobShading);
+                AddQuad(gameObjects[j], world.GetBlockSize());
+                gameObjects[j].GetTile()->SetType(TileTypePaintBlob);
+            }
         }
     }
 }

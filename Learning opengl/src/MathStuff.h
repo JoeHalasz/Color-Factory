@@ -22,6 +22,9 @@ struct Vec3
     inline bool operator==(Vec3 a) {
         { return x == a.x && y == a.y && z == a.z; };
     }
+    inline Vec3 Round() {
+        return Vec3{ std::ceilf(x * 100.0f) / 100.0f , std::ceilf(y * 100.0f) / 100.0f, std::ceilf(z * 100.0f) / 100.0f };
+    }
 };
 struct Vec2 { float x, y; };
 struct Vec4 { float x, y, z, w; };

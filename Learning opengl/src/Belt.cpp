@@ -11,8 +11,8 @@ Belt::Belt(WorldTile tile, Vec3 pos, int size, Direction direction, BeltType bel
 	if (beltType == BeltTypeOrange) m_ArrowTile = TileType(TileTypeOrangeArrow);
 	if (beltType == BeltTypeRed) m_ArrowTile = TileType(TileTypeRedArrow);
 
-	BELT_SPEED *= (m_BeltType + 1);
-	m_MaxItemMoves = FramesTillMovedFullTile / (m_BeltType + 1);
+	BELT_SPEED = (1.0f / FramesTillMovedFullTile) * (m_BeltType + 1);
+	m_MaxItemMoves = (float)FramesTillMovedFullTile / (m_BeltType + 1);
 }
 
 void Belt::SetUpNextAndLastBelt(std::unordered_map<int, std::unordered_map<int, std::vector<std::shared_ptr<Belt>>>>& AllOtherBelts)
@@ -56,7 +56,7 @@ void Belt::Update()
 				{
 					m_NextBelt->m_ObjectsOnBelt.push_back(m_ObjectsOnBelt[i]);
 					if (m_NextBelt->GetTile()->GetType() == TileTypeTurnBelt || m_NextBelt->GetTile()->GetType() == TileTypeTurnBeltBackwards)
-						m_NextBelt->m_ObjectNumMoves.push_back(FramesTillMovedFullTile / 2);
+						m_NextBelt->m_ObjectNumMoves.push_back(m_MaxItemMoves / 2);
 					else
 						m_NextBelt->m_ObjectNumMoves.push_back(0);
 					MoveGameObject(i);
@@ -98,7 +98,7 @@ bool Belt::AllowNewItem(bool StartAtHalf) const
 		return true;
 	int spot = m_MinSpaceBetween;
 	if (StartAtHalf)
-		spot += FramesTillMovedFullTile / 2;
+		spot += m_MaxItemMoves / 2;
 	if (m_ObjectNumMoves[m_ObjectNumMoves.size() - 1] >= spot)
 		return true;
 	return false;
@@ -212,28 +212,56 @@ void Belt::MoveGameObject(int pos)
 		moveTo.x = BELT_SPEED * (m_BeltType + 1);
 	else if (m_Direction == DirectionLeft) 
 		moveTo.x = -1 * BELT_SPEED * (m_BeltType + 1);	
+	
 
-
+	m_ObjectsOnBelt[pos].SetPos(m_ObjectsOnBelt[pos].GetPos() + moveTo);
 	// move to middle of the belt on turns 
+
+	float toCheck = .5;
 	if (m_Direction == DirectionUp || m_Direction == DirectionDown)
 	{
-		offset = m_ObjectsOnBelt[pos].GetPos().x - std::floor(m_ObjectsOnBelt[pos].GetPos().x);
-		if (std::abs(offset) != .5f) {
-			direction = .5f - offset;
-			direction /= std::abs(direction);
-			moveTo.x = BELT_SPEED * (m_BeltType + 1) * direction;
-		}
+		if (m_ObjectsOnBelt[pos].GetPos().x < 0)
+			toCheck *= -1;
+		offset = round((m_ObjectsOnBelt[pos].GetPos().x - int(m_ObjectsOnBelt[pos].GetPos().x)) * 100) / 100;
+		if (offset < toCheck)
+			moveTo.x = BELT_SPEED * (m_BeltType + 1);
+		else
+			moveTo.x = -1 * BELT_SPEED * (m_BeltType + 1);
 	}
 	else
 	{
-		offset = m_ObjectsOnBelt[pos].GetPos().y - std::floor(m_ObjectsOnBelt[pos].GetPos().y);
-		if (std::abs(offset) != .5f) {
-			direction = .5f - offset;
-			direction /= std::abs(direction);
-			moveTo.y = BELT_SPEED * (m_BeltType + 1) * direction;
-		}
+		if (m_ObjectsOnBelt[pos].GetPos().y < 0)
+			toCheck *= -1;
+		offset = round((m_ObjectsOnBelt[pos].GetPos().y - int(m_ObjectsOnBelt[pos].GetPos().y)) * 100) / 100;
+		if (offset < toCheck)
+			moveTo.y = BELT_SPEED * (m_BeltType + 1);
+		else
+			moveTo.y = -1 * BELT_SPEED * (m_BeltType + 1);
 	}
 
-	m_ObjectsOnBelt[pos].SetPos(m_ObjectsOnBelt[pos].GetPos() + moveTo);
+
+	//if (m_Direction == DirectionUp || m_Direction == DirectionDown)
+	//{
+	//	offset = m_ObjectsOnBelt[pos].GetPos().x - std::floor(m_ObjectsOnBelt[pos].GetPos().x);
+	//	std::cout << offset << " " << m_ObjectsOnBelt[pos].GetPos().x << " " << std::floor(m_ObjectsOnBelt[pos].GetPos().x) << std::endl;
+	//	if (std::abs(offset) != .5f) {
+	//		/*direction = .5f - offset;
+	//		direction /= std::abs(direction);
+	//		moveTo.x = BELT_SPEED * (m_BeltType + 1) * direction;*/
+	//		m_ObjectsOnBelt[pos].SetPos(m_ObjectsOnBelt[pos].GetPos() + Vec3{ .5f, 0,0 });
+	//	}
+	//}
+	//else
+	//{
+	//	offset = m_ObjectsOnBelt[pos].GetPos().y - std::floor(m_ObjectsOnBelt[pos].GetPos().y);
+	//	std::cout << offset << " " << m_ObjectsOnBelt[pos].GetPos().y << " " << std::floor(m_ObjectsOnBelt[pos].GetPos().y) << std::endl;
+	//	if (std::abs(offset) != .5f) {
+	//		/*direction = .5f - offset;
+	//		direction /= std::abs(direction);
+	//		moveTo.y = BELT_SPEED * (m_BeltType + 1) * direction;*/
+	//		m_ObjectsOnBelt[pos].SetPos(GetPos() + Vec3{ 0,.5f,0 });
+	//	}
+	//}
+
 
 }
