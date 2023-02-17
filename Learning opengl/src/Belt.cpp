@@ -24,7 +24,7 @@ void Belt::SetUpNextAndLastBelt(std::unordered_map<int, std::unordered_map<int, 
 		while (m_NextBelt->m_LastBelt == NULL || m_NextBelt->m_LastBelt != this->shared_from_this()) { // not sure why this needs to happen more than once, but it does. Sometimes will not set it correctly
 			m_NextBelt->m_LastBelt = this->shared_from_this();
 			if (here++ >= 10)
-				std::cout << "Im stuck help2" << std::endl; // keep this here
+				std::cout << "Im stuck help" << std::endl; // keep this here
 		}
 	}
 	if (m_LastBelt != NULL) {
