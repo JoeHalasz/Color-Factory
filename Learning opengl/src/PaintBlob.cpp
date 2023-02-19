@@ -2,29 +2,25 @@
 
 
 PaintBlob::PaintBlob(Vec3 pos, int size, Vec4 color, Direction direction)
-	:m_WorldPos(pos), m_Size(size), m_Direction(direction)
 {
-	m_Tile = WorldTile(TileTypePaintBlob, color);
+	SetPos(pos);
+	SetSize(size);
+	SetDirection(direction);
+	WorldTile tile = WorldTile(TileTypePaintBlob, color);
+	SetTile(&tile);
 }
 
 PaintBlob::~PaintBlob()
 {
 }
 
-bool PaintBlob::Update()
-{
-	m_WorldPos.x += m_Speed.x;
-	m_WorldPos.y += m_Speed.y;
-	m_WorldPos.z += m_Speed.z;
-	return false;
-}
 
 bool equals(const PaintBlob& lhs, const PaintBlob& rhs)
 {
 	if (lhs.GetTileCopy().GetType() == rhs.GetTileCopy().GetType() &&
-		lhs.GetPosConst().x == rhs.GetPosConst().x &&
-		lhs.GetPosConst().y == rhs.GetPosConst().y &&
-		lhs.GetPosConst().z == rhs.GetPosConst().z &&
+		lhs.GetPos().x == rhs.GetPos().x &&
+		lhs.GetPos().y == rhs.GetPos().y &&
+		lhs.GetPos().z == rhs.GetPos().z &&
 		lhs.GetSize() == rhs.GetSize())
 	{
 		return true;
@@ -39,21 +35,21 @@ bool PaintBlob::operator==(const PaintBlob& other)
 
 bool PaintBlob::MoveBy(Vec3 amount, std::unordered_map<int, std::unordered_map<int, std::vector<PaintBlob>>>& PaintBlobs)
 {
-	Vec3 oldWorldPos = m_WorldPos;
+	Vec3 oldWorldPos = GetPos();
 
-	m_WorldPos = m_WorldPos + amount;
-	m_WorldPos = roundVec3(m_WorldPos);
+	SetPos(GetPos() + amount);
+	SetPos(roundVec3(GetPos()));
 
-	bool movedSquares = std::floor(oldWorldPos.x) != std::floor(m_WorldPos.x) || std::floor(oldWorldPos.y) != std::floor(m_WorldPos.y);
+	bool movedSquares = std::floor(oldWorldPos.x) != std::floor(GetPos().x) || std::floor(oldWorldPos.y) != std::floor(GetPos().y);
 
 	std::vector<std::vector<PaintBlob>> objectsNearPos;
-	auto& objectsOnPos = PaintBlobs[std::floor(m_WorldPos.x)][std::floor(m_WorldPos.y)];
+	auto& objectsOnPos = PaintBlobs[std::floor(GetPos().x)][std::floor(GetPos().y)];
 	if (!movedSquares)
 		objectsNearPos.push_back(objectsOnPos);
-	objectsNearPos.push_back(PaintBlobs[std::floor(m_WorldPos.x + 1)][std::floor(m_WorldPos.y)]);
-	objectsNearPos.push_back(PaintBlobs[std::floor(m_WorldPos.x - 1)][std::floor(m_WorldPos.y)]);
-	objectsNearPos.push_back(PaintBlobs[std::floor(m_WorldPos.x)][std::floor(m_WorldPos.y + 1)]);
-	objectsNearPos.push_back(PaintBlobs[std::floor(m_WorldPos.x)][std::floor(m_WorldPos.y - 1)]);
+	objectsNearPos.push_back(PaintBlobs[std::floor(GetPos().x + 1)][std::floor(GetPos().y)]);
+	objectsNearPos.push_back(PaintBlobs[std::floor(GetPos().x - 1)][std::floor(GetPos().y)]);
+	objectsNearPos.push_back(PaintBlobs[std::floor(GetPos().x)][std::floor(GetPos().y + 1)]);
+	objectsNearPos.push_back(PaintBlobs[std::floor(GetPos().x)][std::floor(GetPos().y - 1)]);
 	auto& objectsOnOldPos = PaintBlobs[std::floor(oldWorldPos.x)][std::floor(oldWorldPos.y)];
 	
 
@@ -65,7 +61,7 @@ bool PaintBlob::MoveBy(Vec3 amount, std::unordered_map<int, std::unordered_map<i
 			{
 				if (checkHowClose(objectsNearPos[i][j].GetPos(), GetPos()) < .5)
 				{
-					m_WorldPos = oldWorldPos; // change it back if there is something too close
+					SetPos(oldWorldPos); // change it back if there is something too close
 					return false;
 				}
 			}
@@ -79,7 +75,7 @@ bool PaintBlob::MoveBy(Vec3 amount, std::unordered_map<int, std::unordered_map<i
 		{
 			if (std::floor(objectsOnOldPos[i].GetPos().x) != std::floor(oldWorldPos.x) || std::floor(objectsOnOldPos[i].GetPos().y) != std::floor(oldWorldPos.y))
 			{
-				PaintBlobs[std::floor(m_WorldPos.x)][std::floor(m_WorldPos.y)].push_back(objectsOnOldPos[i]);
+				PaintBlobs[std::floor(GetPos().x)][std::floor(GetPos().y)].push_back(objectsOnOldPos[i]);
 				PaintBlobs[std::floor(oldWorldPos.x)][std::floor(oldWorldPos.y)].erase(objectsOnOldPos.begin() + i);
 				i--;
 			}
@@ -97,8 +93,8 @@ glm::vec4 PaintBlob::ConvertToRGB()
 {
 	glm::vec4 RGBValues;
 	RGBValues.a = 1;
-	RGBValues.r = (1 - m_Tile.GetColor().c) * (1 - m_Tile.GetColor().k);
-	RGBValues.g = (1 - m_Tile.GetColor().m) * (1 - m_Tile.GetColor().k);
-	RGBValues.b = (1 - m_Tile.GetColor().y) * (1 - m_Tile.GetColor().k);
+	RGBValues.r = (1 - GetTile()->GetColor().c) * (1 - GetTile()->GetColor().k);
+	RGBValues.g = (1 - GetTile()->GetColor().m) * (1 - GetTile()->GetColor().k);
+	RGBValues.b = (1 - GetTile()->GetColor().y) * (1 - GetTile()->GetColor().k);
 	return RGBValues;
 }

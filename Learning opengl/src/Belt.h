@@ -1,8 +1,9 @@
 #pragma once
 #include <vector>
-#include "PaintBlob.h"
 #include <cmath>
 #include <cstdlib>
+#include "GameObject.h"
+#include "PaintBlob.h"
 
 enum BeltType
 {
@@ -11,22 +12,17 @@ enum BeltType
 	BeltTypeRed = 2,	
 };
 
-class Belt : public std::enable_shared_from_this <Belt>
+class Belt : public GameObject, public std::enable_shared_from_this <Belt>
 {
 private:
 	std::shared_ptr<Belt> m_NextBelt;
 	std::shared_ptr<Belt> m_LastBelt;
 	std::vector<PaintBlob> m_ObjectsOnBelt;
 	std::vector<int> m_ObjectNumMoves;
-	
-	WorldTile m_Tile;
-	Vec3 m_Pos;
-	int m_Size;
-	Direction m_Direction;
+
 	BeltType m_BeltType;
 	TileType m_ArrowTile;
 	Vec3 m_ArrowOffset = { 0 };
-
 
 	bool m_LastItemMoved = false;
 	int FramesTillMovedFullTile = 120;//MUST BE EVEN: the number of frames the slowest belt should take to move an object across the entire belt
@@ -54,17 +50,13 @@ public:
 			GetBeltType() == other.GetBeltType());
 	}
 
-	inline WorldTile* GetTile() { return &m_Tile; }
-	inline Vec3 GetPos() const { return m_Pos; }
-	inline int GetSize() const { return m_Size; }
-	inline Direction GetDirection() const { return m_Direction; }
+
 	inline Vec3 GetArrowPos() const {return Vec3{GetPos().x + m_ArrowOffset.x,GetPos().y + m_ArrowOffset.y,GetPos().z + m_ArrowOffset.z};}
 	inline TileType GetArrowTile() const { return m_ArrowTile; }
 	inline std::shared_ptr<Belt> GetNextBelt() const { return m_NextBelt; }
 	inline std::shared_ptr<Belt> GetLastBelt() const { return m_LastBelt; }
 	inline BeltType GetBeltType() const { return m_BeltType; }
 
-	inline void SetDirection(Direction direction) { m_Direction = direction; }
 	inline void AddObject(PaintBlob& object, bool StartAtHalf = false) {
 		m_ObjectsOnBelt.emplace_back(object);
 		if (StartAtHalf)

@@ -81,6 +81,9 @@
     <ClCompile Include="src\PaintBlobCombiner.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\GameObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shaders\vertex.shader" />
@@ -1436,6 +1439,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\PaintBlobCombiner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

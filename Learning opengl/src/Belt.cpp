@@ -4,8 +4,13 @@
 
 // this function will not deal with connecting the other belts to this belt 
 Belt::Belt(WorldTile tile, Vec3 pos, int size, Direction direction, BeltType beltType)
-	:m_Tile(tile), m_Pos(pos), m_Size(size), m_Direction(direction), m_BeltType(beltType)
+	: m_BeltType(beltType)
 {
+	SetTile(&tile);
+	SetPos(pos);
+	SetSize(size);
+	SetDirection(direction);
+
 	BELT_SPEED = (1.0f / FramesTillMovedFullTile) * (GetBeltTypeSpeed());
 	m_MaxItemMoves = (float)FramesTillMovedFullTile / ((GetBeltTypeSpeed() * GetBeltTypeSpeed())); // fix this equation. Might be the .5 thing
 	
@@ -161,7 +166,7 @@ std::shared_ptr<Belt> Belt::GetNextOrLastBelt(bool isLastBelt, std::unordered_ma
 		std::shared_ptr<Belt> possibleNextBelt = AllOtherBelts[xPos][yPos][0];
 
 		if (possibleNextBelt->GetTile()->GetType() != TileTypeTurnBelt && possibleNextBelt->GetTile()->GetType() != TileTypeTurnBeltBackwards)
-			if (possibleNextBelt->m_Direction != GetDirection())
+			if (possibleNextBelt->GetDirection() != GetDirection())
 				return fake;
 
 		return AllOtherBelts[xPos][yPos][0];
@@ -229,20 +234,20 @@ void Belt::MovePaintBlob(int pos)
 	Vec3 moveTo = { 0,0,1 };
 	// move by direction and speed
 	float offset; float direction;
-	if (m_Direction == DirectionUp) 
+	if (GetDirection() == DirectionUp)
 		moveTo.y = BELT_SPEED * (GetBeltTypeSpeed());
-	else if (m_Direction == DirectionDown) 
+	else if (GetDirection() == DirectionDown)
 		moveTo.y = -1 * BELT_SPEED * (GetBeltTypeSpeed());
-	else if (m_Direction == DirectionRight) 
+	else if (GetDirection() == DirectionRight)
 		moveTo.x = BELT_SPEED * (GetBeltTypeSpeed());
-	else if (m_Direction == DirectionLeft) 
+	else if (GetDirection() == DirectionLeft)
 		moveTo.x = -1 * BELT_SPEED * (GetBeltTypeSpeed());
 	
 
 	// move to middle of the belt on turns 
 
 	float toCheck = .5;
-	if (m_Direction == DirectionUp || m_Direction == DirectionDown)
+	if (GetDirection() == DirectionUp || GetDirection() == DirectionDown)
 	{
 		offset = round((m_ObjectsOnBelt[pos].GetPos().x - int(GetPos().x)) * 100) / 100;
 		if (offset < toCheck)

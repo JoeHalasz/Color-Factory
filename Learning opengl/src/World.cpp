@@ -267,7 +267,7 @@ void World::OnUpdate(Input* input)
             std::vector<PaintBlob>& PaintBlobs = col.second;
             for (int i = 0; i < PaintBlobs.size(); i++)
             {
-                PaintBlobs[i].Update();
+                // PaintBlobs[i].Update();
             }
 
         }
