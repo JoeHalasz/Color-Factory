@@ -26,6 +26,7 @@
 
 int main(void)
 {
+    double WORLDTICKSPERSECOND = 120.0;
     GLFWwindow* window;
 
     /* Initialize the library */
@@ -77,7 +78,6 @@ int main(void)
 
     { // this fixes some error when trying to close the window
 
-        Renderer renderer;
 
         ImGui::CreateContext();
         ImGui_ImplGlfwGL3_Init(window, true);
@@ -85,15 +85,16 @@ int main(void)
 
         // set up world
         World world(window);
+        Renderer renderer(world.GetBlockSize());
         // set up inputs
         Input input(window, world.IS3D);
 
         // renderer.AddQuad(1, 50, 200, 100);
-        double lastTime = glfwGetTime();
+        double lastTimeRendered = glfwGetTime();
+        double lastTimeUpdatedWorld = glfwGetTime();
         int nbFrames = 0;
-        int counter = 1;
 
-        bool printStuff = false;
+        bool printStuff = true;
         while (!glfwWindowShouldClose(window))
         {
             // PaintBlob b(glm::vec3(0.0f), glm::vec4(.7f, 1.0f, 0.0f, 0.0f));
@@ -108,22 +109,33 @@ int main(void)
             }
             bool beenOneSecond = false;
             // Measure fps
+            double currentTime = glfwGetTime();
             if (printStuff) {
-                double currentTime = glfwGetTime();
                 nbFrames++;
-                if (currentTime - lastTime >= 1.0) { // If last prinf() was more than 1 sec ago
+                if (currentTime - lastTimeRendered >= 1.0) { // If last prinf() was more than 1 sec ago
                     //std::cout << b.ConvertToRGB().r * 255 << " " << b.ConvertToRGB().g * 255 << " " << b.ConvertToRGB().b * 255 << std::endl;
                     std::cout << "\x1B[2J\x1B[H";
                     // printf and reset timer
                     beenOneSecond = true;
                     printf("%f ms/frame %f fps\n", 1000.0 / double(nbFrames), double(nbFrames));
                     nbFrames = 0;
-                    lastTime += 1.0;
-                    counter++;
+                    lastTimeRendered += 1.0;
                 }
             }
-            // inputs and update world
-            world.OnUpdate(&input);
+            int numTimesUpdated = 0;
+            while (currentTime - lastTimeUpdatedWorld >= (1.0 / WORLDTICKSPERSECOND)) // update the world until we have caught up to 60 ticks per second
+            {
+                currentTime = glfwGetTime();
+                // inputs and update world
+                world.OnUpdate(&input);
+                lastTimeUpdatedWorld += (1.0/ WORLDTICKSPERSECOND);
+                numTimesUpdated++;
+                if (numTimesUpdated > 10)
+                {
+                    std::cout << "WORLD UPDATED TOO MANY TIMES" << std::endl;
+                    break;
+                }
+            }
 
             ImGui_ImplGlfwGL3_NewFrame();
             renderer.OnRender(WIDTH, HEIGHT, world);

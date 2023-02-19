@@ -6,9 +6,9 @@
 
 enum BeltType
 {
-	BeltTypeYellow = 0, // speed * 1
-	BeltTypeOrange = 1,	// speed * 2
-	BeltTypeRed = 3,	// speed * 4
+	BeltTypeYellow = 0, 
+	BeltTypeOrange = 1,	
+	BeltTypeRed = 2,	
 };
 
 class Belt : public std::enable_shared_from_this <Belt>
@@ -29,10 +29,10 @@ private:
 
 
 	bool m_LastItemMoved = false;
-	int FramesTillMovedFullTile = 144;//MUST BE EVEN: the number of frames the slowest belt should take to move an object across the entire belt
-	float BELT_SPEED = 1.0f / FramesTillMovedFullTile; // updated in constructor using belt type
+	int FramesTillMovedFullTile = 120;//MUST BE EVEN: the number of frames the slowest belt should take to move an object across the entire belt
+	float BELT_SPEED; // updated in constructor using belt type
 	int m_MaxItemMoves; // should be calculated when belt is created based on speed
-	float m_MinSpaceBetween = (FramesTillMovedFullTile/5)+2; // min allowed space between items on the belt
+	float m_MinSpaceBetween; // min allowed space between items on the belt
 
 
 public:
@@ -68,12 +68,18 @@ public:
 	inline void AddObject(PaintBlob& object, bool StartAtHalf = false) {
 		m_ObjectsOnBelt.emplace_back(object);
 		if (StartAtHalf)
-			m_ObjectNumMoves.push_back(FramesTillMovedFullTile / 2);
+			m_ObjectNumMoves.push_back(m_MaxItemMoves / 2);
 		else
 			m_ObjectNumMoves.push_back(0);
 	}
 	inline PaintBlob& GetObjectAt(int pos) { return m_ObjectsOnBelt[pos]; }
 	inline std::vector<PaintBlob>& GetAllObjects() { return m_ObjectsOnBelt; }
 	inline unsigned int GetNumObjects() { return m_ObjectsOnBelt.size(); }
-
+	inline float GetBeltTypeSpeed() {
+		switch (m_BeltType) {
+			case(0): return 1.0f; break;
+			case(1): return 1.2f; break;
+			case(2): return 1.4f; break;
+		}
+	}
 };

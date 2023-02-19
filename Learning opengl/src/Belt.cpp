@@ -6,13 +6,13 @@
 Belt::Belt(WorldTile tile, Vec3 pos, int size, Direction direction, BeltType beltType)
 	:m_Tile(tile), m_Pos(pos), m_Size(size), m_Direction(direction), m_BeltType(beltType)
 {
+	BELT_SPEED = (1.0f / FramesTillMovedFullTile) * (GetBeltTypeSpeed());
+	m_MaxItemMoves = (float)FramesTillMovedFullTile / ((GetBeltTypeSpeed() * GetBeltTypeSpeed())); // fix this equation. Might be the .5 thing
+	
+	if (beltType == BeltTypeYellow) { m_ArrowTile = TileType(TileTypeYellowArrow); m_MinSpaceBetween = (m_MaxItemMoves / 5); }
+	if (beltType == BeltTypeOrange) { m_ArrowTile = TileType(TileTypeOrangeArrow); m_MinSpaceBetween = (m_MaxItemMoves / 5) + 1; }
+	if (beltType == BeltTypeRed)	{ m_ArrowTile = TileType(TileTypeRedArrow	); m_MinSpaceBetween = (m_MaxItemMoves / 5) + 1; }
 
-	if (beltType == BeltTypeYellow) m_ArrowTile = TileType(TileTypeYellowArrow);
-	if (beltType == BeltTypeOrange) m_ArrowTile = TileType(TileTypeOrangeArrow);
-	if (beltType == BeltTypeRed) m_ArrowTile = TileType(TileTypeRedArrow);
-
-	BELT_SPEED = (1.0f / FramesTillMovedFullTile) * (m_BeltType + 1);
-	m_MaxItemMoves = (float)FramesTillMovedFullTile / (m_BeltType + 1);
 }
 
 void Belt::SetUpNextAndLastBelt(std::unordered_map<int, std::unordered_map<int, std::vector<std::shared_ptr<Belt>>>>& AllOtherBelts)
@@ -55,6 +55,8 @@ void Belt::Update()
 	if (m_NextBelt == NULL)
 		m_LastItemMoved = true;
 
+	if (m_ObjectsOnBelt.size() == 0)
+		m_LastItemMoved = true;
 	for (int i = 0; i < m_ObjectsOnBelt.size(); i++)
 	{
 		if (m_ObjectNumMoves[i] == m_MaxItemMoves) // this can only happen with the first element
@@ -84,7 +86,23 @@ void Belt::Update()
 		}
 		else
 		{
-			if (i == 0) MovePaintBlob(i);
+			if (i == 0)
+			{
+				// make sure the next belt doesnt have an object too close
+				bool move = true;
+				if (m_NextBelt != NULL && m_NextBelt->m_ObjectNumMoves.size() != 0) {
+					int spot = m_NextBelt->m_MinSpaceBetween;
+					if (m_NextBelt->GetTile()->GetType() == TileTypeTurnBelt || m_NextBelt->GetTile()->GetType() == TileTypeTurnBeltBackwards)
+						spot += m_MaxItemMoves / 2;
+					if ((m_MaxItemMoves + m_NextBelt->m_ObjectNumMoves[m_NextBelt->m_ObjectNumMoves.size() - 1]) - m_ObjectNumMoves[0] <= spot)
+						move = false;
+				}
+				if (move)
+					MovePaintBlob(i);
+				else {
+					m_LastItemMoved = false;
+				}
+			}
 			else if (m_LastItemMoved) MovePaintBlob(i);
 			else
 			{
@@ -107,7 +125,7 @@ bool Belt::AllowNewItem(bool StartAtHalf)
 	if (m_ObjectsOnBelt.size() == 0)
 		return true;
 	int spot = m_MinSpaceBetween;
-	if (StartAtHalf || GetTile()->GetType() == TileTypeTurnBelt || GetTile()->GetType() == TileTypeTurnBeltBackwards)
+	if (StartAtHalf/* || GetTile()->GetType() == TileTypeTurnBelt || GetTile()->GetType() == TileTypeTurnBeltBackwards*/)
 		spot += m_MaxItemMoves / 2;
 	if (m_ObjectNumMoves[m_ObjectNumMoves.size() - 1] >= spot)
 		return true;
@@ -212,13 +230,13 @@ void Belt::MovePaintBlob(int pos)
 	// move by direction and speed
 	float offset; float direction;
 	if (m_Direction == DirectionUp) 
-		moveTo.y = BELT_SPEED * (m_BeltType + 1);
+		moveTo.y = BELT_SPEED * (GetBeltTypeSpeed());
 	else if (m_Direction == DirectionDown) 
-		moveTo.y = -1 * BELT_SPEED * (m_BeltType + 1);
+		moveTo.y = -1 * BELT_SPEED * (GetBeltTypeSpeed());
 	else if (m_Direction == DirectionRight) 
-		moveTo.x = BELT_SPEED * (m_BeltType + 1);
+		moveTo.x = BELT_SPEED * (GetBeltTypeSpeed());
 	else if (m_Direction == DirectionLeft) 
-		moveTo.x = -1 * BELT_SPEED * (m_BeltType + 1);	
+		moveTo.x = -1 * BELT_SPEED * (GetBeltTypeSpeed());
 	
 
 	// move to middle of the belt on turns 
@@ -228,17 +246,17 @@ void Belt::MovePaintBlob(int pos)
 	{
 		offset = round((m_ObjectsOnBelt[pos].GetPos().x - int(GetPos().x)) * 100) / 100;
 		if (offset < toCheck)
-			moveTo.x = BELT_SPEED * (m_BeltType + 1);
+			moveTo.x = BELT_SPEED * (GetBeltTypeSpeed());
 		else if (offset > toCheck)
-			moveTo.x = -1 * BELT_SPEED * (m_BeltType + 1);
+			moveTo.x = -1 * BELT_SPEED * (GetBeltTypeSpeed());
 	}
 	else
 	{
 		offset = round((m_ObjectsOnBelt[pos].GetPos().y - int(GetPos().y)) * 100) / 100;
 		if (offset < toCheck)
-			moveTo.y = BELT_SPEED * (m_BeltType + 1);
+			moveTo.y = BELT_SPEED * (GetBeltTypeSpeed());
 		else if (offset > toCheck)
-			moveTo.y = -1 * BELT_SPEED * (m_BeltType + 1);
+			moveTo.y = -1 * BELT_SPEED * (GetBeltTypeSpeed());
 	}
 
 	m_ObjectsOnBelt[pos].SetPos(m_ObjectsOnBelt[pos].GetPos() + moveTo);

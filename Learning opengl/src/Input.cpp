@@ -4,6 +4,7 @@
 
 
 Input* i;
+int x = 0;
 static void cursor_position_callback(GLFWwindow* window, double mousePosX, double mousePosY)
 {
     glfwGetCursorPos(window, &mousePosX, &mousePosY);

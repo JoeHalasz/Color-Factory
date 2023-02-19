@@ -16,6 +16,8 @@ enum TileType
 	TileTypeYellowArrow,
 	TileTypeOrangeArrow,
 	TileTypeRedArrow,
+	TileTypePaintBlobContainer1,
+	TileTypePaintBlobContainer2,
 };
 
 

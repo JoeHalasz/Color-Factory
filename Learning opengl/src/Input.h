@@ -36,7 +36,6 @@ private:
 public:
 	GLFWwindow* m_Window;
 	bool IS3D = false;
-	Input() {};
 	Input(GLFWwindow* window, bool IS3D);
 	bool KeyPressed(int key);
 	bool KeyHeld(int key);

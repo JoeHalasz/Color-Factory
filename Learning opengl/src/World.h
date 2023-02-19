@@ -13,6 +13,8 @@
 #include "Belt.h"
 #include <memory>
 
+#include "PaintBlobCombiner.h"
+
 class World
 {
 private:
@@ -30,9 +32,11 @@ private:
 
 	std::unordered_map<int, std::unordered_map<int, std::vector<PaintBlob>>> m_PaintBlobs;
 	std::unordered_map<int, std::unordered_map<int, std::vector<std::shared_ptr<Belt>>>> m_Belts;
+	std::unordered_map<int, std::unordered_map<int, std::vector<std::shared_ptr<PaintBlobCombiner>>>> m_PaintBlobCombiners;
 
 	bool AddBelt(BeltType beltColor, Vec3 pos, Direction direction);
 	bool AddPaintBlob(Vec4 BlobColor, Vec3 pos, float size);
+	bool AddPaintBlobCombiner(Vec3 pos, Direction direction);
 
 public:
 	bool IS3D = false; // Only works if there is only one texture
@@ -55,10 +59,11 @@ public:
 
 	inline std::vector<PaintBlob>& GetPaintBlobsAtPos(float x, float y) { return m_PaintBlobs[std::floor(x)][std::floor(y)]; }
 	inline PaintBlob AddPaintBlobAtPos(PaintBlob& newObject, float x, float y) { m_PaintBlobs[std::floor(x)][std::floor(y)].emplace_back(newObject); return newObject; } // will return the object
-	
+
 	inline std::vector<std::shared_ptr<Belt>>& GetBeltsAtPos(float x, float y) { return m_Belts[std::floor(x)][std::floor(y)]; }
-	inline void AddBeltAtPos(std::shared_ptr <Belt> newBelt, float x, float y) {
-		m_Belts[std::floor(x)][std::floor(y)].push_back(newBelt); 
-	}
+	inline void AddBeltAtPos(std::shared_ptr <Belt> newBelt, float x, float y) { m_Belts[std::floor(x)][std::floor(y)].push_back(newBelt); }
+
+	inline std::vector<std::shared_ptr<PaintBlobCombiner>>& GetPaintBlobCombinersAtPos(float x, float y) { return m_PaintBlobCombiners[std::floor(x)][std::floor(y)]; }
+	inline void AddPaintBlobCombinerAtPos(std::shared_ptr <PaintBlobCombiner> newObject, float x, float y) { m_PaintBlobCombiners[std::floor(x)][std::floor(y)].push_back(newObject); }
 
 };

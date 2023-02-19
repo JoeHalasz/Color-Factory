@@ -16,6 +16,7 @@
 class Renderer
 {
 private:
+    int m_TileSize;
     std::vector<std::vector<Vertex>> m_AllQuads;
     std::unique_ptr<VertexArray> m_VertexArray;
     std::unique_ptr<VertexBuffer> m_VertexBuffer;
@@ -26,15 +27,15 @@ private:
 
     unsigned int m_MAXNUMQUADS;
 public:
-    Renderer();
+    Renderer(int tileSize);
     void Clear() const;
     void DeleteQuads();
     void Draw() const;
     void OnRender(int width, int height, World& world);
     void DrawWorld(World& world, int width, int height);
-    void AddQuad(PaintBlob& PaintBlob, float tileSize);
-    void AddQuad(Belt& belt, float tileSize);
-    void AddQuad(float textureID, float size, Direction direction, int tileSize, Vec3 pos, Vec4 color={0});
+    void AddQuad(PaintBlob& PaintBlob);
+    void AddQuad(Belt& belt);
+    void AddQuad(float textureID, float size, Direction direction, Vec3 pos, Vec4 color={0});
     inline unsigned int GetAmountOfCurrentQuads() { return m_AllQuads.size(); }
     inline unsigned int GetMaxAmountOfQuads() { return m_MAXNUMQUADS; }
 };

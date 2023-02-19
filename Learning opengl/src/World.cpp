@@ -77,6 +77,7 @@ bool World::AddPaintBlob(Vec4 BlobColor, Vec3 pos, float size)
     
 }
 
+
 bool World::AddBelt(BeltType beltColor, Vec3 pos, Direction direction)
 {
     if (!BeltCanBeMade(pos, beltColor, direction))
@@ -158,6 +159,14 @@ bool World::AddBelt(BeltType beltColor, Vec3 pos, Direction direction)
 }
 
 
+bool World::AddPaintBlobCombiner(Vec3 pos, Direction direction)
+{
+    std::shared_ptr<PaintBlobCombiner> paintBlobCombiner(new PaintBlobCombiner(pos, GetBlockSize(), direction));
+    AddPaintBlobCombinerAtPos(paintBlobCombiner, pos.x, pos.y);
+    return true;
+}
+
+
 void World::OnUpdate(Input* input)
 {
     // do inputs
@@ -194,9 +203,10 @@ void World::OnUpdate(Input* input)
             case(1): AddBelt(BeltTypeYellow, { mousePosX, mousePosY, 1 }, (Direction)input->GetDirection()); break;
             case(2): AddBelt(BeltTypeOrange, { mousePosX, mousePosY, 1 }, (Direction)input->GetDirection()); break;
             case(3): AddBelt(BeltTypeRed,    { mousePosX, mousePosY, 1 }, (Direction)input->GetDirection()); break;
-            case(4): AddPaintBlob(Vec4{ 1.0f, 0.0f, 0.0f, 1.0f }, Vec3{ mousePosX, mousePosY, 1 }, .1); break;
+            case(4): AddPaintBlob(Vec4{ 1.0f, 0.0f, 0.0f, 1.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2); break;
             case(5): AddPaintBlob(Vec4{ 0.0f, 1.0f, 0.0f, 1.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2); break;
-            case(6): AddPaintBlob(Vec4{ 0.0f, 0.0f, 1.0f, 1.0f }, Vec3{ mousePosX, mousePosY, 1 }, .3); break;
+            case(6): AddPaintBlob(Vec4{ 0.0f, 0.0f, 1.0f, 1.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2); break;
+            case(7): AddPaintBlobCombiner(Vec3{ mousePosX, mousePosY,1 }, (Direction)input->GetDirection()); break;
             default: std::cout << "No tile for that number yet" << std::endl;
         }
     }
@@ -297,4 +307,5 @@ void World::DeleteAllAtPos(Vec3 pos)
 {
     m_PaintBlobs[std::floor(pos.x)][std::floor(pos.y)].clear();
     m_Belts[std::floor(pos.x)][std::floor(pos.y)].clear();
+    m_PaintBlobCombiners[std::floor(pos.x)][std::floor(pos.y)].clear();
 }

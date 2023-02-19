@@ -10,7 +10,7 @@
 #include <glm/gtc/quaternion.hpp> 
 #include <glm/gtx/quaternion.hpp>
 
-
+#include "PaintBlobCombiner.h"
 
 std::vector<unsigned int> makeIndices(int numQuads)
 {
@@ -97,7 +97,8 @@ static std::vector<Vertex> CreateQuad(float textureID, float size, Direction dir
 
 }
 
-Renderer::Renderer()
+Renderer::Renderer(int tileSize)
+    :m_TileSize(tileSize)
 {
     m_MAXNUMQUADS = 2000000;
 
@@ -127,6 +128,8 @@ Renderer::Renderer()
     m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/belts/yellow arrow.png"));
     m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/belts/orange arrow.png"));
     m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/belts/red arrow.png"));
+    m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/machines/PaintBlobCombiner1.png"));
+    m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/machines/PaintBlobCombiner2.png"));
 }
 
 void Renderer::Clear() const
@@ -143,20 +146,20 @@ void Renderer::Draw() const
     GLCall(glDrawElements(GL_TRIANGLES, m_IndexBuffer->GetCount(), GL_UNSIGNED_INT, nullptr));
 }
 
-void Renderer::AddQuad(PaintBlob& PaintBlob, float tileSize)
+void Renderer::AddQuad(PaintBlob& PaintBlob)
 {
-    m_AllQuads.push_back(CreateQuad(PaintBlob.GetTile()->GetType(), PaintBlob.GetSize(), PaintBlob.GetDirection(), tileSize, PaintBlob.GetPos()*tileSize, PaintBlob.GetTile()->GetColor()));
+    m_AllQuads.push_back(CreateQuad(PaintBlob.GetTile()->GetType(), PaintBlob.GetSize(), PaintBlob.GetDirection(), m_TileSize, PaintBlob.GetPos()* m_TileSize, PaintBlob.GetTile()->GetColor()));
 }
 
-void Renderer::AddQuad(Belt& belt, float tileSize)
+void Renderer::AddQuad(Belt& belt)
 {
-    m_AllQuads.push_back(CreateQuad(belt.GetTile()->GetType(), belt.GetSize(), belt.GetDirection(), tileSize, belt.GetPos() * tileSize, belt.GetTile()->GetColor()));
+    m_AllQuads.push_back(CreateQuad(belt.GetTile()->GetType(), belt.GetSize(), belt.GetDirection(), m_TileSize, belt.GetPos() * m_TileSize, belt.GetTile()->GetColor()));
 }
 
 
-void Renderer::AddQuad(float textureID, float size, Direction direction, int tileSize, Vec3 pos, Vec4 color)
+void Renderer::AddQuad(float textureID, float size, Direction direction, Vec3 pos, Vec4 color)
 {
-    m_AllQuads.push_back(CreateQuad(textureID, size, direction, tileSize, pos, color));
+    m_AllQuads.push_back(CreateQuad(textureID, size, direction, m_TileSize, pos * size, color));
 }
 
 
@@ -180,7 +183,7 @@ void Renderer::DrawWorld(World& world, int width, int height)
     for (float x = startDrawX; x < startDrawX + amountToDrawX + extraQuads; x++) {
         for (float y = startDrawY; y < startDrawY + amountToDrawY + extraQuads; y++) {
             OnScreenPositions.push_back(glm::vec3(x, y, 1));
-            AddQuad(TileTypeBackgroundDark, size, DirectionUp, world.GetBlockSize(), Vec3{ x * size, y * size, 1 });
+            AddQuad(TileTypeBackgroundDark, size, DirectionUp, Vec3{ x, y, 1 });
         }
     }
 
@@ -195,35 +198,46 @@ void Renderer::DrawWorld(World& world, int width, int height)
         if (belts.size() != 0)
         { // there is a belt on this square
             std::shared_ptr<Belt> belt = belts[0];
-            AddQuad(belt.get()[0], world.GetBlockSize());
+            AddQuad(belt.get()[0]);
             if (belt.get()[0].GetTile()->GetType() == TileTypeStraightBelt) // draw arrow if it is not a turn belt
-                AddQuad(belt->GetArrowTile(), size, belt->GetDirection(), world.GetBlockSize(), Vec3{belt->GetArrowPos().x * size, belt->GetArrowPos().y * size, 1});
+                AddQuad(belt->GetArrowTile(), size, belt->GetDirection(), belt->GetArrowPos());
             
             // add objects on the belt to draw to the list of things to draw
             blobsOnBelts.insert(blobsOnBelts.end(), belt->GetAllObjects().begin(), belt->GetAllObjects().end());
         }
     }
-    // draw all the blobs
-    for (int i = 0; i < blobsOnBelts.size(); i++)
-    {
-        AddQuad(blobsOnBelts[i], world.GetBlockSize());
-        blobsOnBelts[i].GetTile()->SetType(TileTypePaintBlobShading);
-        AddQuad(blobsOnBelts[i], world.GetBlockSize());
-        blobsOnBelts[i].GetTile()->SetType(TileTypePaintBlob);
-    }
+    // draw the rest of the world except paint blobs on belts
     for (int i = 0; i < OnScreenPositions.size(); i++){
+        
+        // draw paint blob combiners
+        std::vector<std::shared_ptr<PaintBlobCombiner>> PaintBlobCombiners = world.GetPaintBlobCombinersAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
+        for (int j = 0; j < PaintBlobCombiners.size(); j++)
+        {
+            AddQuad(PaintBlobCombiners[j]->GetTile1()->GetType(), PaintBlobCombiners[j]->GetSize(), PaintBlobCombiners[j]->GetDirection(), PaintBlobCombiners[j]->GetPos1());
+            AddQuad(PaintBlobCombiners[j]->GetTile2()->GetType(), PaintBlobCombiners[j]->GetSize(), PaintBlobCombiners[j]->GetDirection(), PaintBlobCombiners[j]->GetPos2());
+        }
+
+        // draw all other paint blobs
         std::vector<PaintBlob>& PaintBlobs = world.GetPaintBlobsAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
-        // draw everything else
         for (int j = 0; j < PaintBlobs.size(); j++)
         {
-            AddQuad(PaintBlobs[j], world.GetBlockSize());
+            AddQuad(PaintBlobs[j]);
             if (PaintBlobs[j].GetTile()->GetType() == TileTypePaintBlob)
             {
                 PaintBlobs[j].GetTile()->SetType(TileTypePaintBlobShading);
-                AddQuad(PaintBlobs[j], world.GetBlockSize());
+                AddQuad(PaintBlobs[j]);
                 PaintBlobs[j].GetTile()->SetType(TileTypePaintBlob);
             }
         }
+    }
+
+    // draw the belt paint blobs
+    for (int i = 0; i < blobsOnBelts.size(); i++)
+    {
+        AddQuad(blobsOnBelts[i]);
+        blobsOnBelts[i].GetTile()->SetType(TileTypePaintBlobShading);
+        AddQuad(blobsOnBelts[i]);
+        blobsOnBelts[i].GetTile()->SetType(TileTypePaintBlob);
     }
 }
 
