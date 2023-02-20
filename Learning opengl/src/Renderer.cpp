@@ -162,6 +162,10 @@ void Renderer::AddQuad(float textureID, float size, Direction direction, Vec3 po
     m_AllQuads.push_back(CreateQuad(textureID, size, direction, m_TileSize, pos * size, color));
 }
 
+void Renderer::AddQuad(std::shared_ptr<GameObject> gameObject, Vec4 color)
+{
+    m_AllQuads.push_back(CreateQuad(gameObject->GetTile()->GetType(), gameObject->GetSize(), gameObject->GetDirection(), m_TileSize, gameObject->GetPos() * m_TileSize, color));
+}
 
 void Renderer::DrawWorld(World& world, int width, int height)
 {
@@ -187,63 +191,61 @@ void Renderer::DrawWorld(World& world, int width, int height)
         }
     }
 
-    std::vector<PaintBlob> blobsOnBelts;
+    std::vector<std::shared_ptr<PaintBlob>> blobsOnBelts;
     // draw world tiles
     for (int i = 0; i < OnScreenPositions.size(); i++)
     {
         // draw belt if it exists
-        std::vector<std::shared_ptr<Belt>>& belts = world.GetBeltsAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
-        std::vector<PaintBlob>& PaintBlobs = world.GetPaintBlobsAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
-
-        if (belts.size() != 0)
+        std::shared_ptr<Belt> belt = world.GetBeltAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
+        if (belt != NULL)
         { // there is a belt on this square
-            std::shared_ptr<Belt> belt = belts[0];
-            AddQuad(belt.get()[0]);
-            if (belt.get()[0].GetTile()->GetType() == TileTypeStraightBelt) // draw arrow if it is not a turn belt
+            AddQuad(belt);
+            if (belt->GetTile()->GetType() == TileTypeStraightBelt) // draw arrow if it is not a turn belt
                 AddQuad(belt->GetArrowTile(), size, belt->GetDirection(), belt->GetArrowPos());
             
             // add objects on the belt to draw to the list of things to draw
-            blobsOnBelts.insert(blobsOnBelts.end(), belt->GetAllObjects().begin(), belt->GetAllObjects().end());
+            for (int i = 0; i < belt->GetAllObjects().size(); i++)
+            {
+                blobsOnBelts.push_back(belt->GetAllObjects()[i]);
+            }
         }
     }
     // draw the rest of the world except paint blobs on belts
     for (int i = 0; i < OnScreenPositions.size(); i++){
         
         // draw paint blob combiners
-        std::vector<std::shared_ptr<PaintBlobCombiner>> PaintBlobCombiners = world.GetPaintBlobCombinersAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
-        for (int j = 0; j < PaintBlobCombiners.size(); j++)
-        {
-            AddQuad(PaintBlobCombiners[j]->GetTile1()->GetType(), PaintBlobCombiners[j]->GetSize(), PaintBlobCombiners[j]->GetDirection(), PaintBlobCombiners[j]->GetPos1());
-            AddQuad(PaintBlobCombiners[j]->GetTile2()->GetType(), PaintBlobCombiners[j]->GetSize(), PaintBlobCombiners[j]->GetDirection(), PaintBlobCombiners[j]->GetPos2());
-        }
+        std::shared_ptr<GameObject> gameObject = world.GetGameObjectAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
+        if (gameObject != NULL)
+            AddQuad(gameObject);
+        
 
         // draw all other paint blobs
-        std::vector<PaintBlob>& PaintBlobs = world.GetPaintBlobsAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
-        for (int j = 0; j < PaintBlobs.size(); j++)
+        std::shared_ptr<PaintBlob> paintBlob = world.GetPaintBlobAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
+        if (paintBlob != NULL)
         {
-            AddQuad(PaintBlobs[j]);
-            if (PaintBlobs[j].GetTile()->GetType() == TileTypePaintBlob)
-            {
-                PaintBlobs[j].GetTile()->SetType(TileTypePaintBlobShading);
-                AddQuad(PaintBlobs[j]);
-                PaintBlobs[j].GetTile()->SetType(TileTypePaintBlob);
-            }
+            AddQuad(paintBlob, paintBlob->GetTile()->GetColor());
+            paintBlob->GetTile()->SetType(TileTypePaintBlobShading);
+            AddQuad(paintBlob, paintBlob->GetTile()->GetColor());
+            paintBlob->GetTile()->SetType(TileTypePaintBlob);
         }
     }
 
     // draw the belt paint blobs
     for (int i = 0; i < blobsOnBelts.size(); i++)
     {
-        AddQuad(blobsOnBelts[i]);
-        blobsOnBelts[i].GetTile()->SetType(TileTypePaintBlobShading);
-        AddQuad(blobsOnBelts[i]);
-        blobsOnBelts[i].GetTile()->SetType(TileTypePaintBlob);
+        AddQuad(blobsOnBelts[i], blobsOnBelts[i]->GetTile()->GetColor());
+        blobsOnBelts[i]->GetTile()->SetType(TileTypePaintBlobShading);
+        AddQuad(blobsOnBelts[i], blobsOnBelts[i]->GetTile()->GetColor());
+        blobsOnBelts[i]->GetTile()->SetType(TileTypePaintBlob);
     }
 }
 
 void Renderer::OnRender(int width, int height, World& world)
 {
+
+    std::cout << "HERE" << std::endl;
     DrawWorld(world, width, height);
+    std::cout << "HERE22" << std::endl;
 
     float v1 = -1 * (width / 2) - (world.GetZoomAmount() * (width / 20));
     float v2 = -1 * v1;

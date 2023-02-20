@@ -98,8 +98,6 @@ int main(void)
         while (!glfwWindowShouldClose(window))
         {
             // PaintBlob b(glm::vec3(0.0f), glm::vec4(.7f, 1.0f, 0.0f, 0.0f));
-            
-
             int lastWidth = WIDTH;
             int lastHeight = HEIGHT;
             glfwGetWindowSize(window, &WIDTH, &HEIGHT);
@@ -136,9 +134,9 @@ int main(void)
                     break;
                 }
             }
-
             ImGui_ImplGlfwGL3_NewFrame();
             renderer.OnRender(WIDTH, HEIGHT, world);
+            std::cout << "worked" << std::endl;
             if (beenOneSecond && printStuff)
             {
                 std::cout << "Drawing " << renderer.GetAmountOfCurrentQuads() << "/" << renderer.GetMaxAmountOfQuads()

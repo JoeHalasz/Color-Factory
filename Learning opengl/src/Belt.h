@@ -17,7 +17,7 @@ class Belt : public GameObject, public std::enable_shared_from_this <Belt>
 private:
 	std::shared_ptr<Belt> m_NextBelt;
 	std::shared_ptr<Belt> m_LastBelt;
-	std::vector<PaintBlob> m_ObjectsOnBelt;
+	std::vector<std::shared_ptr<PaintBlob>> m_ObjectsOnBelt;
 	std::vector<int> m_ObjectNumMoves;
 
 	BeltType m_BeltType;
@@ -39,8 +39,8 @@ public:
 
 	void Update();
 	void MovePaintBlob(int pos);
-	std::shared_ptr<Belt> GetNextOrLastBelt(bool isLastBelt, std::unordered_map<int, std::unordered_map<int, std::vector<std::shared_ptr<Belt>>>>& AllOtherBelts);
-	void SetUpNextAndLastBelt(std::unordered_map<int, std::unordered_map<int, std::vector<std::shared_ptr<Belt>>>>& AllOtherBelts);
+	std::shared_ptr<Belt> GetNextOrLastBelt(bool isLastBelt, std::unordered_map<int, std::unordered_map<int, std::shared_ptr<Belt>>>& AllOtherBelts);
+	void SetUpNextAndLastBelt(std::unordered_map<int, std::unordered_map<int, std::shared_ptr<Belt>>>& AllOtherBelts);
 	bool AllowNewItem(bool StartAtHalf = false);
 
 
@@ -57,15 +57,17 @@ public:
 	inline std::shared_ptr<Belt> GetLastBelt() const { return m_LastBelt; }
 	inline BeltType GetBeltType() const { return m_BeltType; }
 
-	inline void AddObject(PaintBlob& object, bool StartAtHalf = false) {
-		m_ObjectsOnBelt.emplace_back(object);
+	inline void AddObject(std::shared_ptr<PaintBlob> object, bool StartAtHalf = false) {
+		if (object == NULL)
+			return;
+		m_ObjectsOnBelt.push_back(object);
 		if (StartAtHalf)
 			m_ObjectNumMoves.push_back(m_MaxItemMoves / 2);
 		else
 			m_ObjectNumMoves.push_back(0);
 	}
-	inline PaintBlob& GetObjectAt(int pos) { return m_ObjectsOnBelt[pos]; }
-	inline std::vector<PaintBlob>& GetAllObjects() { return m_ObjectsOnBelt; }
+	inline std::shared_ptr<PaintBlob> GetObjectAt(int pos) { return m_ObjectsOnBelt[pos]; }
+	inline std::vector<std::shared_ptr<PaintBlob>> GetAllObjects() { return m_ObjectsOnBelt; }
 	inline unsigned int GetNumObjects() { return m_ObjectsOnBelt.size(); }
 	inline float GetBeltTypeSpeed() {
 		switch (m_BeltType) {
