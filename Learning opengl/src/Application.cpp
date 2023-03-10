@@ -136,7 +136,6 @@ int main(void)
             }
             ImGui_ImplGlfwGL3_NewFrame();
             renderer.OnRender(WIDTH, HEIGHT, world);
-            std::cout << "worked" << std::endl;
             if (beenOneSecond && printStuff)
             {
                 std::cout << "Drawing " << renderer.GetAmountOfCurrentQuads() << "/" << renderer.GetMaxAmountOfQuads()

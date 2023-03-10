@@ -158,7 +158,7 @@ bool World::AddBelt(BeltType beltColor, Vec3 pos, Direction direction)
         m_PaintBlobs[std::floor(belt->GetPos().x)][std::floor(belt->GetPos().y)] = NULL;// this will only be blobs because of check at beginning of func
     }
     AddBeltAtPos(belt, belt->GetPos().x, belt->GetPos().y);
-    belt->SetUpNextAndLastBelt(m_Belts);
+    belt->SetUpNextAndLastObject(m_Belts, m_GameObjects);
 
     return true;
 }
@@ -168,6 +168,9 @@ bool World::AddPaintBlobCombiner(Vec3 pos, Direction direction)
 {
     if (!NothingAtPos(pos))
         return false;
+    if (!NothingAtPos(Vec3{ pos.x + 1, pos.y, pos.z }))
+        return false;
+
     std::shared_ptr<GameObject> paintBlobCombiner(new PaintBlobCombiner(pos, GetBlockSize(), direction, true));
     AddGameObjectAtPos(paintBlobCombiner, pos.x, pos.y);
     Vec3 otherPos;
@@ -249,7 +252,7 @@ void World::OnUpdate(Input* input)
             std::shared_ptr<Belt> belt = col.second;
             if (belt != NULL)
             {
-                if (belt->GetNextBelt() == NULL)
+                if (belt->getNextObject() == NULL)
                     heads.push_back(belt);
                 belt->UpdatedThisFrame = false;
             }
@@ -259,7 +262,7 @@ void World::OnUpdate(Input* input)
     // update the heads. This will update every belt in that chain
     for (int i = 0; i < heads.size(); i++)
     {
-        if (heads[i]->GetNextBelt() == NULL)
+        if (heads[i]->getNextObject() == NULL)
             heads[i]->Update(); // this will call all the belts in the chain to update
     }
 

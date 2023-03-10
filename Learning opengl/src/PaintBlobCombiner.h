@@ -13,4 +13,5 @@ public:
 		bool isBasePart = true, TileType type = TileTypePaintBlobContainer1);
 	void Update();
 	void Render();
+	bool AllowNewItem(bool StartAtHalf = false);
 };

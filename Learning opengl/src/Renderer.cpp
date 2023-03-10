@@ -191,7 +191,7 @@ void Renderer::DrawWorld(World& world, int width, int height)
         }
     }
 
-    std::vector<std::shared_ptr<PaintBlob>> blobsOnBelts;
+    std::vector<std::shared_ptr<GameObject>> blobsOnBelts;
     // draw world tiles
     for (int i = 0; i < OnScreenPositions.size(); i++)
     {
@@ -243,9 +243,7 @@ void Renderer::DrawWorld(World& world, int width, int height)
 void Renderer::OnRender(int width, int height, World& world)
 {
 
-    std::cout << "HERE" << std::endl;
     DrawWorld(world, width, height);
-    std::cout << "HERE22" << std::endl;
 
     float v1 = -1 * (width / 2) - (world.GetZoomAmount() * (width / 20));
     float v2 = -1 * v1;

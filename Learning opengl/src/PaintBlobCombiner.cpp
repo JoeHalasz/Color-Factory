@@ -17,3 +17,8 @@ void PaintBlobCombiner::Update()
 void PaintBlobCombiner::Render()
 {
 }
+
+bool PaintBlobCombiner::AllowNewItem(bool StartAtHalf)
+{
+	return false;
+}
