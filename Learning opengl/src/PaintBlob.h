@@ -27,6 +27,6 @@ public:
 
 	bool MoveBy(Vec3 amount, std::unordered_map<int, std::unordered_map<int, std::vector<PaintBlob>>>& PaintBlobs);
 
-	void CombineColor(glm::vec4 otherColor);
-	glm::vec4 ConvertToRGB();
+	void CombineColor(PaintBlob* other);
+	Vec4 ConvertToRGB();
 };

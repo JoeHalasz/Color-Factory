@@ -26,7 +26,6 @@ private:
 	bool m_LastItemMoved = false;
 	int FramesTillMovedFullTile = 120;//MUST BE EVEN: the number of frames the slowest belt should take to move an object across the entire belt
 	float BELT_SPEED; // updated in constructor using belt type
-	int m_MaxItemMoves; // should be calculated when belt is created based on speed
 
 
 public:
@@ -55,18 +54,9 @@ public:
 	inline TileType GetArrowTile() const { return m_ArrowTile; }
 	inline BeltType GetBeltType() const { return m_BeltType; }
 
-	inline void AddObject(std::shared_ptr<PaintBlob> object, bool StartAtHalf = false) {
-		if (object == NULL)
-			return;
-		getObjectInInv().push_back(object);
-		if (StartAtHalf)
-			getObjectNumMoves().push_back(m_MaxItemMoves / 2);
-		else
-			getObjectNumMoves().push_back(0);
-	}
-	inline std::shared_ptr<GameObject> GetObjectAt(int pos) { return getObjectInInv()[pos]; }
-	inline std::vector<std::shared_ptr<GameObject>> GetAllObjects() { return getObjectInInv(); }
-	inline unsigned int GetNumObjects() { return getObjectInInv().size(); }
+	
+	inline std::vector<std::shared_ptr<GameObject>> GetAllObjects() { return getObjectsInInv(); }
+	inline unsigned int GetNumObjects() { return getObjectsInInv().size(); }
 	inline float GetBeltTypeSpeed() {
 		switch (m_BeltType) {
 			case(0): return 1.0f; break;

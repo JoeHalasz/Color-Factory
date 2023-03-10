@@ -7,6 +7,7 @@
 class PaintBlobCombiner : public GameObject
 {
 private:
+	std::shared_ptr<GameObject> m_output;
 	
 public:
 	PaintBlobCombiner(Vec3 pos, int size, Direction direction=DirectionUp, 

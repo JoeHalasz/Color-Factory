@@ -84,17 +84,17 @@ bool PaintBlob::MoveBy(Vec3 amount, std::unordered_map<int, std::unordered_map<i
 	return true;
 }
 
-void PaintBlob::CombineColor(glm::vec4 otherColor)
+void PaintBlob::CombineColor(PaintBlob* other)
 {
-
+	GetTile()->SetColor((GetTile()->GetColor() + other->GetTile()->GetColor())/2); // maybe subtract the max cmyk value if its above 1?
 }
 
-glm::vec4 PaintBlob::ConvertToRGB()
+Vec4 PaintBlob::ConvertToRGB()
 {
-	glm::vec4 RGBValues;
-	RGBValues.a = 1;
-	RGBValues.r = (1 - GetTile()->GetColor().c) * (1 - GetTile()->GetColor().k);
-	RGBValues.g = (1 - GetTile()->GetColor().m) * (1 - GetTile()->GetColor().k);
-	RGBValues.b = (1 - GetTile()->GetColor().y) * (1 - GetTile()->GetColor().k);
-	return RGBValues;
+	return {
+		(1 - GetTile()->GetColor().c) * (1 - GetTile()->GetColor().k),
+		(1 - GetTile()->GetColor().m) * (1 - GetTile()->GetColor().k),
+		(1 - GetTile()->GetColor().y) * (1 - GetTile()->GetColor().k),
+		1
+	};
 }

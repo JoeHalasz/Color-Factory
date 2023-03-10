@@ -28,6 +28,7 @@ private:
 	std::vector<std::shared_ptr<GameObject>> m_ObjectsInInv;
 	std::vector<int> m_ObjectNumMoves;
 	float m_MinSpaceBetween; // min allowed space between items on the belt
+	int m_MaxItemMoves; // should be calculated when belt is created based on speed
 
 
 public:
@@ -53,7 +54,21 @@ public:
 	inline std::shared_ptr<GameObject> getLastObject() { return m_LastObject; }
 	inline void setNextObject(std::shared_ptr<GameObject> obj) { m_NextObject = obj; }
 	inline std::shared_ptr<GameObject> getNextObject() { return m_NextObject; }
-	inline std::vector<std::shared_ptr<GameObject>>& getObjectInInv() { return m_ObjectsInInv; }
+	inline int getMaxItemMoves() { return m_MaxItemMoves; }
+	inline void setMaxItemMoves(int maxItemMoves) { m_MaxItemMoves = maxItemMoves; }
+
+	inline std::vector<std::shared_ptr<GameObject>>& getObjectsInInv() { return m_ObjectsInInv; }
+	inline void AddObject(std::shared_ptr<GameObject> object, bool StartAtHalf = false) {
+		if (object == NULL)
+			return;
+		getObjectsInInv().push_back(object);
+		if (GetTile()->GetType() == TileTypeTurnBelt || GetTile()->GetType() == TileTypeTurnBeltBackwards || StartAtHalf)
+			getObjectNumMoves().push_back(m_MaxItemMoves / 2);
+		else
+			getObjectNumMoves().push_back(0);
+	}
+	inline std::shared_ptr<GameObject> GetObjectAt(int pos) { return getObjectsInInv()[pos]; }
+	
 	inline std::vector<int>& getObjectNumMoves() { return m_ObjectNumMoves; }
 
 	inline float getMinSpaceBetween() { return m_MinSpaceBetween; }

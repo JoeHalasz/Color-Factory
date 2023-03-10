@@ -12,11 +12,11 @@ Belt::Belt(WorldTile tile, Vec3 pos, int size, Direction direction, BeltType bel
 	SetDirection(direction);
 
 	BELT_SPEED = (1.0f / FramesTillMovedFullTile) * (GetBeltTypeSpeed());
-	m_MaxItemMoves = (float)FramesTillMovedFullTile / ((GetBeltTypeSpeed() * GetBeltTypeSpeed())); // fix this equation. Might be the .5 thing
+	setMaxItemMoves((float)FramesTillMovedFullTile / ((GetBeltTypeSpeed() * GetBeltTypeSpeed()))); // fix this equation. Might be the .5 thing
 	
-	if (beltType == BeltTypeYellow) { m_ArrowTile = TileType(TileTypeYellowArrow); SetMinSpaceBetween(m_MaxItemMoves / 5); }
-	if (beltType == BeltTypeOrange) { m_ArrowTile = TileType(TileTypeOrangeArrow); SetMinSpaceBetween((m_MaxItemMoves / 5) + 1); }
-	if (beltType == BeltTypeRed)	{ m_ArrowTile = TileType(TileTypeRedArrow	); SetMinSpaceBetween((m_MaxItemMoves / 5) + 1); }
+	if (beltType == BeltTypeYellow) { m_ArrowTile = TileType(TileTypeYellowArrow); SetMinSpaceBetween(getMaxItemMoves() / 5); }
+	if (beltType == BeltTypeOrange) { m_ArrowTile = TileType(TileTypeOrangeArrow); SetMinSpaceBetween((getMaxItemMoves() / 5) + 1); }
+	if (beltType == BeltTypeRed)	{ m_ArrowTile = TileType(TileTypeRedArrow	); SetMinSpaceBetween((getMaxItemMoves() / 5) + 1); }
 
 }
 
@@ -60,24 +60,24 @@ void Belt::Update()
 	if (getNextObject() == NULL)
 		m_LastItemMoved = true;
 
-	if (getObjectInInv().size() == 0)
+	if (getObjectsInInv().size() == 0)
 		m_LastItemMoved = true;
-	for (int i = 0; i < getObjectInInv().size(); i++)
+	for (int i = 0; i < getObjectsInInv().size(); i++)
 	{
-		if (getObjectNumMoves()[i] == m_MaxItemMoves) // this can only happen with the first element
+		if (getObjectNumMoves()[i] == getMaxItemMoves()) // this can only happen with the first element
 		{
 			if (getNextObject() != NULL)
 			{
 				bool nextItemAllowed = getNextObject()->AllowNewItem();
 				if (getNextObject()->AllowNewItem()) // move it from this belt to the next belt
 				{
-					getNextObject()->getObjectInInv().push_back(getObjectInInv()[i]);
+					getNextObject()->getObjectsInInv().push_back(getObjectsInInv()[i]);
 					if (getNextObject()->GetTile()->GetType() == TileTypeTurnBelt || getNextObject()->GetTile()->GetType() == TileTypeTurnBeltBackwards)
-						getNextObject()->getObjectNumMoves().push_back(m_MaxItemMoves / 2);
+						getNextObject()->getObjectNumMoves().push_back(getMaxItemMoves() / 2);
 					else
 						getNextObject()->getObjectNumMoves().push_back(0);
 					MovePaintBlob(i);
-					getObjectInInv().erase(getObjectInInv().begin() + i);
+					getObjectsInInv().erase(getObjectsInInv().begin() + i);
 					getObjectNumMoves().erase(getObjectNumMoves().begin() + i);
 					i--;
 				}
@@ -99,8 +99,8 @@ void Belt::Update()
 				if (getNextObject() != NULL && getNextObject()->getObjectNumMoves().size() != 0) {
 					int spot = getNextObject()->getMinSpaceBetween();
 					if (getNextObject()->GetTile()->GetType() == TileTypeTurnBelt || getNextObject()->GetTile()->GetType() == TileTypeTurnBeltBackwards)
-						spot += m_MaxItemMoves / 2;
-					if ((m_MaxItemMoves + getNextObject()->getObjectNumMoves()[getNextObject()->getObjectNumMoves().size() - 1]) - getObjectNumMoves()[0] <= spot)
+						spot += getMaxItemMoves() / 2;
+					if ((getMaxItemMoves() + getNextObject()->getObjectNumMoves()[getNextObject()->getObjectNumMoves().size() - 1]) - getObjectNumMoves()[0] <= spot)
 						move = false;
 				}
 				if (move)
@@ -137,11 +137,11 @@ std::shared_ptr<GameObject> findWorldObjectAtPos(int xPos, int yPos, std::unorde
 
 bool Belt::AllowNewItem(bool StartAtHalf)
 {
-	if (getObjectInInv().size() == 0)
+	if (getObjectsInInv().size() == 0)
 		return true;
 	int spot = getMinSpaceBetween();
 	if (StartAtHalf/* || GetTile()->GetType() == TileTypeTurnBelt || GetTile()->GetType() == TileTypeTurnBeltBackwards*/)
-		spot += m_MaxItemMoves / 2;
+		spot += getMaxItemMoves() / 2;
 	if (getObjectNumMoves()[getObjectNumMoves().size() - 1] >= spot)
 		return true;
 	return false;
@@ -267,7 +267,7 @@ void Belt::MovePaintBlob(int pos)
 	float toCheck = .5;
 	if (GetDirection() == DirectionUp || GetDirection() == DirectionDown)
 	{
-		offset = round((getObjectInInv()[pos]->GetPos().x - int(GetPos().x)) * 100) / 100;
+		offset = round((getObjectsInInv()[pos]->GetPos().x - int(GetPos().x)) * 100) / 100;
 		if (offset < toCheck)
 			moveTo.x = BELT_SPEED * (GetBeltTypeSpeed());
 		else if (offset > toCheck)
@@ -275,13 +275,13 @@ void Belt::MovePaintBlob(int pos)
 	}
 	else
 	{
-		offset = round((getObjectInInv()[pos]->GetPos().y - int(GetPos().y)) * 100) / 100;
+		offset = round((getObjectsInInv()[pos]->GetPos().y - int(GetPos().y)) * 100) / 100;
 		if (offset < toCheck)
 			moveTo.y = BELT_SPEED * (GetBeltTypeSpeed());
 		else if (offset > toCheck)
 			moveTo.y = -1 * BELT_SPEED * (GetBeltTypeSpeed());
 	}
 
-	getObjectInInv()[pos]->SetPos(getObjectInInv()[pos]->GetPos() + moveTo);
+	getObjectsInInv()[pos]->SetPos(getObjectsInInv()[pos]->GetPos() + moveTo);
 
 }

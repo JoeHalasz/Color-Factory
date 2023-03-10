@@ -27,7 +27,23 @@ struct Vec3
     }
 };
 struct Vec2 { float x, y; };
-struct Vec4 { float c, m, y, k; };
+struct Vec4 
+{ float c, m, y, k; 
+    inline Vec4 operator+(Vec4 a)
+    {
+        return { c + a.c, m + a.m,y + a.y,k + a.k };
+    }
+    inline Vec4 operator-(Vec4 a)
+    {
+        return { c - a.c, m - a.m,y - a.y,k - a.k };
+    }
+    inline Vec4 operator/(float a)
+    {
+        return { c/a, m/a, y/a, k/a };
+    }
+
+
+};
 
 struct Vertex {
     Vec3 Position;

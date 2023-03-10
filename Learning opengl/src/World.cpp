@@ -228,10 +228,11 @@ void World::OnUpdate(Input* input)
             case(1): AddBelt(BeltTypeYellow, { mousePosX, mousePosY, 1 }, (Direction)input->GetDirection()); break;
             case(2): AddBelt(BeltTypeOrange, { mousePosX, mousePosY, 1 }, (Direction)input->GetDirection()); break;
             case(3): AddBelt(BeltTypeRed,    { mousePosX, mousePosY, 1 }, (Direction)input->GetDirection()); break;
-            case(4): AddPaintBlob(Vec4{ 1.0f, 0.0f, 0.0f, 1.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2); break;
-            case(5): AddPaintBlob(Vec4{ 0.0f, 1.0f, 0.0f, 1.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2); break;
-            case(6): AddPaintBlob(Vec4{ 0.0f, 0.0f, 1.0f, 1.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2); break;
-            case(7): AddPaintBlobCombiner(Vec3{ mousePosX, mousePosY,1 }, (Direction)input->GetDirection()); break;
+            case(4): AddPaintBlob(Vec4{ 0.0f, 1.0f, 1.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2); break;
+            case(5): AddPaintBlob(Vec4{ 1.0f, 0.0f, 1.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2); break;
+            case(6): AddPaintBlob(Vec4{ 1.0f, 1.0f, 0.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2); break;
+            case(7): AddPaintBlob(Vec4{ 0.0f, 0.0f, 0.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2); break;
+            case(8): AddPaintBlobCombiner(Vec3{ mousePosX, mousePosY,1 }, (Direction)input->GetDirection()); break;
             default: std::cout << "No tile for that number yet" << std::endl;
         }
     }

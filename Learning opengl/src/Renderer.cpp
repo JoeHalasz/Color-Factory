@@ -148,7 +148,7 @@ void Renderer::Draw() const
 
 void Renderer::AddQuad(PaintBlob& PaintBlob)
 {
-    m_AllQuads.push_back(CreateQuad(PaintBlob.GetTile()->GetType(), PaintBlob.GetSize(), PaintBlob.GetDirection(), m_TileSize, PaintBlob.GetPos()* m_TileSize, PaintBlob.GetTile()->GetColor()));
+    m_AllQuads.push_back(CreateQuad(PaintBlob.GetTile()->GetType(), PaintBlob.GetSize(), PaintBlob.GetDirection(), m_TileSize, PaintBlob.GetPos()* m_TileSize, PaintBlob.ConvertToRGB()));
 }
 
 void Renderer::AddQuad(Belt& belt)
@@ -223,9 +223,9 @@ void Renderer::DrawWorld(World& world, int width, int height)
         std::shared_ptr<PaintBlob> paintBlob = world.GetPaintBlobAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
         if (paintBlob != NULL)
         {
-            AddQuad(paintBlob, paintBlob->GetTile()->GetColor());
+            AddQuad(paintBlob, paintBlob->ConvertToRGB());
             paintBlob->GetTile()->SetType(TileTypePaintBlobShading);
-            AddQuad(paintBlob, paintBlob->GetTile()->GetColor());
+            AddQuad(paintBlob, paintBlob->ConvertToRGB());
             paintBlob->GetTile()->SetType(TileTypePaintBlob);
         }
     }
@@ -233,10 +233,12 @@ void Renderer::DrawWorld(World& world, int width, int height)
     // draw the belt paint blobs
     for (int i = 0; i < blobsOnBelts.size(); i++)
     {
-        AddQuad(blobsOnBelts[i], blobsOnBelts[i]->GetTile()->GetColor());
-        blobsOnBelts[i]->GetTile()->SetType(TileTypePaintBlobShading);
-        AddQuad(blobsOnBelts[i], blobsOnBelts[i]->GetTile()->GetColor());
-        blobsOnBelts[i]->GetTile()->SetType(TileTypePaintBlob);
+        if (PaintBlob* b = dynamic_cast<PaintBlob*>(blobsOnBelts[i].get())) {
+            AddQuad(blobsOnBelts[i], b->ConvertToRGB());
+            blobsOnBelts[i]->GetTile()->SetType(TileTypePaintBlobShading);
+            AddQuad(blobsOnBelts[i], b->ConvertToRGB());
+            blobsOnBelts[i]->GetTile()->SetType(TileTypePaintBlob);
+        }
     }
 }
 
