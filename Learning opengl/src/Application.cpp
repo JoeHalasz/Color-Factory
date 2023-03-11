@@ -22,8 +22,6 @@
 #include "imgui/imgui_impl_glfw_gl3.h"
 
 
-
-
 int main(void)
 {
     double WORLDTICKSPERSECOND = 120.0;
