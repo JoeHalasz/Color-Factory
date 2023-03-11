@@ -84,11 +84,6 @@ bool PaintBlob::MoveBy(Vec3 amount, std::unordered_map<int, std::unordered_map<i
 	return true;
 }
 
-void PaintBlob::CombineColor(PaintBlob* other)
-{
-	GetTile()->SetColor((GetTile()->GetColor() + other->GetTile()->GetColor())/2); // maybe subtract the max cmyk value if its above 1?
-}
-
 Vec4 PaintBlob::ConvertToRGB()
 {
 	return {

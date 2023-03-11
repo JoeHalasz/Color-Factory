@@ -128,9 +128,17 @@ void Belt::Update()
 
 std::shared_ptr<GameObject> findWorldObjectAtPos(int xPos, int yPos, std::unordered_map<int, std::unordered_map<int, std::shared_ptr<GameObject>>>& worldGameObjects)
 {
-	if (worldGameObjects[xPos][yPos] != NULL)
-		if (worldGameObjects[xPos][yPos]->AllowNewItem())
-			return worldGameObjects[xPos][yPos];
+	if (worldGameObjects[xPos][yPos] != NULL) {
+		std::shared_ptr<GameObject> obj;
+		if (worldGameObjects[xPos][yPos]->GetParentObject() != NULL) { // use the parent obj
+			obj = worldGameObjects[xPos][yPos]->GetParentObject();
+		}
+		else
+			obj = worldGameObjects[xPos][yPos];
+		if (obj->AllowNewItem())
+			return obj;
+
+	}
 	std::unique_ptr<Belt> fake;
 	return fake;
 }

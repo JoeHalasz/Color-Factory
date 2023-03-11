@@ -36,7 +36,7 @@ private:
 
 	bool AddBelt(BeltType beltColor, Vec3 pos, Direction direction);
 	bool AddPaintBlob(Vec4 BlobColor, Vec3 pos, float size);
-	bool AddPaintBlobCombiner(Vec3 pos, Direction direction);
+	bool AddPaintBlobCombiner(Vec3 pos, Direction direction, int numInputs);
 
 public:
 	bool IS3D = false; // Only works if there is only one texture

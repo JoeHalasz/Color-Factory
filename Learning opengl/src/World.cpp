@@ -164,29 +164,50 @@ bool World::AddBelt(BeltType beltColor, Vec3 pos, Direction direction)
 }
 
 
-bool World::AddPaintBlobCombiner(Vec3 pos, Direction direction)
+bool World::AddPaintBlobCombiner(Vec3 pos, Direction direction, int numInputs)
 {
     if (!NothingAtPos(pos))
         return false;
     if (!NothingAtPos(Vec3{ pos.x + 1, pos.y, pos.z }))
         return false;
 
-    std::shared_ptr<GameObject> paintBlobCombiner(new PaintBlobCombiner(pos, GetBlockSize(), direction, true));
+    std::shared_ptr<GameObject> paintBlobCombiner(new PaintBlobCombiner(pos, GetBlockSize(), numInputs, direction, true));
     AddGameObjectAtPos(paintBlobCombiner, pos.x, pos.y);
-    Vec3 otherPos;
-    if (direction == DirectionUp)
-        otherPos = pos + Vec3{ 1,0,0 };
-    else if (direction == DirectionDown)
-        otherPos = pos + Vec3{ -1,0,0 };
-    else if (direction == DirectionLeft)
-        otherPos = pos + Vec3{ 0, -1,0 };
-    else /*if (direction == DirectionRight)*/
-        otherPos = pos + Vec3{ 0, 1,0 };
+    Vec3 otherPos1;
+    Vec3 otherPos2;
+    if (direction == DirectionUp) {
+        otherPos1 = pos + Vec3{ 1,0,0 };
+        otherPos2 = pos + Vec3{ -1,0,0 };
+    }
+    else if (direction == DirectionDown) {
+        otherPos1 = pos + Vec3{ -1,0,0 };
+        otherPos2 = pos + Vec3{ 1,0,0 };
+    }
+    else if (direction == DirectionLeft) {
+        otherPos1 = pos + Vec3{ 0, -1,0 };
+        otherPos2 = pos + Vec3{ 0, 1,0 };
+    }
+    else { /*if (direction == DirectionRight)*/
+        otherPos1 = pos + Vec3{ 0, 1,0 };
+        otherPos2 = pos + Vec3{ 0, -1,0 };
+    }
 
-    std::shared_ptr<GameObject> paintBlobCombiner2(new PaintBlobCombiner(otherPos, GetBlockSize(), direction, false, TileTypePaintBlobContainer2));
-    paintBlobCombiner2->SetParentObject(paintBlobCombiner);
-    paintBlobCombiner->AddOtherPart(paintBlobCombiner2);
-    AddGameObjectAtPos(paintBlobCombiner2, otherPos.x, otherPos.y);
+    if (numInputs == 3) {
+        std::shared_ptr<GameObject> paintBlobCombiner2(new PaintBlobCombiner(otherPos1, GetBlockSize(), numInputs, direction, false, TileTypePaintBlobContainer2));
+        paintBlobCombiner2->SetParentObject(paintBlobCombiner);
+        paintBlobCombiner->AddOtherPart(paintBlobCombiner2);    AddGameObjectAtPos(paintBlobCombiner2, otherPos1.x, otherPos1.y);
+        AddGameObjectAtPos(paintBlobCombiner2, otherPos1.x, otherPos1.y);
+        std::shared_ptr<GameObject> paintBlobCombiner3(new PaintBlobCombiner(otherPos2, GetBlockSize(), numInputs, direction, false, TileTypePaintBlobContainer2));
+        paintBlobCombiner3->SetParentObject(paintBlobCombiner);
+        paintBlobCombiner->AddOtherPart(paintBlobCombiner3);
+        AddGameObjectAtPos(paintBlobCombiner3, otherPos2.x, otherPos2.y);
+    }
+    if (numInputs == 2) {
+        std::shared_ptr<GameObject> paintBlobCombiner2(new PaintBlobCombiner(otherPos1, GetBlockSize(), numInputs, direction, false, TileTypePaintBlobContainer2));
+        paintBlobCombiner2->SetParentObject(paintBlobCombiner);
+        paintBlobCombiner->AddOtherPart(paintBlobCombiner2);
+        AddGameObjectAtPos(paintBlobCombiner2, otherPos1.x, otherPos1.y);
+    }
     
     return true;
 }
@@ -232,7 +253,9 @@ void World::OnUpdate(Input* input)
             case(5): AddPaintBlob(Vec4{ 1.0f, 0.0f, 1.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2); break;
             case(6): AddPaintBlob(Vec4{ 1.0f, 1.0f, 0.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2); break;
             case(7): AddPaintBlob(Vec4{ 0.0f, 0.0f, 0.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2); break;
-            case(8): AddPaintBlobCombiner(Vec3{ mousePosX, mousePosY,1 }, (Direction)input->GetDirection()); break;
+            case(8): AddPaintBlob(Vec4{ .6f, .4f, .4f, 1.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2); break;
+            case(9): AddPaintBlobCombiner(Vec3{ mousePosX, mousePosY,1 }, (Direction)input->GetDirection(), 2); break;
+            case(0): AddPaintBlobCombiner(Vec3{ mousePosX, mousePosY,1 }, (Direction)input->GetDirection(), 3); break;
             default: std::cout << "No tile for that number yet" << std::endl;
         }
     }
