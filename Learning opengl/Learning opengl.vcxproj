@@ -140,6 +140,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="MergeBelt.cpp" />
     <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\Belt.cpp" />
     <ClCompile Include="src\BeltOLD.cpp" />
@@ -309,6 +310,7 @@
     <None Include="src\vendor\glm\gtx\wrap.inl" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="MergeBelt.h" />
     <ClInclude Include="src\Belt.h" />
     <ClInclude Include="src\BeltOLD.h" />
     <ClInclude Include="src\ErrorCatching.h" />

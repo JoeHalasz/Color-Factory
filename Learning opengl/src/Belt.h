@@ -16,9 +16,6 @@ class Belt : public GameObject, public std::enable_shared_from_this <Belt>
 {
 private:
 
-	
-	
-
 	BeltType m_BeltType;
 	TileType m_ArrowTile;
 	Vec3 m_ArrowOffset = { 0 };

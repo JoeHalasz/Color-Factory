@@ -130,6 +130,8 @@ Renderer::Renderer(int tileSize)
     m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/belts/red arrow.png"));
     m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/machines/PaintBlobCombiner1.png"));
     m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/machines/PaintBlobCombiner2.png"));
+    m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/drawer/drawer background.png"));
+    m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/drawer/drawer background selected.png"));
 }
 
 void Renderer::Clear() const
@@ -162,9 +164,34 @@ void Renderer::AddQuad(float textureID, float size, Direction direction, Vec3 po
     m_AllQuads.push_back(CreateQuad(textureID, size, direction, m_TileSize, pos * size, color));
 }
 
+void Renderer::AddQuadOffset(float textureID, float size, Direction direction, Vec3 pos, Vec4 color)
+{
+    m_AllQuads.push_back(CreateQuad(textureID, size, direction, m_TileSize, pos, color));
+}
+
+
 void Renderer::AddQuad(std::shared_ptr<GameObject> gameObject, Vec4 color)
 {
     m_AllQuads.push_back(CreateQuad(gameObject->GetTile()->GetType(), gameObject->GetSize(), gameObject->GetDirection(), m_TileSize, gameObject->GetPos() * m_TileSize, color));
+}
+
+void Renderer::DrawDrawer(World& world, int width, int height)
+{
+    int size = world.GetBlockSize();
+    float zoomedWidth = (width / 2) + (world.GetZoomAmount() * (width / 20));
+    float zoomedHeight = (height / 2) + (world.GetZoomAmount() * (height / 20));
+
+    float startDrawX = (-1 * ((world.GetPosition().x) + (zoomedWidth)));
+    float startDrawY = (-1 * ((world.GetPosition().y) + (zoomedHeight)));
+
+    float percentOffset = .05;
+
+    startDrawX *= (1.0f - percentOffset);
+    startDrawY *= (1.0f - percentOffset);
+
+    AddQuad(TileTypeDrawerBackground, world.GetBlockSize(), DirectionUp, { startDrawX, startDrawY, 1 });
+
+    std::cout << startDrawX << " " << startDrawY << std::endl;
 }
 
 void Renderer::DrawWorld(World& world, int width, int height)
@@ -202,7 +229,7 @@ void Renderer::DrawWorld(World& world, int width, int height)
             AddQuad(belt);
             if (belt->GetTile()->GetType() == TileTypeStraightBelt) // draw arrow if it is not a turn belt
                 AddQuad(belt->GetArrowTile(), size, belt->GetDirection(), belt->GetArrowPos());
-            
+
             // add objects on the belt to draw to the list of things to draw
             for (int i = 0; i < belt->GetAllObjects().size(); i++)
             {
@@ -211,13 +238,13 @@ void Renderer::DrawWorld(World& world, int width, int height)
         }
     }
     // draw the rest of the world except paint blobs on belts
-    for (int i = 0; i < OnScreenPositions.size(); i++){
-        
+    for (int i = 0; i < OnScreenPositions.size(); i++) {
+
         // draw paint blob combiners
         std::shared_ptr<GameObject> gameObject = world.GetGameObjectAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
         if (gameObject != NULL)
             AddQuad(gameObject);
-        
+
 
         // draw all other paint blobs
         std::shared_ptr<PaintBlob> paintBlob = world.GetPaintBlobAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
@@ -242,7 +269,47 @@ void Renderer::DrawWorld(World& world, int width, int height)
     }
 }
 
-void Renderer::OnRender(int width, int height, World& world)
+void Renderer::RenderScene(int width, int height, World& world, glm::mat4& mvp)
+{
+    // set dynamic vertex buffer
+    std::vector<Vertex> vertices(m_AllQuads.size() * 4);
+    if (m_MAXNUMQUADS < m_AllQuads.size())
+    {
+        std::cout << "TOO MANY QUADS" << std::endl;
+        std::cout << "Need " << m_AllQuads.size() << " Quads" << std::endl;
+        std::cout << "Max is " << m_MAXNUMQUADS << " Quads" << std::endl;
+    }
+
+    Vertex* buffer = vertices.data();
+
+    for (unsigned int i = 0; i < m_AllQuads.size(); i++)
+    {
+        memcpy(buffer + (m_AllQuads[i].size() * i), m_AllQuads[i].data(), m_AllQuads[i].size() * sizeof(Vertex));
+    }
+
+    m_VertexBuffer->Bind();
+    GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(Vertex), vertices.data()));
+
+    for (unsigned int i = 0; i < m_Textures.size(); i++) {
+        m_Textures[i]->Bind(i);
+    }
+
+    int numSamplers = m_Textures.size();
+    if (numSamplers > 32)
+        std::cout << "TOO MANY TEXTURES" << std::endl;
+
+    int* samplers = (int*)malloc(numSamplers * sizeof(int));
+    for (int i = 0; i < numSamplers; i++) { samplers[i] = i; }
+
+    m_Shader->SetUniform1iv("u_Textures", numSamplers, samplers);
+
+    m_Shader->Bind();
+    m_Shader->SetUniformMat4f("u_MVP", mvp);
+    Draw();
+    free(samplers);
+}
+
+void Renderer::OnRender(int width, int height, World& world, bool beenOneSecond, bool printStuff)
 {
 
     DrawWorld(world, width, height);
@@ -266,45 +333,28 @@ void Renderer::OnRender(int width, int height, World& world)
     std::vector<unsigned int> indices = makeIndices(m_AllQuads.size());
     m_IndexBuffer = std::make_unique<IndexBuffer>(indices.data(), indices.size());
     
-    
+    RenderScene(width, height, world, mvp);
+    if (beenOneSecond && printStuff)
     {
-        // set dynamic vertex buffer
-        std::vector<Vertex> vertices(m_AllQuads.size() * 4);
-        if (m_MAXNUMQUADS < m_AllQuads.size())
-        {
-            std::cout << "TOO MANY QUADS" << std::endl;
-            std::cout << "Need " << m_AllQuads.size() << " Quads" << std::endl;
-            std::cout << "Max is " << m_MAXNUMQUADS << " Quads" << std::endl;
-        }
-
-        Vertex* buffer = vertices.data();
-
-        for (unsigned int i = 0; i < m_AllQuads.size(); i++)
-        {
-            memcpy(buffer + (m_AllQuads[i].size() * i), m_AllQuads[i].data(), m_AllQuads[i].size() * sizeof(Vertex));
-        }
-
-        m_VertexBuffer->Bind();
-        GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(Vertex), vertices.data()));
-
-        for (unsigned int i = 0; i < m_Textures.size(); i++) {
-            m_Textures[i]->Bind(i);
-        }
-
-        int numSamplers = m_Textures.size();
-        if (numSamplers > 32)
-            std::cout << "TOO MANY TEXTURES" << std::endl;
-
-        int* samplers = (int*)malloc(numSamplers * sizeof(int));
-        for (int i = 0; i < numSamplers; i++) { samplers[i] = i; }
-
-        m_Shader->SetUniform1iv("u_Textures", numSamplers, samplers);
-
-        m_Shader->Bind();
-        m_Shader->SetUniformMat4f("u_MVP", mvp);
-        Draw();
-        free(samplers);
+        std::cout << "Drawing " << GetAmountOfCurrentQuads() << "/" << GetMaxAmountOfQuads()
+            << " Quads: " << ((float)GetAmountOfCurrentQuads() / GetMaxAmountOfQuads()) * 100 << "% " << std::endl;
     }
+
+    DeleteQuads();
+
+    // draw drawer
+    DrawDrawer(world, width, height);
+    proj = glm::ortho(v1, v2, v3, v4, -1.0f, 1.0f);
+    view = glm::translate(glm::mat4(1.0f), world.GetPosition());
+
+    mvp = proj * view;
+
+    indices = makeIndices(m_AllQuads.size());
+    m_IndexBuffer = std::make_unique<IndexBuffer>(indices.data(), indices.size());
+
+    RenderScene(width, height, world, mvp);
+
+    DeleteQuads();
 }
 
 void Renderer::DeleteQuads()

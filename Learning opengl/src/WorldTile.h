@@ -18,6 +18,8 @@ enum TileType
 	TileTypeRedArrow,
 	TileTypePaintBlobContainer1,
 	TileTypePaintBlobContainer2,
+	TileTypeDrawerBackground,
+	TileTypeDrawBackgroundSelected,
 };
 
 
