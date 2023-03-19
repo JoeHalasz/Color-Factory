@@ -30,6 +30,8 @@ private:
 	int m_MousePosX = 0;
 	int m_MousePosY = 0;
 
+	Input* m_Input;
+
 	std::unordered_map<int, std::unordered_map<int, std::shared_ptr<PaintBlob>>> m_PaintBlobs;
 	std::unordered_map<int, std::unordered_map<int, std::shared_ptr<Belt>>> m_Belts;
 	std::unordered_map<int, std::unordered_map<int, std::shared_ptr<GameObject>>> m_GameObjects;
@@ -44,7 +46,7 @@ public:
 	World(GLFWwindow* window);
 	World(GLFWwindow* window, glm::vec3 position);
 	~World();
-	void OnUpdate(Input* input);
+	void OnUpdate();
 	bool AddPaintBlob(std::shared_ptr<PaintBlob> newObject);
 	bool BeltCanBeMade(Vec3 pos, BeltType beltColor, Direction direction);
 	bool NothingAtPos(Vec3 pos);
@@ -57,6 +59,8 @@ public:
 	inline int GetBlockSize() { return m_BlockSize; }
 	inline int GetMousePosX() { return m_MousePosX; }
 	inline int GetMousePosY() { return m_MousePosY; }
+	inline void SetInput(Input* input) { m_Input = input; }
+	inline Input* GetInput() { return m_Input; }
 
 	inline std::shared_ptr<PaintBlob> GetPaintBlobAtPos(float x, float y) { return m_PaintBlobs[std::floor(x)][std::floor(y)]; }
 	inline void AddPaintBlobAtPos(std::shared_ptr<PaintBlob> newObject, float x, float y) { m_PaintBlobs[std::floor(x)][std::floor(y)] = newObject; }

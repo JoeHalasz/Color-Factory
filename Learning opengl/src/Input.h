@@ -17,8 +17,7 @@ private:
 	float m_RotationChange = 0.0f;
 	bool changePos = false;
 	glm::vec3 m_NewPos = glm::vec3(0.0f);
-
-	int m_LastNumPressed = 1;
+	
 
 	double m_MousePosX = 0;
 	double m_MousePosY = 0;
@@ -34,11 +33,17 @@ private:
 	Direction m_Direction = DirectionUp;
 	
 public:
+	int m_SecondNumPressed = -1; // second number pressed
+	int m_LastNumPressed = -1; // first number pressed
+	bool m_NumberPressed = false;
+	bool m_WaitingForSecondNumber = false;
+
 	GLFWwindow* m_Window;
 	bool IS3D = false;
 	Input(GLFWwindow* window, bool IS3D);
 	bool KeyPressed(int key);
 	bool KeyHeld(int key);
+	bool KeyUp(int key);
 	void CheckInputPresses();
 	void Reset();
 	inline bool NeedChangePos() { return changePos; }
@@ -52,6 +57,7 @@ public:
 	inline bool GetRightMouseUp() { return m_RightMouseUp; }
 	inline bool GetRightMouseDown() { return m_RightMouseDown; }
 	inline int GetLastNumPressed() { return m_LastNumPressed; }
+	inline bool GetWaitingForSecondNumber() { return m_WaitingForSecondNumber; }
 	inline int GetDirection() { return m_Direction; }
 	inline void ChangeDirection(){ m_Direction = (Direction)((int)m_Direction + 1); if (m_Direction == 4) m_Direction = (Direction)0; }
 	void SetMouseXandY(double x, double y);

@@ -9,6 +9,7 @@
 
 #include <glm/gtc/quaternion.hpp> 
 #include <glm/gtx/quaternion.hpp>
+#include <algorithm>
 
 #include "PaintBlobCombiner.h"
 
@@ -30,7 +31,7 @@ std::vector<unsigned int> makeIndices(int numQuads)
     return indices;
 }
 
-static std::vector<Vertex> CreateQuad(float textureID, float size, Direction direction, int tileSize, Vec3 pos, Vec4 color)
+static std::vector<Vertex> CreateQuad(float textureID, float size, Direction direction, float tileSize, Vec3 pos, Vec4 color, bool offset=false)
 {
     float x = pos.x;
     float y = pos.y;
@@ -42,10 +43,14 @@ static std::vector<Vertex> CreateQuad(float textureID, float size, Direction dir
     {   // if its a paint blob
         x = (int)x;
         y = (int)y;
-        float onTileOffsetX = abs(pos.x / tileSize - (int)pos.x / (float)tileSize);
-        float onTileOffsetY = abs(pos.y / tileSize - (int)pos.y / (float)tileSize);
         x -= (size/2.0f);
         y -= (size/2.0f);
+    }
+
+    if (offset)
+    {
+        x -= (size - tileSize)/2;
+        y -= (size - tileSize)/2;
     }
 
 
@@ -164,9 +169,9 @@ void Renderer::AddQuad(float textureID, float size, Direction direction, Vec3 po
     m_AllQuads.push_back(CreateQuad(textureID, size, direction, m_TileSize, pos * size, color));
 }
 
-void Renderer::AddQuadOffset(float textureID, float size, Direction direction, Vec3 pos, Vec4 color)
+void Renderer::AddQuadOffset(float textureID, float size, Direction direction, Vec3 pos, float tileSize, Vec4 color)
 {
-    m_AllQuads.push_back(CreateQuad(textureID, size, direction, m_TileSize, pos, color));
+    m_AllQuads.push_back(CreateQuad(textureID, size, direction, tileSize, pos * tileSize, color, true));
 }
 
 
@@ -177,21 +182,60 @@ void Renderer::AddQuad(std::shared_ptr<GameObject> gameObject, Vec4 color)
 
 void Renderer::DrawDrawer(World& world, int width, int height)
 {
-    int size = world.GetBlockSize();
-    float zoomedWidth = (width / 2) + (world.GetZoomAmount() * (width / 20));
-    float zoomedHeight = (height / 2) + (world.GetZoomAmount() * (height / 20));
+    float drawerBlockSize = world.GetBlockSize();
+    float itemBlockSize = world.GetBlockSize() * .75f;
 
-    float startDrawX = (-1 * ((world.GetPosition().x) + (zoomedWidth)));
-    float startDrawY = (-1 * ((world.GetPosition().y) + (zoomedHeight)));
+    float startDrawX = -1 * (width/2.0f);
+    float startDrawY = -1 * (height/2.0f);
 
-    float percentOffset = .05;
+    float percentOffset = .2;
 
     startDrawX *= (1.0f - percentOffset);
     startDrawY *= (1.0f - percentOffset);
 
-    AddQuad(TileTypeDrawerBackground, world.GetBlockSize(), DirectionUp, { startDrawX, startDrawY, 1 });
+    startDrawX /= drawerBlockSize;
+    startDrawY /= drawerBlockSize;
 
-    std::cout << startDrawX << " " << startDrawY << std::endl;
+    // background for first number selection drawer
+    for (float i = 0; i < 9; i++) {
+        AddQuad(TileTypeDrawerBackground, drawerBlockSize, DirectionUp, { startDrawX + i, startDrawY, 1 });
+    }
+    // first number selection drawer
+    AddQuadOffset(TileTypeStraightBelt, itemBlockSize, DirectionUp, Vec3{ startDrawX, startDrawY, 1 }, drawerBlockSize);
+    AddQuadOffset(TileTypeYellowArrow, itemBlockSize, DirectionUp, Vec3{startDrawX, startDrawY, 1}, drawerBlockSize);
+    if (world.GetInput()->GetLastNumPressed() == 1) 
+        AddQuadOffset(TileTypeYellowArrow + (BeltType)(std::max(std::min((BeltTypeYellow + world.GetInput()->m_SecondNumPressed - 1), 2), 0)), itemBlockSize, DirectionUp, Vec3{startDrawX, startDrawY, 1}, drawerBlockSize);
+    AddQuadOffset(TileTypePaintBlobContainer1, itemBlockSize, DirectionUp, Vec3{ startDrawX + 1, startDrawY, 1 }, drawerBlockSize);
+
+    if (world.GetInput()->GetLastNumPressed() > 0) // highlight pressed number
+        AddQuad(TileTypeDrawerBackgroundSelected, drawerBlockSize, DirectionUp, { startDrawX + world.GetInput()->GetLastNumPressed() - 1, startDrawY, 1 });
+    
+    // second number selection drawer
+    if (world.GetInput()->GetWaitingForSecondNumber())
+    {
+        switch (world.GetInput()->GetLastNumPressed())
+        {
+        case 1:
+            for (float i = 0; i < 3; i++) {
+                AddQuad(TileTypeDrawerBackground, drawerBlockSize, DirectionUp, { startDrawX + i, startDrawY + 1, 1 });
+            }
+            AddQuadOffset(TileTypeStraightBelt, itemBlockSize, DirectionUp, Vec3{ startDrawX, startDrawY + 1, 1 }, drawerBlockSize);
+            AddQuadOffset(TileTypeYellowArrow, itemBlockSize, DirectionUp, Vec3{ startDrawX, startDrawY + 1, 1 }, drawerBlockSize);
+            AddQuadOffset(TileTypeStraightBelt, itemBlockSize, DirectionUp, Vec3{ startDrawX + 1, startDrawY + 1, 1 }, drawerBlockSize);
+            AddQuadOffset(TileTypeOrangeArrow, itemBlockSize, DirectionUp, Vec3{ startDrawX + 1, startDrawY + 1, 1 }, drawerBlockSize);
+            AddQuadOffset(TileTypeStraightBelt, itemBlockSize, DirectionUp, Vec3{ startDrawX + 2, startDrawY + 1, 1 }, drawerBlockSize);
+            AddQuadOffset(TileTypeRedArrow, itemBlockSize, DirectionUp, Vec3{ startDrawX + 2, startDrawY + 1, 1 }, drawerBlockSize);
+            break;
+        case 2:
+            for (float i = 0; i < 2; i++) {
+                AddQuad(TileTypeDrawerBackground, drawerBlockSize, DirectionUp, { startDrawX + i, startDrawY + 1, 1 });
+            }
+            AddQuadOffset(TileTypePaintBlobContainer1, itemBlockSize, DirectionUp, Vec3{ startDrawX, startDrawY + 1, 1 }, drawerBlockSize);
+            AddQuadOffset(TileTypePaintBlobContainer2, itemBlockSize, DirectionUp, Vec3{ startDrawX + 1, startDrawY + 1, 1 }, drawerBlockSize);
+        default:;
+        }
+        
+    }
 }
 
 void Renderer::DrawWorld(World& world, int width, int height)
@@ -217,6 +261,7 @@ void Renderer::DrawWorld(World& world, int width, int height)
             AddQuad(TileTypeBackgroundDark, size, DirectionUp, Vec3{ x, y, 1 });
         }
     }
+   
 
     std::vector<std::shared_ptr<GameObject>> blobsOnBelts;
     // draw world tiles
@@ -344,10 +389,11 @@ void Renderer::OnRender(int width, int height, World& world, bool beenOneSecond,
 
     // draw drawer
     DrawDrawer(world, width, height);
-    proj = glm::ortho(v1, v2, v3, v4, -1.0f, 1.0f);
-    view = glm::translate(glm::mat4(1.0f), world.GetPosition());
-
-    mvp = proj * view;
+    v1 = -1 * (width / 2);
+    v2 = -1 * v1;
+    v3 = -1 * (height / 2);
+    v4 = -1 * v3;
+    mvp = glm::ortho(v1, v2, v3, v4, -1.0f, 1.0f);
 
     indices = makeIndices(m_AllQuads.size());
     m_IndexBuffer = std::make_unique<IndexBuffer>(indices.data(), indices.size());

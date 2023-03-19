@@ -19,7 +19,7 @@ enum TileType
 	TileTypePaintBlobContainer1,
 	TileTypePaintBlobContainer2,
 	TileTypeDrawerBackground,
-	TileTypeDrawBackgroundSelected,
+	TileTypeDrawerBackgroundSelected,
 };
 
 

@@ -38,7 +38,7 @@ public:
     void AddQuad(PaintBlob& PaintBlob);
     void AddQuad(Belt& belt);
     void AddQuad(float textureID, float size, Direction direction, Vec3 pos, Vec4 color={0});
-    void AddQuadOffset(float textureID, float size, Direction direction, Vec3 pos, Vec4 color={0});
+    void AddQuadOffset(float textureID, float size, Direction direction, Vec3 pos, float tileSize, Vec4 color = { 0 });
     void AddQuad(std::shared_ptr<GameObject> gameObject, Vec4 color = {0});
     inline unsigned int GetAmountOfCurrentQuads() { return m_AllQuads.size(); }
     inline unsigned int GetMaxAmountOfQuads() { return m_MAXNUMQUADS; }

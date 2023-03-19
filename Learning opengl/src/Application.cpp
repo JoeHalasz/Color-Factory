@@ -76,7 +76,6 @@ int main(void)
 
     { // this fixes some error when trying to close the window
 
-
         ImGui::CreateContext();
         ImGui_ImplGlfwGL3_Init(window, true);
         ImGui::StyleColorsDark();
@@ -86,8 +85,8 @@ int main(void)
         Renderer renderer(world.GetBlockSize());
         // set up inputs
         Input input(window, world.IS3D);
+        world.SetInput(&input);
 
-        // renderer.AddQuad(1, 50, 200, 100);
         double lastTimeRendered = glfwGetTime();
         double lastTimeUpdatedWorld = glfwGetTime();
         int nbFrames = 0;
@@ -95,7 +94,6 @@ int main(void)
         bool printStuff = true;
         while (!glfwWindowShouldClose(window))
         {
-            // PaintBlob b(glm::vec3(0.0f), glm::vec4(.7f, 1.0f, 0.0f, 0.0f));
             int lastWidth = WIDTH;
             int lastHeight = HEIGHT;
             glfwGetWindowSize(window, &WIDTH, &HEIGHT);
@@ -109,7 +107,6 @@ int main(void)
             if (printStuff) {
                 nbFrames++;
                 if (currentTime - lastTimeRendered >= 1.0) { // If last prinf() was more than 1 sec ago
-                    //std::cout << b.ConvertToRGB().r * 255 << " " << b.ConvertToRGB().g * 255 << " " << b.ConvertToRGB().b * 255 << std::endl;
                     std::cout << "\x1B[2J\x1B[H";
                     // printf and reset timer
                     beenOneSecond = true;
@@ -123,7 +120,7 @@ int main(void)
             {
                 currentTime = glfwGetTime();
                 // inputs and update world
-                world.OnUpdate(&input);
+                world.OnUpdate();
                 lastTimeUpdatedWorld += (1.0/ WORLDTICKSPERSECOND);
                 numTimesUpdated++;
                 if (numTimesUpdated > 10)

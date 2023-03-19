@@ -8,18 +8,14 @@ World::World(GLFWwindow* window)
     :m_Window(window)
 {
     if (IS3D)
-    {
         m_Position.z = -350;
-    }
 }
 
 World::World(GLFWwindow* window, glm::vec3 position)
     :m_Window(window), m_Position(position)
 {
     if (IS3D)
-    {
         m_Position.z = -350;
-    }
 }
 
 World::~World()
@@ -213,19 +209,19 @@ bool World::AddPaintBlobCombiner(Vec3 pos, Direction direction, int numInputs)
 }
 
 
-void World::OnUpdate(Input* input)
+void World::OnUpdate()
 {
     // do inputs
-    input->CheckInputPresses();
+    m_Input->CheckInputPresses();
     
-    m_ZoomAmount -= input->GetChangeZoom();
+    m_ZoomAmount -= m_Input->GetChangeZoom();
     if (m_ZoomAmount >= ZOOM_MAX)
         m_ZoomAmount = ZOOM_MAX;
     if (m_ZoomAmount <= ZOOM_MIN) 
         m_ZoomAmount = ZOOM_MIN;
     
-    m_Position += input->GetSpeed() + (input->GetSpeed() * ((float)m_ZoomAmount/10));
-    m_Rotation += input->GetRotationChange();
+    m_Position += m_Input->GetSpeed() + (m_Input->GetSpeed() * ((float)m_ZoomAmount/10));
+    m_Rotation += m_Input->GetRotationChange();
     
    
     int WIDTH, HEIGHT;
@@ -234,32 +230,29 @@ void World::OnUpdate(Input* input)
     float zoomedWidth = (WIDTH / 2) + (m_ZoomAmount * (WIDTH / 20));
     float zoomedHeight = (HEIGHT / 2) + (m_ZoomAmount * (HEIGHT / 20));
 
-    float mousePosX = ((((input->GetMousePosX() / (WIDTH / 2)) * zoomedWidth) - zoomedWidth) - m_Position.x) / m_BlockSize;
-    float mousePosY = -1 * ((((input->GetMousePosY() / (HEIGHT / 2)) * zoomedHeight) - zoomedHeight) + m_Position.y) / m_BlockSize;
+    float mousePosX = ((((m_Input->GetMousePosX() / (WIDTH / 2)) * zoomedWidth) - zoomedWidth) - m_Position.x) / m_BlockSize;
+    float mousePosY = -1 * ((((m_Input->GetMousePosY() / (HEIGHT / 2)) * zoomedHeight) - zoomedHeight) + m_Position.y) / m_BlockSize;
 
     if (mousePosX < 0) mousePosX = floor(mousePosX);
     else mousePosX = floor(mousePosX);
     if (mousePosY < 0) mousePosY = floor(mousePosY);
     else mousePosY = floor(mousePosY);
 
-    if (input->GetLeftMouseDown())
+    if (m_Input->GetLeftMouseDown())
     {
-        switch (input->GetLastNumPressed()) 
+        switch (m_Input->GetLastNumPressed())
         {
-            case(1): AddBelt(BeltTypeYellow, { mousePosX, mousePosY, 1 }, (Direction)input->GetDirection()); break;
-            case(2): AddBelt(BeltTypeOrange, { mousePosX, mousePosY, 1 }, (Direction)input->GetDirection()); break;
-            case(3): AddBelt(BeltTypeRed,    { mousePosX, mousePosY, 1 }, (Direction)input->GetDirection()); break;
-            case(4): AddPaintBlob(Vec4{ 0.0f, 1.0f, 1.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2); break;
-            case(5): AddPaintBlob(Vec4{ 1.0f, 0.0f, 1.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2); break;
-            case(6): AddPaintBlob(Vec4{ 1.0f, 1.0f, 0.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2); break;
-            case(7): AddPaintBlob(Vec4{ 0.0f, 0.0f, 0.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2); break;
-            case(8): AddPaintBlob(Vec4{ .6f, .4f, .4f, 1.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2); break;
-            case(9): AddPaintBlobCombiner(Vec3{ mousePosX, mousePosY,1 }, (Direction)input->GetDirection(), 2); break;
-            case(0): AddPaintBlobCombiner(Vec3{ mousePosX, mousePosY,1 }, (Direction)input->GetDirection(), 3); break;
+            case(1): AddBelt((BeltType)std::max(std::min((BeltTypeYellow + m_Input->m_SecondNumPressed - 1), 2), 0), { mousePosX, mousePosY, 1 }, (Direction)m_Input->GetDirection()); break;
+            case(2):AddPaintBlobCombiner(Vec3{ mousePosX, mousePosY,1 }, (Direction)m_Input->GetDirection(), std::max(std::min(m_Input->m_SecondNumPressed+1, 3), 2));break;
+            case(3): AddPaintBlob(Vec4{ 0.0f, 1.0f, 1.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2); break;
+            case(4): AddPaintBlob(Vec4{ 1.0f, 0.0f, 1.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2); break;
+            case(5): AddPaintBlob(Vec4{ 1.0f, 1.0f, 0.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2); break;
+            case(6): AddPaintBlob(Vec4{ 0.0f, 0.0f, 0.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2); break;
+            case(7): AddPaintBlob(Vec4{ .6f, .4f, .4f, 1.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2); break;
             default: std::cout << "No tile for that number yet" << std::endl;
         }
     }
-    if (input->GetRightMouseDown())
+    if (m_Input->GetRightMouseDown())
     {
         DeleteAllAtPos(Vec3{ mousePosX, mousePosY, 1 });
     }
@@ -321,8 +314,7 @@ void World::OnUpdate(Input* input)
 
         }
     }
-
-    input->Reset();
+    m_Input->Reset();
 }
 
 
