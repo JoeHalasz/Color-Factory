@@ -67,7 +67,7 @@ int main(void)
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
 
-    glfwSwapInterval(1);
+    glfwSwapInterval(0);
 
     if (glewInit() != GLEW_OK) {
         printf("Glew Init did not work!\n");
@@ -92,6 +92,8 @@ int main(void)
         int nbFrames = 0;
 
         bool printStuff = true;
+        double currentTime = glfwGetTime();
+        double lastTime = currentTime;
         while (!glfwWindowShouldClose(window))
         {
             int lastWidth = WIDTH;
@@ -103,7 +105,10 @@ int main(void)
             }
             bool beenOneSecond = false;
             // Measure fps
-            double currentTime = glfwGetTime();
+            currentTime = glfwGetTime();
+            if (currentTime - lastTime < 1.0f / 1000.0f)
+                continue;
+            lastTime = currentTime;
             if (printStuff) {
                 nbFrames++;
                 if (currentTime - lastTimeRendered >= 1.0) { // If last prinf() was more than 1 sec ago
@@ -114,6 +119,7 @@ int main(void)
                     nbFrames = 0;
                     lastTimeRendered += 1.0;
                 }
+                
             }
             int numTimesUpdated = 0;
             while (currentTime - lastTimeUpdatedWorld >= (1.0 / WORLDTICKSPERSECOND)) // update the world until we have caught up to 60 ticks per second
