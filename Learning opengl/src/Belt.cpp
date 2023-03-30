@@ -17,7 +17,6 @@ Belt::Belt(WorldTile tile, Vec3 pos, int size, Direction direction, BeltType bel
 	if (beltType == BeltTypeYellow) { m_ArrowTile = TileType(TileTypeYellowArrow); SetMinSpaceBetween(getMaxItemMoves() / 5); }
 	if (beltType == BeltTypeOrange) { m_ArrowTile = TileType(TileTypeOrangeArrow); SetMinSpaceBetween((getMaxItemMoves() / 5) + 1); }
 	if (beltType == BeltTypeRed)	{ m_ArrowTile = TileType(TileTypeRedArrow	); SetMinSpaceBetween((getMaxItemMoves() / 5) + 1); }
-
 }
 
 void Belt::SetUpNextAndLastObject(std::unordered_map<int, std::unordered_map<int, std::shared_ptr<Belt>>>& AllOtherBelts, 
@@ -25,18 +24,18 @@ void Belt::SetUpNextAndLastObject(std::unordered_map<int, std::unordered_map<int
 {
 	setNextObject(GetNextOrLastObject(false, AllOtherBelts, worldGameObjects));
 	setLastObject(GetNextOrLastObject(true, AllOtherBelts, worldGameObjects));
-	int here = 0;
+	int tries = 0;
 	if (getNextObject() != NULL) {
 		while (getNextObject()->getLastObject() == NULL || getNextObject()->getLastObject() != this->shared_from_this()) { // not sure why this needs to happen more than once, but it does. Sometimes will not set it correctly
 			getNextObject()->setLastObject(this->shared_from_this());
-			if (here++ >= 10)
+			if (tries++ >= 10)
 				std::cout << "Im stuck help" << std::endl; // keep this here
 		}
 	}
 	if (getLastObject() != NULL) {
 		while (getLastObject()->getNextObject() == NULL || getLastObject()->getNextObject() != this->shared_from_this()) {
 			getLastObject()->setNextObject(this->shared_from_this());
-			if (here++ >= 10)
+			if (tries++ >= 10)
 				std::cout << "Im stuck help2" << std::endl; // keep this here
 		}
 	}
@@ -71,22 +70,20 @@ void Belt::Update()
 				bool nextItemAllowed = getNextObject()->AllowNewItem();
 				if (getNextObject()->AllowNewItem()) // move it from this belt to the next belt
 				{
-					getNextObject()->getObjectsInInv().push_back(getObjectsInInv()[i]);
-					if (getNextObject()->GetTile()->GetType() == TileTypeTurnBelt || getNextObject()->GetTile()->GetType() == TileTypeTurnBeltBackwards)
-						getNextObject()->getObjectNumMoves().push_back(getMaxItemMoves() / 2);
-					else
-						getNextObject()->getObjectNumMoves().push_back(0);
+					int numObjectsInNext = getNextObject()->getObjectsInInv().size();
+					getNextObject()->AddObject(getObjectsInInv()[i]);
 					MovePaintBlob(i);
-					getObjectsInInv().erase(getObjectsInInv().begin() + i);
-					getObjectNumMoves().erase(getObjectNumMoves().begin() + i);
-					i--;
+					if (numObjectsInNext != getNextObject()->getObjectsInInv().size()) {
+						getObjectsInInv().erase(getObjectsInInv().begin() + i);
+						getObjectNumMoves().erase(getObjectNumMoves().begin() + i);
+						i--;
+					}
 				}
 				else {
 					m_LastItemMoved = false;
 				}
 			}
-			else { // put it on the floor on the next tile
-
+			else { // TODO (maybe) put it on the floor on the next tile 
 				m_LastItemMoved = false;
 			}
 		}

@@ -40,7 +40,7 @@ int main(void)
 
     int WIDTH, HEIGHT;
 
-    if (1) // fullscreen
+    if (0) // fullscreen
     {
         WIDTH = mode->width;
         HEIGHT = mode->height;
@@ -119,7 +119,6 @@ int main(void)
                     nbFrames = 0;
                     lastTimeRendered += 1.0;
                 }
-                
             }
             int numTimesUpdated = 0;
             while (currentTime - lastTimeUpdatedWorld >= (1.0 / WORLDTICKSPERSECOND)) // update the world until we have caught up to 60 ticks per second

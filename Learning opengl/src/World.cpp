@@ -147,11 +147,16 @@ bool World::AddBelt(BeltType beltColor, Vec3 pos, Direction direction)
     // remove what ever is there and add belt if it is not the same
     if (m_Belts[std::floor(belt->GetPos().x)][std::floor(belt->GetPos().y)] != NULL)
     {
+        std::shared_ptr<Belt> otherBelt = m_Belts[std::floor(belt->GetPos().x)][std::floor(belt->GetPos().y)];
+        if (otherBelt->GetBeltTypeSpeed() == belt->GetBeltTypeSpeed() && otherBelt->GetDirection() == belt->GetDirection())
+        {
+			return false;
+		}
         m_Belts[std::floor(belt->GetPos().x)][std::floor(belt->GetPos().y)] = NULL;
     }
     if (m_PaintBlobs[std::floor(belt->GetPos().x)][std::floor(belt->GetPos().y)] != NULL)
     {
-        m_PaintBlobs[std::floor(belt->GetPos().x)][std::floor(belt->GetPos().y)] = NULL;// this will only be blobs because of check at beginning of func
+       m_PaintBlobs[std::floor(belt->GetPos().x)][std::floor(belt->GetPos().y)] = NULL;// this will only be blobs because of check at beginning of func
     }
     AddBeltAtPos(belt, belt->GetPos().x, belt->GetPos().y);
     belt->SetUpNextAndLastObject(m_Belts, m_GameObjects);
@@ -243,7 +248,7 @@ void World::OnUpdate()
         switch (m_Input->GetLastNumPressed())
         {
             case(1): AddBelt((BeltType)std::max(std::min((BeltTypeYellow + m_Input->m_SecondNumPressed - 1), 2), 0), { mousePosX, mousePosY, 1 }, (Direction)m_Input->GetDirection()); break;
-            case(2):AddPaintBlobCombiner(Vec3{ mousePosX, mousePosY,1 }, (Direction)m_Input->GetDirection(), std::max(std::min(m_Input->m_SecondNumPressed+1, 3), 2));break;
+            case(2): AddPaintBlobCombiner(Vec3{ mousePosX, mousePosY,1 }, (Direction)m_Input->GetDirection(), std::max(std::min(m_Input->m_SecondNumPressed+1, 3), 2));break;
             case(3): AddPaintBlob(Vec4{ 0.0f, 1.0f, 1.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2); break;
             case(4): AddPaintBlob(Vec4{ 1.0f, 0.0f, 1.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2); break;
             case(5): AddPaintBlob(Vec4{ 1.0f, 1.0f, 0.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2); break;
