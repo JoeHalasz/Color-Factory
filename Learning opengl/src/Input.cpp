@@ -77,7 +77,6 @@ bool Input::KeyUp(int key)
 void Input::CheckInputPresses()
 {
     float MOVE_SPEED = ORIGINAL_MOVE_SPEED;
-    int action;
 
     if (KeyHeld(GLFW_KEY_LEFT_SHIFT)) MOVE_SPEED *= 2;
 

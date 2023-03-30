@@ -12,6 +12,7 @@
 #include "PaintBlob.h"
 #include "Belt.h"
 #include <memory>
+#include <cmath>
 
 #include "PaintBlobCombiner.h"
 
@@ -20,12 +21,12 @@ class World
 private:
 	GLFWwindow* m_Window;
 	glm::vec3 m_Position = glm::vec3(0.0f, 0.0f, 0.0f);
-	float m_ZoomAmount = 0;
+	double m_ZoomAmount = 0;
 	int m_BlockSize = 75;
 
 	float m_Rotation = 0;
-	float ZOOM_MAX = 25;
-	float ZOOM_MIN = 1;
+	double ZOOM_MAX = 25;
+	double ZOOM_MIN = 1;
 
 	int m_MousePosX = 0;
 	int m_MousePosY = 0;
@@ -41,8 +42,7 @@ private:
 	bool AddPaintBlobCombiner(Vec3 pos, Direction direction, int numInputs);
 
 public:
-	bool IS3D = false; // Only works if there is only one texture
-	
+	bool IS3D = false;
 	World(GLFWwindow* window);
 	World(GLFWwindow* window, glm::vec3 position);
 	~World();
@@ -59,16 +59,16 @@ public:
 	inline int GetBlockSize() { return m_BlockSize; }
 	inline int GetMousePosX() { return m_MousePosX; }
 	inline int GetMousePosY() { return m_MousePosY; }
-	inline void SetInput(Input* input) { m_Input = input; }
+	inline void SetInput() { m_Input = new Input(m_Window, IS3D);}
 	inline Input* GetInput() { return m_Input; }
 
-	inline std::shared_ptr<PaintBlob> GetPaintBlobAtPos(float x, float y) { return m_PaintBlobs[std::floor(x)][std::floor(y)]; }
-	inline void AddPaintBlobAtPos(std::shared_ptr<PaintBlob> newObject, float x, float y) { m_PaintBlobs[std::floor(x)][std::floor(y)] = newObject; }
+	inline std::shared_ptr<PaintBlob> GetPaintBlobAtPos(float x, float y) { return m_PaintBlobs[(int)std::floor(x)][(int)std::floor(y)]; }
+	inline void AddPaintBlobAtPos(std::shared_ptr<PaintBlob> newObject, float x, float y) { m_PaintBlobs[(int)std::floor(x)][(int)std::floor(y)] = newObject; }
 
-	inline std::shared_ptr<Belt> GetBeltAtPos(float x, float y) { return m_Belts[std::floor(x)][std::floor(y)]; }
-	inline void AddBeltAtPos(std::shared_ptr <Belt> newBelt, float x, float y) { m_Belts[std::floor(x)][std::floor(y)] = newBelt; }
+	inline std::shared_ptr<Belt> GetBeltAtPos(float x, float y) { return m_Belts[(int)std::floor(x)][(int)std::floor(y)]; }
+	inline void AddBeltAtPos(std::shared_ptr <Belt> newBelt, float x, float y) { m_Belts[(int)std::floor(x)][(int)std::floor(y)] = newBelt; }
 
-	inline std::shared_ptr<GameObject> GetGameObjectAtPos(float x, float y) { return m_GameObjects[std::floor(x)][std::floor(y)]; }
-	inline void AddGameObjectAtPos(std::shared_ptr <GameObject> newObject, float x, float y) { m_GameObjects[std::floor(x)][std::floor(y)] = newObject; }
+	inline std::shared_ptr<GameObject> GetGameObjectAtPos(float x, float y) { return m_GameObjects[(int)std::floor(x)][(int)std::floor(y)]; }
+	inline void AddGameObjectAtPos(std::shared_ptr <GameObject> newObject, float x, float y) { m_GameObjects[(int)std::floor(x)][(int)std::floor(y)] = newObject; }
 
 };

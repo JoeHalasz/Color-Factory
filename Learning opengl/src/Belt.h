@@ -59,6 +59,7 @@ public:
 			case(0): return 1.0f; break;
 			case(1): return 1.2f; break;
 			case(2): return 1.4f; break;
+			default: return 0.0f; break;
 		}
 	}
 	bool AllowNewItem(bool StartAtHalf = false);

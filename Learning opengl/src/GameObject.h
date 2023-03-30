@@ -15,14 +15,14 @@ class GameObject
 private:
 
 	WorldTile m_Tile;
-	Vec3 m_Pos;
-	int m_Size;
-	Direction m_Direction;
+	Vec3 m_Pos = { 0 };
+	int m_Size = 0;
+	Direction m_Direction = DirectionUp;
 
 	std::shared_ptr<GameObject> m_NextObject;
 	std::shared_ptr<GameObject> m_LastObject;
 
-	bool m_IsBasePart; // this is true if this is not one of the connecting parts of a game object
+	bool m_IsBasePart = false; // this is true if this is not one of the connecting parts of a game object
 	std::vector<std::shared_ptr<GameObject>> m_OtherParts; // contains the other parts of a game object (so rendered pieces of the object that are on different squares )
 	std::shared_ptr<GameObject> m_ParentObject; // this will only exist if m_IsBasePart is true
 	std::vector<std::shared_ptr<GameObject>> m_ObjectsInInv;

@@ -43,19 +43,19 @@ bool PaintBlob::MoveBy(Vec3 amount, std::unordered_map<int, std::unordered_map<i
 	bool movedSquares = std::floor(oldWorldPos.x) != std::floor(GetPos().x) || std::floor(oldWorldPos.y) != std::floor(GetPos().y);
 
 	std::vector<std::vector<PaintBlob>> objectsNearPos;
-	auto& objectsOnPos = PaintBlobs[std::floor(GetPos().x)][std::floor(GetPos().y)];
+	auto& objectsOnPos = PaintBlobs[(int)std::floor(GetPos().x)][(int)std::floor(GetPos().y)];
 	if (!movedSquares)
 		objectsNearPos.push_back(objectsOnPos);
-	objectsNearPos.push_back(PaintBlobs[std::floor(GetPos().x + 1)][std::floor(GetPos().y)]);
-	objectsNearPos.push_back(PaintBlobs[std::floor(GetPos().x - 1)][std::floor(GetPos().y)]);
-	objectsNearPos.push_back(PaintBlobs[std::floor(GetPos().x)][std::floor(GetPos().y + 1)]);
-	objectsNearPos.push_back(PaintBlobs[std::floor(GetPos().x)][std::floor(GetPos().y - 1)]);
-	auto& objectsOnOldPos = PaintBlobs[std::floor(oldWorldPos.x)][std::floor(oldWorldPos.y)];
+	objectsNearPos.push_back(PaintBlobs[(int)std::floor(GetPos().x + 1)][(int)std::floor(GetPos().y)]);
+	objectsNearPos.push_back(PaintBlobs[(int)std::floor(GetPos().x - 1)][(int)std::floor(GetPos().y)]);
+	objectsNearPos.push_back(PaintBlobs[(int)std::floor(GetPos().x)][(int)std::floor(GetPos().y + 1)]);
+	objectsNearPos.push_back(PaintBlobs[(int)std::floor(GetPos().x)][(int)std::floor(GetPos().y - 1)]);
+	auto& objectsOnOldPos =  PaintBlobs[(int)std::floor(oldWorldPos.x)][(int)std::floor(oldWorldPos.y)];
 	
 
-	for (int i = 0; i < objectsNearPos.size(); i++)
+	for (unsigned int i = 0; i < objectsNearPos.size(); i++)
 	{
-		for (int j = 0; j < objectsNearPos[i].size(); j++)
+		for (unsigned int j = 0; j < objectsNearPos[i].size(); j++)
 		{
 			if (!(objectsNearPos[i][j] == this[0]))
 			{
@@ -71,12 +71,12 @@ bool PaintBlob::MoveBy(Vec3 amount, std::unordered_map<int, std::unordered_map<i
 	
 	if (movedSquares)
 	{
-		for (int i = 0; i < objectsOnOldPos.size(); i++)
+		for (unsigned int i = 0; i < objectsOnOldPos.size(); i++)
 		{
 			if (std::floor(objectsOnOldPos[i].GetPos().x) != std::floor(oldWorldPos.x) || std::floor(objectsOnOldPos[i].GetPos().y) != std::floor(oldWorldPos.y))
 			{
-				PaintBlobs[std::floor(GetPos().x)][std::floor(GetPos().y)].push_back(objectsOnOldPos[i]);
-				PaintBlobs[std::floor(oldWorldPos.x)][std::floor(oldWorldPos.y)].erase(objectsOnOldPos.begin() + i);
+				PaintBlobs[(int)std::floor(GetPos().x)][(int)std::floor(GetPos().y)].push_back(objectsOnOldPos[i]);
+				PaintBlobs[(int)std::floor(oldWorldPos.x)][(int)std::floor(oldWorldPos.y)].erase(objectsOnOldPos.begin() + i);
 				i--;
 			}
 		}

@@ -49,7 +49,7 @@ public:
 	inline bool NeedChangePos() { return changePos; }
 	inline glm::vec3 GetSpeed() { return m_Speed; }
 	inline float GetRotationChange() { return m_RotationChange; }
-	inline float GetChangeZoom() { return m_ScrollOffset; }
+	inline double GetChangeZoom() { return m_ScrollOffset; }
 	inline double GetMousePosX() { return m_MousePosX; }
 	inline double GetMousePosY() { return m_MousePosY; }
 	inline bool GetLeftMouseUp() { return m_LeftMouseUp; }

@@ -83,9 +83,6 @@ int main(void)
         // set up world
         World world(window);
         Renderer renderer(world.GetBlockSize());
-        // set up inputs
-        Input input(window, world.IS3D);
-        world.SetInput(&input);
 
         double lastTimeRendered = glfwGetTime();
         double lastTimeUpdatedWorld = glfwGetTime();

@@ -18,13 +18,13 @@ Vec4 CombineColors(std::vector<PaintBlob*> allColors)
 		return { 0,0,0,0 };
 	
 	Vec4 newColor = { 0,0,0,0 };
-	for (int i = 0; i < allColors.size(); i++)
+	for (unsigned int i = 0; i < allColors.size(); i++)
 	{
 		std::cout << "Before color is " << newColor.c << " " << newColor.m << " " << newColor.y << " " << newColor.k << std::endl; // this is wrong
 		newColor = newColor + allColors[i]->GetTile()->GetColor();
 		std::cout << "After color is " << newColor.c << " " << newColor.m << " " << newColor.y << " " << newColor.k << std::endl; // this is wrong
 	}
-	newColor = newColor / allColors.size();
+	newColor = newColor / (float) allColors.size();
 	return newColor;
 }
 
@@ -38,7 +38,7 @@ void PaintBlobCombiner::Update()
 			
 			std::vector<PaintBlob*> allColors;
 			if (PaintBlob* p1 = dynamic_cast<PaintBlob*>(o1.get())) {
-				for (int i = 0; i < getObjectsInInv().size(); i++)
+				for (unsigned int i = 0; i < getObjectsInInv().size(); i++)
 				{
 					if (PaintBlob* p2 = dynamic_cast<PaintBlob*>(GetObjectAt(i).get())) {
 						allColors.push_back(p2);
@@ -69,7 +69,7 @@ void PaintBlobCombiner::Render()
 
 bool PaintBlobCombiner::AllowNewItem(bool StartAtHalf)
 {
-	if (getObjectsInInv().size() < m_NumToCombine)
+	if (getObjectsInInv().size() < (unsigned int) m_NumToCombine)
 		return true;
 	return false;
 }

@@ -12,11 +12,11 @@ Belt::Belt(WorldTile tile, Vec3 pos, int size, Direction direction, BeltType bel
 	SetDirection(direction);
 
 	BELT_SPEED = (1.0f / FramesTillMovedFullTile) * (GetBeltTypeSpeed());
-	setMaxItemMoves((float)FramesTillMovedFullTile / ((GetBeltTypeSpeed() * GetBeltTypeSpeed()))); // fix this equation. Might be the .5 thing
+	setMaxItemMoves((int)((float)FramesTillMovedFullTile / ((GetBeltTypeSpeed() * GetBeltTypeSpeed())))); // fix this equation. Might be the .5 thing
 	
-	if (beltType == BeltTypeYellow) { m_ArrowTile = TileType(TileTypeYellowArrow); SetMinSpaceBetween(getMaxItemMoves() / 5); }
-	if (beltType == BeltTypeOrange) { m_ArrowTile = TileType(TileTypeOrangeArrow); SetMinSpaceBetween((getMaxItemMoves() / 5) + 1); }
-	if (beltType == BeltTypeRed)	{ m_ArrowTile = TileType(TileTypeRedArrow	); SetMinSpaceBetween((getMaxItemMoves() / 5) + 1); }
+	if (beltType == BeltTypeYellow) { m_ArrowTile = TileType(TileTypeYellowArrow); SetMinSpaceBetween((float)getMaxItemMoves() / 5); }
+	if (beltType == BeltTypeOrange) { m_ArrowTile = TileType(TileTypeOrangeArrow); SetMinSpaceBetween((float)(getMaxItemMoves() / 5) + 1); }
+	if (beltType == BeltTypeRed)	{ m_ArrowTile = TileType(TileTypeRedArrow	); SetMinSpaceBetween((float)(getMaxItemMoves() / 5) + 1); }
 }
 
 void Belt::SetUpNextAndLastObject(std::unordered_map<int, std::unordered_map<int, std::shared_ptr<Belt>>>& AllOtherBelts, 
@@ -61,7 +61,7 @@ void Belt::Update()
 
 	if (getObjectsInInv().size() == 0)
 		m_LastItemMoved = true;
-	for (int i = 0; i < getObjectsInInv().size(); i++)
+	for (unsigned int i = 0; i < getObjectsInInv().size(); i++)
 	{
 		if (getObjectNumMoves()[i] == getMaxItemMoves()) // this can only happen with the first element
 		{
@@ -94,7 +94,7 @@ void Belt::Update()
 				// make sure the next belt doesnt have an object too close
 				bool move = true;
 				if (getNextObject() != NULL && getNextObject()->getObjectNumMoves().size() != 0) {
-					int spot = getNextObject()->getMinSpaceBetween();
+					int spot = (int)getNextObject()->getMinSpaceBetween();
 					if (getNextObject()->GetTile()->GetType() == TileTypeTurnBelt || getNextObject()->GetTile()->GetType() == TileTypeTurnBeltBackwards)
 						spot += getMaxItemMoves() / 2;
 					if ((getMaxItemMoves() + getNextObject()->getObjectNumMoves()[getNextObject()->getObjectNumMoves().size() - 1]) - getObjectNumMoves()[0] <= spot)
@@ -144,7 +144,7 @@ bool Belt::AllowNewItem(bool StartAtHalf)
 {
 	if (getObjectsInInv().size() == 0)
 		return true;
-	int spot = getMinSpaceBetween();
+	int spot = (int)getMinSpaceBetween();
 	if (StartAtHalf/* || GetTile()->GetType() == TileTypeTurnBelt || GetTile()->GetType() == TileTypeTurnBeltBackwards*/)
 		spot += getMaxItemMoves() / 2;
 	if (getObjectNumMoves()[getObjectNumMoves().size() - 1] >= spot)
@@ -155,8 +155,8 @@ bool Belt::AllowNewItem(bool StartAtHalf)
 std::shared_ptr<GameObject> Belt::GetNextOrLastObject(bool isLastBelt, std::unordered_map<int, std::unordered_map<int, std::shared_ptr<Belt>>>& AllOtherBelts,
 	std::unordered_map<int, std::unordered_map<int, std::shared_ptr<GameObject>>>& worldGameObjects)
 {
-	float xPos = GetPos().x;
-	float yPos = GetPos().y;
+	int xPos = (int)GetPos().x;
+	int yPos = (int)GetPos().y;
 	
 	if (GetTile()->GetType() == TileTypeStraightBelt || !isLastBelt) // do this if we are a straight belt or looking for the next belt
 	{
@@ -256,7 +256,7 @@ void Belt::MovePaintBlob(int pos)
 	getObjectNumMoves()[pos]++;
 	Vec3 moveTo = { 0,0,1 };
 	// move by direction and speed
-	float offset; float direction;
+	float offset;
 	if (GetDirection() == DirectionUp)
 		moveTo.y = BELT_SPEED * (GetBeltTypeSpeed());
 	else if (GetDirection() == DirectionDown)
@@ -268,7 +268,6 @@ void Belt::MovePaintBlob(int pos)
 	
 
 	// move to middle of the belt on turns 
-
 	float toCheck = .5;
 	if (GetDirection() == DirectionUp || GetDirection() == DirectionDown)
 	{

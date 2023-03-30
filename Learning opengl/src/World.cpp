@@ -9,6 +9,8 @@ World::World(GLFWwindow* window)
 {
     if (IS3D)
         m_Position.z = -350;
+    // set up inputs
+    SetInput();
 }
 
 World::World(GLFWwindow* window, glm::vec3 position)
@@ -16,6 +18,8 @@ World::World(GLFWwindow* window, glm::vec3 position)
 {
     if (IS3D)
         m_Position.z = -350;
+    // set up inputs
+    SetInput();
 }
 
 World::~World()
@@ -24,7 +28,7 @@ World::~World()
 
 int World::GetBeltDirectionAt(int x, int y)
 {
-    std::shared_ptr<Belt> belt = GetBeltAtPos(x, y);
+    std::shared_ptr<Belt> belt = GetBeltAtPos((float)x, (float)y);
     if (belt != NULL)
     {
         return belt->GetDirection();
@@ -48,7 +52,7 @@ bool World::AddPaintBlob(Vec4 BlobColor, Vec3 pos, float size)
     }
 
     // there is no blob there
-    std::shared_ptr<PaintBlob> paintBlob(new PaintBlob(pos + .5f, size * m_BlockSize, BlobColor));
+    std::shared_ptr<PaintBlob> paintBlob(new PaintBlob(pos + .5f, (int)(size * m_BlockSize), BlobColor));
     if (GetBeltAtPos(pos.x, pos.y) != NULL)
     {
         if (GetBeltAtPos(pos.x, pos.y)->AllowNewItem(true))
@@ -89,8 +93,8 @@ bool World::AddBelt(BeltType beltColor, Vec3 pos, Direction direction)
 
     if (direction == DirectionUp)
     {
-        int leftBelt = GetBeltDirectionAt(pos.x - 1, pos.y);
-        int rightBelt = GetBeltDirectionAt(pos.x + 1, pos.y);
+        int leftBelt = GetBeltDirectionAt((int)pos.x - 1, (int)pos.y);
+        int rightBelt = GetBeltDirectionAt((int)pos.x + 1, (int)pos.y);
         if (leftBelt == DirectionRight)
         {
             belt->GetTile()->SetType(TileTypeTurnBelt);
@@ -102,8 +106,8 @@ bool World::AddBelt(BeltType beltColor, Vec3 pos, Direction direction)
     }
     if (direction == DirectionRight)
     {
-        int upBelt = GetBeltDirectionAt(pos.x, pos.y + 1);
-        int downBelt = GetBeltDirectionAt(pos.x, pos.y - 1);
+        int upBelt = GetBeltDirectionAt((int)pos.x, (int)pos.y + 1);
+        int downBelt = GetBeltDirectionAt((int)pos.x, (int)pos.y - 1);
         if (upBelt == DirectionDown)
         {
             belt->GetTile()->SetType(TileTypeTurnBeltBackwards);
@@ -117,8 +121,8 @@ bool World::AddBelt(BeltType beltColor, Vec3 pos, Direction direction)
     }
     if (direction == DirectionDown)
     {
-        int rightBelt = GetBeltDirectionAt(pos.x + 1, pos.y);
-        int leftBelt = GetBeltDirectionAt(pos.x - 1, pos.y);
+        int rightBelt = GetBeltDirectionAt((int)pos.x + 1, (int)pos.y);
+        int leftBelt = GetBeltDirectionAt((int)pos.x - 1, (int)pos.y);
         if (rightBelt == DirectionLeft)
         {
             belt->GetTile()->SetType(TileTypeTurnBelt);
@@ -131,9 +135,9 @@ bool World::AddBelt(BeltType beltColor, Vec3 pos, Direction direction)
     }
     if (direction == DirectionLeft)
     {
-        int downBelt = GetBeltDirectionAt(pos.x, pos.y - 1);
+        int downBelt = GetBeltDirectionAt((int)pos.x, (int)pos.y - 1);
 
-        int upBelt = GetBeltDirectionAt(pos.x, pos.y + 1);
+        int upBelt = GetBeltDirectionAt((int)pos.x, (int)pos.y + 1);
         if (downBelt == DirectionUp)
         {
             belt->GetTile()->SetType(TileTypeTurnBeltBackwards);
@@ -145,18 +149,18 @@ bool World::AddBelt(BeltType beltColor, Vec3 pos, Direction direction)
         }
     }
     // remove what ever is there and add belt if it is not the same
-    if (m_Belts[std::floor(belt->GetPos().x)][std::floor(belt->GetPos().y)] != NULL)
+    if (m_Belts[(int)std::floor(belt->GetPos().x)][(int)std::floor(belt->GetPos().y)] != NULL)
     {
-        std::shared_ptr<Belt> otherBelt = m_Belts[std::floor(belt->GetPos().x)][std::floor(belt->GetPos().y)];
+        std::shared_ptr<Belt> otherBelt = m_Belts[(int)std::floor(belt->GetPos().x)][(int)std::floor(belt->GetPos().y)];
         if (otherBelt->GetBeltTypeSpeed() == belt->GetBeltTypeSpeed() && otherBelt->GetDirection() == belt->GetDirection())
         {
 			return false;
 		}
-        m_Belts[std::floor(belt->GetPos().x)][std::floor(belt->GetPos().y)] = NULL;
+        m_Belts[(int)std::floor(belt->GetPos().x)][(int)std::floor(belt->GetPos().y)] = NULL;
     }
-    if (m_PaintBlobs[std::floor(belt->GetPos().x)][std::floor(belt->GetPos().y)] != NULL)
+    if (m_PaintBlobs[(int)std::floor(belt->GetPos().x)][(int)std::floor(belt->GetPos().y)] != NULL)
     {
-       m_PaintBlobs[std::floor(belt->GetPos().x)][std::floor(belt->GetPos().y)] = NULL;// this will only be blobs because of check at beginning of func
+       m_PaintBlobs[(int)std::floor(belt->GetPos().x)][(int)std::floor(belt->GetPos().y)] = NULL;// this will only be blobs because of check at beginning of func
     }
     AddBeltAtPos(belt, belt->GetPos().x, belt->GetPos().y);
     belt->SetUpNextAndLastObject(m_Belts, m_GameObjects);
@@ -232,11 +236,11 @@ void World::OnUpdate()
     int WIDTH, HEIGHT;
     glfwGetWindowSize(m_Window, &WIDTH, &HEIGHT);
     
-    float zoomedWidth = (WIDTH / 2) + (m_ZoomAmount * (WIDTH / 20));
-    float zoomedHeight = (HEIGHT / 2) + (m_ZoomAmount * (HEIGHT / 20));
+    float zoomedWidth = (float)((WIDTH / 2) + (m_ZoomAmount * (WIDTH / 20)));
+    float zoomedHeight = (float)((HEIGHT / 2) + (m_ZoomAmount * (HEIGHT / 20)));
 
-    float mousePosX = ((((m_Input->GetMousePosX() / (WIDTH / 2)) * zoomedWidth) - zoomedWidth) - m_Position.x) / m_BlockSize;
-    float mousePosY = -1 * ((((m_Input->GetMousePosY() / (HEIGHT / 2)) * zoomedHeight) - zoomedHeight) + m_Position.y) / m_BlockSize;
+    float mousePosX = (float)(((((m_Input->GetMousePosX() / (WIDTH / 2)) * zoomedWidth) - zoomedWidth) - m_Position.x) / m_BlockSize);
+    float mousePosY = (float)(-1 * ((((m_Input->GetMousePosY() / (HEIGHT / 2)) * zoomedHeight) - zoomedHeight) + m_Position.y) / m_BlockSize);
 
     if (mousePosX < 0) mousePosX = floor(mousePosX);
     else mousePosX = floor(mousePosX);
@@ -249,11 +253,11 @@ void World::OnUpdate()
         {
             case(1): AddBelt((BeltType)std::max(std::min((BeltTypeYellow + m_Input->m_SecondNumPressed - 1), 2), 0), { mousePosX, mousePosY, 1 }, (Direction)m_Input->GetDirection()); break;
             case(2): AddPaintBlobCombiner(Vec3{ mousePosX, mousePosY,1 }, (Direction)m_Input->GetDirection(), std::max(std::min(m_Input->m_SecondNumPressed+1, 3), 2));break;
-            case(3): AddPaintBlob(Vec4{ 0.0f, 1.0f, 1.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2); break;
-            case(4): AddPaintBlob(Vec4{ 1.0f, 0.0f, 1.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2); break;
-            case(5): AddPaintBlob(Vec4{ 1.0f, 1.0f, 0.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2); break;
-            case(6): AddPaintBlob(Vec4{ 0.0f, 0.0f, 0.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2); break;
-            case(7): AddPaintBlob(Vec4{ .6f, .4f, .4f, 1.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2); break;
+            case(3): AddPaintBlob(Vec4{ 0.0f, 1.0f, 1.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2f); break;
+            case(4): AddPaintBlob(Vec4{ 1.0f, 0.0f, 1.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2f); break;
+            case(5): AddPaintBlob(Vec4{ 1.0f, 1.0f, 0.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2f); break;
+            case(6): AddPaintBlob(Vec4{ 0.0f, 0.0f, 0.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2f); break;
+            case(7): AddPaintBlob(Vec4{ .6f, .4f, .4f, 1.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2f); break;
             default: std::cout << "No tile for that number yet" << std::endl;
         }
     }
@@ -282,7 +286,7 @@ void World::OnUpdate()
     }
 
     // update the heads. This will update every belt in that chain
-    for (int i = 0; i < heads.size(); i++)
+    for (unsigned int i = 0; i < heads.size(); i++)
     {
         if (heads[i]->getNextObject() == NULL)
             heads[i]->Update(); // this will call all the belts in the chain to update
@@ -347,21 +351,21 @@ bool World::BeltCanBeMade(Vec3 pos, BeltType beltColor, Direction direction)
 
 void World::DeleteAllAtPos(Vec3 pos)
 {
-    m_PaintBlobs[std::floor(pos.x)][std::floor(pos.y)] = NULL;
-    m_Belts[std::floor(pos.x)][std::floor(pos.y)] = NULL;
+    m_PaintBlobs[(int)std::floor(pos.x)][(int)std::floor(pos.y)] = NULL;
+    m_Belts[(int)std::floor(pos.x)][(int)std::floor(pos.y)] = NULL;
     if (GetGameObjectAtPos(pos.x, pos.y) != NULL)
     {
         std::shared_ptr<GameObject> objectHere = GetGameObjectAtPos(pos.x, pos.y);
         if (!objectHere->GetIsBasePart())
         {
-            for (int j = 0; j < objectHere->GetOtherParts().size(); j++)
+            for (unsigned int j = 0; j < objectHere->GetOtherParts().size(); j++)
             {
-                m_GameObjects[objectHere->GetOtherParts()[j]->GetPos().x][objectHere->GetOtherParts()[j]->GetPos().y] = NULL;
+                m_GameObjects[(int)objectHere->GetOtherParts()[j]->GetPos().x][(int)objectHere->GetOtherParts()[j]->GetPos().y] = NULL;
             }
         }
         else {
-            m_GameObjects[objectHere->GetParentObject()->GetPos().x][objectHere->GetParentObject()->GetPos().y] = NULL;
+            m_GameObjects[(int)objectHere->GetParentObject()->GetPos().x][(int)objectHere->GetParentObject()->GetPos().y] = NULL;
         }
     }
-    m_GameObjects[std::floor(pos.x)][std::floor(pos.y)] = NULL;
+    m_GameObjects[(int)std::floor(pos.x)][(int)std::floor(pos.y)] = NULL;
 }

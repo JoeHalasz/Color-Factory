@@ -41,8 +41,8 @@ static std::vector<Vertex> CreateQuad(float textureID, float size, Direction dir
 
     if (textureID == TileTypePaintBlob || textureID == TileTypePaintBlobShading)
     {   // if its a paint blob
-        x = (int)x;
-        y = (int)y;
+        x = (float)(int)x;
+        y = (float)(int)y;
         x -= (size/2.0f);
         y -= (size/2.0f);
     }
@@ -155,18 +155,18 @@ void Renderer::Draw() const
 
 void Renderer::AddQuad(PaintBlob& PaintBlob)
 {
-    m_AllQuads.push_back(CreateQuad(PaintBlob.GetTile()->GetType(), PaintBlob.GetSize(), PaintBlob.GetDirection(), m_TileSize, PaintBlob.GetPos()* m_TileSize, PaintBlob.ConvertToRGB()));
+    m_AllQuads.push_back(CreateQuad((float)PaintBlob.GetTile()->GetType(), (float)PaintBlob.GetSize(), PaintBlob.GetDirection(), (float)m_TileSize, PaintBlob.GetPos()* (float)m_TileSize, PaintBlob.ConvertToRGB()));
 }
 
 void Renderer::AddQuad(Belt& belt)
 {
-    m_AllQuads.push_back(CreateQuad(belt.GetTile()->GetType(), belt.GetSize(), belt.GetDirection(), m_TileSize, belt.GetPos() * m_TileSize, belt.GetTile()->GetColor()));
+    m_AllQuads.push_back(CreateQuad((float)belt.GetTile()->GetType(), (float)belt.GetSize(), belt.GetDirection(), (float)m_TileSize, belt.GetPos() * (float)m_TileSize, belt.GetTile()->GetColor()));
 }
 
 
 void Renderer::AddQuad(float textureID, float size, Direction direction, Vec3 pos, Vec4 color)
 {
-    m_AllQuads.push_back(CreateQuad(textureID, size, direction, m_TileSize, pos * size, color));
+    m_AllQuads.push_back(CreateQuad(textureID, size, direction, (float)m_TileSize, pos * size, color));
 }
 
 void Renderer::AddQuadOffset(float textureID, float size, Direction direction, Vec3 pos, float tileSize, Vec4 color)
@@ -177,18 +177,18 @@ void Renderer::AddQuadOffset(float textureID, float size, Direction direction, V
 
 void Renderer::AddQuad(std::shared_ptr<GameObject> gameObject, Vec4 color)
 {
-    m_AllQuads.push_back(CreateQuad(gameObject->GetTile()->GetType(), gameObject->GetSize(), gameObject->GetDirection(), m_TileSize, gameObject->GetPos() * m_TileSize, color));
+    m_AllQuads.push_back(CreateQuad((float)gameObject->GetTile()->GetType(), (float)gameObject->GetSize(), gameObject->GetDirection(), (float)m_TileSize, gameObject->GetPos() * (float)m_TileSize, color));
 }
 
 void Renderer::DrawDrawer(World& world, int width, int height)
 {
-    float drawerBlockSize = world.GetBlockSize();
+    float drawerBlockSize = (float)world.GetBlockSize();
     float itemBlockSize = world.GetBlockSize() * .75f;
 
     float startDrawX = -1 * (width/2.0f);
     float startDrawY = -1 * (height/2.0f);
 
-    float percentOffset = .2;
+    float percentOffset = .2f;
 
     startDrawX *= (1.0f - percentOffset);
     startDrawY *= (1.0f - percentOffset);
@@ -204,7 +204,7 @@ void Renderer::DrawDrawer(World& world, int width, int height)
     AddQuadOffset(TileTypeStraightBelt, itemBlockSize, DirectionUp, Vec3{ startDrawX, startDrawY, 1 }, drawerBlockSize);
     AddQuadOffset(TileTypeYellowArrow, itemBlockSize, DirectionUp, Vec3{startDrawX, startDrawY, 1}, drawerBlockSize);
     if (world.GetInput()->GetLastNumPressed() == 1) 
-        AddQuadOffset(TileTypeYellowArrow + (BeltType)(std::max(std::min((BeltTypeYellow + world.GetInput()->m_SecondNumPressed - 1), 2), 0)), itemBlockSize, DirectionUp, Vec3{startDrawX, startDrawY, 1}, drawerBlockSize);
+        AddQuadOffset((float)TileTypeYellowArrow + (BeltType)(std::max(std::min((BeltTypeYellow + world.GetInput()->m_SecondNumPressed - 1), 2), 0)), itemBlockSize, DirectionUp, Vec3{startDrawX, startDrawY, 1}, drawerBlockSize);
     AddQuadOffset(TileTypePaintBlobContainer1, itemBlockSize, DirectionUp, Vec3{ startDrawX + 1, startDrawY, 1 }, drawerBlockSize);
 
     if (world.GetInput()->GetLastNumPressed() > 0) // highlight pressed number
@@ -244,28 +244,28 @@ void Renderer::DrawWorld(World& world, int width, int height)
     int size = world.GetBlockSize();
     std::vector<glm::vec3> OnScreenPositions;
 
-    float zoomedWidth = (width / 2) + (world.GetZoomAmount() * (width / 20));
-    float zoomedHeight = (height / 2) + (world.GetZoomAmount() * (height / 20));
+    float zoomedWidth = (float)((width / 2) + (world.GetZoomAmount() * (width / 20)));
+    float zoomedHeight = (float)((height / 2) + (world.GetZoomAmount() * (height / 20)));
 
-    int startDrawX = (-1 * ((world.GetPosition().x / size) + (zoomedWidth / size))) - 1;
-    int startDrawY = (-1 * ((world.GetPosition().y / size) + (zoomedHeight / size))) - 1;
+    int startDrawX = (int)(-1 * ((world.GetPosition().x / size) + (zoomedWidth / size))) - 1;
+    int startDrawY = (int)(-1 * ((world.GetPosition().y / size) + (zoomedHeight / size))) - 1;
 
-    int amountToDrawX = (zoomedWidth / size) * 2;
-    int amountToDrawY = (zoomedHeight / size) * 2;
+    int amountToDrawX = (int)(zoomedWidth / size) * 2;
+    int amountToDrawY = (int)(zoomedHeight / size) * 2;
 
     int extraQuads = 3;
 
-    for (float x = startDrawX; x < startDrawX + amountToDrawX + extraQuads; x++) {
-        for (float y = startDrawY; y < startDrawY + amountToDrawY + extraQuads; y++) {
+    for (float x = (float)startDrawX; x < startDrawX + amountToDrawX + extraQuads; x++) {
+        for (float y = (float)startDrawY; y < startDrawY + amountToDrawY + extraQuads; y++) {
             OnScreenPositions.push_back(glm::vec3(x, y, 1));
-            AddQuad(TileTypeBackgroundDark, size, DirectionUp, Vec3{ x, y, 1 });
+            AddQuad(TileTypeBackgroundDark, (float)size, DirectionUp, Vec3{ x, y, 1 });
         }
     }
    
 
     std::vector<std::shared_ptr<GameObject>> blobsOnBelts;
     // draw world tiles
-    for (int i = 0; i < OnScreenPositions.size(); i++)
+    for (unsigned int i = 0; i < OnScreenPositions.size(); i++)
     {
         // draw belt if it exists
         std::shared_ptr<Belt> belt = world.GetBeltAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
@@ -273,17 +273,17 @@ void Renderer::DrawWorld(World& world, int width, int height)
         { // there is a belt on this square
             AddQuad(belt);
             if (belt->GetTile()->GetType() == TileTypeStraightBelt) // draw arrow if it is not a turn belt
-                AddQuad(belt->GetArrowTile(), size, belt->GetDirection(), belt->GetArrowPos());
+                AddQuad((float)belt->GetArrowTile(), (float)size, belt->GetDirection(), belt->GetArrowPos());
 
             // add objects on the belt to draw to the list of things to draw
-            for (int i = 0; i < belt->GetAllObjects().size(); i++)
+            for (unsigned int i = 0; i < belt->GetAllObjects().size(); i++)
             {
                 blobsOnBelts.push_back(belt->GetAllObjects()[i]);
             }
         }
     }
     // draw the rest of the world except paint blobs on belts
-    for (int i = 0; i < OnScreenPositions.size(); i++) {
+    for (unsigned int i = 0; i < OnScreenPositions.size(); i++) {
 
         // draw paint blob combiners
         std::shared_ptr<GameObject> gameObject = world.GetGameObjectAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
@@ -303,7 +303,7 @@ void Renderer::DrawWorld(World& world, int width, int height)
     }
 
     // draw the belt paint blobs
-    for (int i = 0; i < blobsOnBelts.size(); i++)
+    for (unsigned int i = 0; i < blobsOnBelts.size(); i++)
     {
         if (PaintBlob* b = dynamic_cast<PaintBlob*>(blobsOnBelts[i].get())) {
             AddQuad(blobsOnBelts[i], b->ConvertToRGB());
@@ -359,9 +359,9 @@ void Renderer::OnRender(int width, int height, World& world, bool beenOneSecond,
 
     DrawWorld(world, width, height);
 
-    float v1 = -1 * (width / 2) - (world.GetZoomAmount() * (width / 20));
+    float v1 = (float)(-1 * (width / 2) - (world.GetZoomAmount() * (width / 20)));
     float v2 = -1 * v1;
-    float v3 = -1 * (height / 2) - (world.GetZoomAmount() * (height / 20));
+    float v3 = (float)(-1 * (height / 2) - (world.GetZoomAmount() * (height / 20)));
     float v4 = -1 * v3;
 
     glm::mat4 proj = glm::ortho(v1, v2, v3, v4, -1.0f, 1.0f);
@@ -389,9 +389,9 @@ void Renderer::OnRender(int width, int height, World& world, bool beenOneSecond,
 
     // draw drawer
     DrawDrawer(world, width, height);
-    v1 = -1 * (width / 2);
+    v1 = (float)(-1 * (width / 2));
     v2 = -1 * v1;
-    v3 = -1 * (height / 2);
+    v3 = (float)(-1 * (height / 2));
     v4 = -1 * v3;
     mvp = glm::ortho(v1, v2, v3, v4, -1.0f, 1.0f);
 

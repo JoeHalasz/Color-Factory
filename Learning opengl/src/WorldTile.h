@@ -26,9 +26,9 @@ enum TileType
 class WorldTile
 {
 private:
-	TileType m_TileType;
+	TileType m_TileType = TileTypePaintBlob;
 	int m_ConnectedCount = 0;
-	Vec4 m_Color;
+	Vec4 m_Color = { 0 };
 
 public:
 
