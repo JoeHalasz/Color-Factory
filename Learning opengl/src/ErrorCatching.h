@@ -3,7 +3,7 @@
 #include <GL/glew.h>
 #include <iostream>
 
-#define ASSERT(x) if (!(x)) __debugbreak();
+#define ASSERT(x) if (!(x)) {std::cout << "SOMETHING BROKE" << std::endl; __debugbreak(); };
 #define GLCall(x) GLClearError();\
     x;\
     ASSERT(GLLogCall(#x, __FILE__, __LINE__))

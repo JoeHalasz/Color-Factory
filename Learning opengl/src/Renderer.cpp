@@ -123,20 +123,13 @@ Renderer::Renderer(int tileSize)
     m_Shader = std::make_unique<Shader>("res/shaders/vertex.shader", "res/shaders/fragment.shader");
     m_Shader->Bind();
 
-    m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/paint blob/paint blob.png"));
-    m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/paint blob/paint blob shading.png"));
-    m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/background/floortile.png"));
-    m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/background/floortile dark.png"));
-    m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/belts/straight belt.png"));
-    m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/belts/turn belt.png"));
-    m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/belts/turn belt backwards.png"));
-    m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/belts/yellow arrow.png"));
-    m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/belts/orange arrow.png"));
-    m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/belts/red arrow.png"));
-    m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/machines/PaintBlobCombiner1.png"));
-    m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/machines/PaintBlobCombiner2.png"));
-    m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/drawer/drawer background.png"));
-    m_Textures.push_back(std::make_unique<Texture>("res/textures/game textures png/drawer/drawer background selected.png"));
+    for (int i = 0; i < TileTypeNumTileTypes; i++)
+    {
+        char fileName[128] = "res/textures/game textures png/";
+        strcat_s(fileName, WorldTile::TileTypeToString((TileType)i));
+        m_Textures.push_back(std::make_unique<Texture>(fileName));
+    }
+
 }
 
 void Renderer::Clear() const
@@ -258,7 +251,11 @@ void Renderer::DrawWorld(World& world, int width, int height)
     for (float x = (float)startDrawX; x < startDrawX + amountToDrawX + extraQuads; x++) {
         for (float y = (float)startDrawY; y < startDrawY + amountToDrawY + extraQuads; y++) {
             OnScreenPositions.push_back(glm::vec3(x, y, 1));
-            AddQuad(TileTypeBackgroundDark, (float)size, DirectionUp, Vec3{ x, y, 1 });
+            std::shared_ptr<WorldBackgroundTile> tile = world.GetWorldBackgroundTileAtPos(x, y);
+            if (tile != nullptr)
+                AddQuad(tile->GetTileType(), (float)size, tile->GetDirection(), Vec3{x, y, 1});
+            else
+                AddQuad(TileTypeGrass, (float)size, DirectionUp, Vec3{x, y, 1});
         }
     }
    

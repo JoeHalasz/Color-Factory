@@ -87,6 +87,9 @@
     <ClCompile Include="MergeBelt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\WorldBackgroundTile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shaders\vertex.shader" />
@@ -1448,6 +1451,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MergeBelt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\WorldBackgroundTile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

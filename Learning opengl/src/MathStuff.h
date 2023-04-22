@@ -5,6 +5,7 @@
 
 
 
+struct Vec2 { float x, y; };
 struct Vec3 
 { float x, y, z; 
     inline Vec3 operator*(float a) {
@@ -22,11 +23,14 @@ struct Vec3
     inline bool operator==(Vec3 a) {
         { return x == a.x && y == a.y && z == a.z; };
     }
+    inline Vec3 operator+(Vec2 a) {
+        std::cout << " HERE " << x + a.x << " " << y + a.y << z << std::endl;
+        return {x + a.x, y + a.y, z};
+	}
     inline Vec3 Round() {
         return Vec3{ std::ceilf(x * 100.0f) / 100.0f , std::ceilf(y * 100.0f) / 100.0f, std::ceilf(z * 100.0f) / 100.0f };
     }
 };
-struct Vec2 { float x, y; };
 struct Vec4 
 { float c, m, y, k; 
     inline Vec4 operator+(Vec4 a)

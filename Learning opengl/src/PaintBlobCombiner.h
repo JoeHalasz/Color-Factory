@@ -12,7 +12,7 @@ private:
 	
 public:
 	PaintBlobCombiner(Vec3 pos, int size, int numInputs, Direction direction=DirectionUp, 
-		bool isBasePart = true, TileType type = TileTypePaintBlobContainer1);
+	bool isBasePart = true, TileType type = TileTypePaintBlobContainer1);
 	void Update();
 	void Render();
 	bool AllowNewItem(bool StartAtHalf = false);

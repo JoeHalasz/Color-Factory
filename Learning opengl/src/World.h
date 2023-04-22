@@ -15,6 +15,7 @@
 #include <cmath>
 
 #include "PaintBlobCombiner.h"
+#include "WorldBackgroundTile.h"
 
 class World
 {
@@ -36,10 +37,14 @@ private:
 	std::unordered_map<int, std::unordered_map<int, std::shared_ptr<PaintBlob>>> m_PaintBlobs;
 	std::unordered_map<int, std::unordered_map<int, std::shared_ptr<Belt>>> m_Belts;
 	std::unordered_map<int, std::unordered_map<int, std::shared_ptr<GameObject>>> m_GameObjects;
+	// make a list of worldbackgroundtiles and use it on line 255 in renderer.h
+	std::unordered_map<int, std::unordered_map<int, std::shared_ptr<WorldBackgroundTile>>> m_WorldBackgroundTiles;
 
 	bool AddBelt(BeltType beltColor, Vec3 pos, Direction direction);
 	bool AddPaintBlob(Vec4 BlobColor, Vec3 pos, float size);
 	bool AddPaintBlobCombiner(Vec3 pos, Direction direction, int numInputs);
+	bool AddIndoorArea(IndoorArea lastArea, Direction directionToCreate, bool isFirst);
+	bool CheckAddBackgroundTile(Vec3 pos);
 
 public:
 	bool IS3D = false;
@@ -70,5 +75,8 @@ public:
 
 	inline std::shared_ptr<GameObject> GetGameObjectAtPos(float x, float y) { return m_GameObjects[(int)std::floor(x)][(int)std::floor(y)]; }
 	inline void AddGameObjectAtPos(std::shared_ptr <GameObject> newObject, float x, float y) { m_GameObjects[(int)std::floor(x)][(int)std::floor(y)] = newObject; }
+
+	inline std::shared_ptr<WorldBackgroundTile> GetWorldBackgroundTileAtPos(float x, float y) { return m_WorldBackgroundTiles[(int)std::floor(x)][(int)std::floor(y)]; }
+	inline void AddWorldBackgroundTileAtPos(std::shared_ptr <WorldBackgroundTile> newObject, float x, float y) { m_WorldBackgroundTiles[(int)std::floor(x)][(int)std::floor(y)] = newObject; }
 
 };

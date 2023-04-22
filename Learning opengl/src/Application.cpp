@@ -24,7 +24,7 @@
 
 int main(void)
 {
-    double WORLDTICKSPERSECOND = 120.0;
+    double WORLDTICKSPERSECOND = 60.0;
     GLFWwindow* window;
 
     /* Initialize the library */
@@ -40,7 +40,7 @@ int main(void)
 
     int WIDTH, HEIGHT;
 
-    if (0) // fullscreen
+    if (1) // fullscreen
     {
         WIDTH = mode->width;
         HEIGHT = mode->height;
@@ -122,7 +122,13 @@ int main(void)
             {
                 currentTime = glfwGetTime();
                 // inputs and update world
-                world.OnUpdate();
+                //try {
+                    world.OnUpdate();
+                //}
+                //catch (const std::exception& e) {
+                //    std::cout << "EXCEPTION IN WORLD UPDATE" << std::endl;
+				//	std::cout << e.what() << std::endl;
+				//}
                 lastTimeUpdatedWorld += (1.0/ WORLDTICKSPERSECOND);
                 numTimesUpdated++;
                 if (numTimesUpdated > 10)
@@ -132,8 +138,13 @@ int main(void)
                 }
             }
             ImGui_ImplGlfwGL3_NewFrame();
-            renderer.OnRender(WIDTH, HEIGHT, world, beenOneSecond, printStuff);
-
+            //try {
+                renderer.OnRender(WIDTH, HEIGHT, world, beenOneSecond, printStuff);
+            //}
+            //catch (const std::exception& e) {
+			//	std::cout << "EXCEPTION IN RENDER" << std::endl;
+            //    std::cout << e.what() << std::endl;
+            //}
             glfwSwapBuffers(window);
 
             glfwPollEvents();

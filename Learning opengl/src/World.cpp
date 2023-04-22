@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <iostream>
 #include <iomanip>
+#include <IndoorArea.h>
 
 World::World(GLFWwindow* window)
     :m_Window(window)
@@ -52,7 +53,7 @@ bool World::AddPaintBlob(Vec4 BlobColor, Vec3 pos, float size)
     }
 
     // there is no blob there
-    std::shared_ptr<PaintBlob> paintBlob(new PaintBlob(pos + .5f, (int)(size * m_BlockSize), BlobColor));
+    std::shared_ptr<PaintBlob> paintBlob = std::make_shared<PaintBlob>(pos + .5f, (int)(size * m_BlockSize), BlobColor);
     if (GetBeltAtPos(pos.x, pos.y) != NULL)
     {
         if (GetBeltAtPos(pos.x, pos.y)->AllowNewItem(true))
@@ -89,7 +90,7 @@ bool World::AddBelt(BeltType beltColor, Vec3 pos, Direction direction)
     if (!BeltCanBeMade(pos, beltColor, direction))
         return false;
 
-    std::shared_ptr<Belt> belt(new Belt(WorldTile(TileTypeStraightBelt), pos, m_BlockSize, direction, beltColor));
+    std::shared_ptr<Belt> belt = std::make_shared<Belt>(WorldTile(TileTypeStraightBelt), pos, m_BlockSize, direction, beltColor);
 
     if (direction == DirectionUp)
     {
@@ -176,7 +177,7 @@ bool World::AddPaintBlobCombiner(Vec3 pos, Direction direction, int numInputs)
     if (!NothingAtPos(Vec3{ pos.x + 1, pos.y, pos.z }))
         return false;
 
-    std::shared_ptr<GameObject> paintBlobCombiner(new PaintBlobCombiner(pos, GetBlockSize(), numInputs, direction, true));
+    std::shared_ptr<GameObject> paintBlobCombiner = std::make_shared<PaintBlobCombiner>(pos, GetBlockSize(), numInputs, direction, true);
     AddGameObjectAtPos(paintBlobCombiner, pos.x, pos.y);
     Vec3 otherPos1;
     Vec3 otherPos2;
@@ -198,17 +199,17 @@ bool World::AddPaintBlobCombiner(Vec3 pos, Direction direction, int numInputs)
     }
 
     if (numInputs == 3) {
-        std::shared_ptr<GameObject> paintBlobCombiner2(new PaintBlobCombiner(otherPos1, GetBlockSize(), numInputs, direction, false, TileTypePaintBlobContainer2));
+        std::shared_ptr<GameObject> paintBlobCombiner2 = std::make_shared<PaintBlobCombiner>(otherPos1, GetBlockSize(), numInputs, direction, false, TileTypePaintBlobContainer2);
         paintBlobCombiner2->SetParentObject(paintBlobCombiner);
         paintBlobCombiner->AddOtherPart(paintBlobCombiner2);    AddGameObjectAtPos(paintBlobCombiner2, otherPos1.x, otherPos1.y);
         AddGameObjectAtPos(paintBlobCombiner2, otherPos1.x, otherPos1.y);
-        std::shared_ptr<GameObject> paintBlobCombiner3(new PaintBlobCombiner(otherPos2, GetBlockSize(), numInputs, direction, false, TileTypePaintBlobContainer2));
+        std::shared_ptr<GameObject> paintBlobCombiner3 = std::make_shared<PaintBlobCombiner>(otherPos2, GetBlockSize(), numInputs, direction, false, TileTypePaintBlobContainer2);
         paintBlobCombiner3->SetParentObject(paintBlobCombiner);
         paintBlobCombiner->AddOtherPart(paintBlobCombiner3);
         AddGameObjectAtPos(paintBlobCombiner3, otherPos2.x, otherPos2.y);
     }
     if (numInputs == 2) {
-        std::shared_ptr<GameObject> paintBlobCombiner2(new PaintBlobCombiner(otherPos1, GetBlockSize(), numInputs, direction, false, TileTypePaintBlobContainer2));
+        std::shared_ptr<GameObject> paintBlobCombiner2 = std::make_shared<PaintBlobCombiner>(otherPos1, GetBlockSize(), numInputs, direction, false, TileTypePaintBlobContainer2);
         paintBlobCombiner2->SetParentObject(paintBlobCombiner);
         paintBlobCombiner->AddOtherPart(paintBlobCombiner2);
         AddGameObjectAtPos(paintBlobCombiner2, otherPos1.x, otherPos1.y);
@@ -216,6 +217,40 @@ bool World::AddPaintBlobCombiner(Vec3 pos, Direction direction, int numInputs)
     
     return true;
 }
+
+
+bool World::AddIndoorArea(IndoorArea lastArea, Direction directionToCreate, bool isFirst=false)
+{
+    if (isFirst) // if its the first area then just create it in the middle at the default size
+    {
+        IndoorArea newArea = IndoorArea(Vec3{0,0,1}, DirectionUp, true);
+        m_IndoorAreas.push_back(newArea);
+        return true;
+    }
+    else 
+    {
+        // check if we can expand in the direction we want to create a new area
+        if (lastArea.checkExpandAvailable(directionToCreate)) {
+            Vec3 newPos = lastArea.GetMiddlePosition();
+            Direction lastDirection;
+            switch (directionToCreate)
+            {
+            case (DirectionUp): lastDirection = DirectionDown; newPos = { newPos.x, newPos.y - lastArea.GetDirectionDownFromMiddle() + 10, newPos.z }; break;
+            case (DirectionDown): lastDirection = DirectionUp; newPos = { newPos.x, newPos.y + lastArea.GetDirectionUpFromMiddle() + 10, newPos.z }; break;
+            case (DirectionLeft): lastDirection = DirectionRight; newPos = { newPos.x + lastArea.GetDirectionRightFromMiddle() + 10, newPos.y, newPos.z }; break;
+            case (DirectionRight): lastDirection = DirectionLeft; newPos = { newPos.x - lastArea.GetDirectionLeftFromMiddle() + 10, newPos.y, newPos.z }; break;
+            }
+            IndoorArea newArea = IndoorArea(newPos, lastDirection);
+            // add the new squares of that area to the world based on newArea.size(doesnt exist) info TODO
+
+            lastArea.AddDirectionToOtherAreas(directionToCreate);
+            m_IndoorAreas.push_back(newArea);
+            return true;
+        }
+    }
+
+}
+
 
 
 void World::OnUpdate()
@@ -253,11 +288,12 @@ void World::OnUpdate()
         {
             case(1): AddBelt((BeltType)std::max(std::min((BeltTypeYellow + m_Input->m_SecondNumPressed - 1), 2), 0), { mousePosX, mousePosY, 1 }, (Direction)m_Input->GetDirection()); break;
             case(2): AddPaintBlobCombiner(Vec3{ mousePosX, mousePosY,1 }, (Direction)m_Input->GetDirection(), std::max(std::min(m_Input->m_SecondNumPressed+1, 3), 2));break;
-            case(3): AddPaintBlob(Vec4{ 0.0f, 1.0f, 1.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2f); break;
-            case(4): AddPaintBlob(Vec4{ 1.0f, 0.0f, 1.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2f); break;
-            case(5): AddPaintBlob(Vec4{ 1.0f, 1.0f, 0.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2f); break;
-            case(6): AddPaintBlob(Vec4{ 0.0f, 0.0f, 0.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2f); break;
-            case(7): AddPaintBlob(Vec4{ .6f, .4f, .4f, 1.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2f); break;
+            case(3): AddBackgroundTile(Vec3{ mousePosX, mousePosY,1 }, TileTypeBackgroundDarkIndoor); break;
+            case(4): AddPaintBlob(Vec4{ 0.0f, 1.0f, 1.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2f); break;
+            case(5): AddPaintBlob(Vec4{ 1.0f, 0.0f, 1.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2f); break;
+            case(6): AddPaintBlob(Vec4{ 1.0f, 1.0f, 0.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2f); break;
+            case(7): AddPaintBlob(Vec4{ 0.0f, 0.0f, 0.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2f); break;
+            case(8): AddPaintBlob(Vec4{ .6f, .4f, .4f, 1.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2f); break;
             default: std::cout << "No tile for that number yet" << std::endl;
         }
     }
@@ -288,7 +324,7 @@ void World::OnUpdate()
     // update the heads. This will update every belt in that chain
     for (unsigned int i = 0; i < heads.size(); i++)
     {
-        if (heads[i]->getNextObject() == NULL)
+        if (heads[i]->getNextObject() == NULL) // it will not have a next if its a head
             heads[i]->Update(); // this will call all the belts in the chain to update
     }
 
@@ -351,8 +387,9 @@ bool World::BeltCanBeMade(Vec3 pos, BeltType beltColor, Direction direction)
 
 void World::DeleteAllAtPos(Vec3 pos)
 {
-    m_PaintBlobs[(int)std::floor(pos.x)][(int)std::floor(pos.y)] = NULL;
-    m_Belts[(int)std::floor(pos.x)][(int)std::floor(pos.y)] = NULL;
+    m_PaintBlobs[(int)std::floor(pos.x)][(int)std::floor(pos.y)].reset();
+    m_Belts[(int)std::floor(pos.x)][(int)std::floor(pos.y)].reset();
+
     if (GetGameObjectAtPos(pos.x, pos.y) != NULL)
     {
         std::shared_ptr<GameObject> objectHere = GetGameObjectAtPos(pos.x, pos.y);
@@ -360,12 +397,17 @@ void World::DeleteAllAtPos(Vec3 pos)
         {
             for (unsigned int j = 0; j < objectHere->GetOtherParts().size(); j++)
             {
-                m_GameObjects[(int)objectHere->GetOtherParts()[j]->GetPos().x][(int)objectHere->GetOtherParts()[j]->GetPos().y] = NULL;
+                m_GameObjects[(int)objectHere->GetOtherParts()[j]->GetPos().x][(int)objectHere->GetOtherParts()[j]->GetPos().y].reset();
             }
         }
         else {
-            m_GameObjects[(int)objectHere->GetParentObject()->GetPos().x][(int)objectHere->GetParentObject()->GetPos().y] = NULL;
+            std::shared_ptr<GameObject> parent = objectHere->GetParentObject();
+            for (unsigned int j = 0; j < parent->GetOtherParts().size(); j++)
+            {
+				m_GameObjects[(int)parent->GetOtherParts()[j]->GetPos().x][(int)parent->GetOtherParts()[j]->GetPos().y].reset();
+			}
+            m_GameObjects[(int)objectHere->GetParentObject()->GetPos().x][(int)objectHere->GetParentObject()->GetPos().y].reset();
         }
     }
-    m_GameObjects[(int)std::floor(pos.x)][(int)std::floor(pos.y)] = NULL;
+    m_GameObjects[(int)std::floor(pos.x)][(int)std::floor(pos.y)].reset();
 }

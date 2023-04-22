@@ -164,6 +164,7 @@
     <ClCompile Include="src\VertexArray.cpp" />
     <ClCompile Include="src\VertexBuffer.cpp" />
     <ClCompile Include="src\World.cpp" />
+    <ClCompile Include="src\WorldBackgroundTile.cpp" />
     <ClCompile Include="src\WorldTile.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -623,6 +624,7 @@
     <ClInclude Include="src\VertexBuffer.h" />
     <ClInclude Include="src\VertexBufferLayout.h" />
     <ClInclude Include="src\World.h" />
+    <ClInclude Include="src\WorldBackgroundTile.h" />
     <ClInclude Include="src\WorldTile.h" />
   </ItemGroup>
   <ItemGroup>

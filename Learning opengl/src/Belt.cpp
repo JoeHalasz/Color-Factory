@@ -50,7 +50,6 @@ Belt::~Belt()
 		getLastObject()->setNextObject(NULL);
 }
 
-
 void Belt::Update()
 {
 	if (UpdatedThisFrame)

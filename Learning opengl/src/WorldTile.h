@@ -8,8 +8,7 @@ enum TileType
 {
 	TileTypePaintBlob,
 	TileTypePaintBlobShading,
-	TileTypeBackground,
-	TileTypeBackgroundDark,
+	TileTypeBackgroundDarkIndoor,
 	TileTypeStraightBelt,
 	TileTypeTurnBelt,
 	TileTypeTurnBeltBackwards,
@@ -20,7 +19,17 @@ enum TileType
 	TileTypePaintBlobContainer2,
 	TileTypeDrawerBackground,
 	TileTypeDrawerBackgroundSelected,
+	TileTypeRoad,
+	TileTypeRoadWithCurb,
+	TileTypeRoadMiddle,
+	TileTypeGrass,
+	TileTypeWall,
+	TileTypeWallCorner,
+	TileTypeWallCornerBackwards,
+	TileTypeNumTileTypes
 };
+
+
 
 
 class WorldTile
@@ -36,6 +45,8 @@ public:
 	WorldTile(TileType type);
 	WorldTile(TileType type, Vec4 color);
 	
+	int TOTALTILES = 17;
+	static const char*  TileTypeToString(TileType type);
 	inline TileType		GetType() const { return m_TileType; }
 	inline void			SetType(TileType Type) { m_TileType = Type; }
 
