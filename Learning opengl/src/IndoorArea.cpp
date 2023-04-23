@@ -1,7 +1,7 @@
 #include "IndoorArea.h"
 
 IndoorArea::IndoorArea()
-	: m_MiddlePosition(Vec3{ 0, 0, 0 }), m_DirectionLeftFromMiddle(50), m_DirectionRightFromMiddle(50), m_DirectionUpFromMiddle(50), m_DirectionDownFromMiddle(50)
+	: m_MiddlePosition(Vec3{ 0, 0, 0 }), m_DirectionLeftFromMiddle(20), m_DirectionRightFromMiddle(20), m_DirectionUpFromMiddle(20), m_DirectionDownFromMiddle(20)
 {
 }
 

@@ -18,7 +18,7 @@ private:
 
 public:
 	IndoorArea();
-	IndoorArea(Vec3 MiddlePosition, Direction lastAreaDirection, bool isFirst = false, int DirectionLeftFromMiddle = 50, int DirectionRightFromMiddle = 50, int DirectionUpFromMiddle = 50, int DirectionDownFromMiddle = 50);
+	IndoorArea(Vec3 MiddlePosition, Direction lastAreaDirection, bool isFirst = false, int DirectionLeftFromMiddle = 20, int DirectionRightFromMiddle = 20, int DirectionUpFromMiddle = 20, int DirectionDownFromMiddle = 20);
 	inline Vec3 GetMiddlePosition() const { return m_MiddlePosition; }
 	inline void SetMiddlePosition(Vec3 MiddlePosition) { m_MiddlePosition = MiddlePosition; }
 	inline int GetDirectionLeftFromMiddle() const { return m_DirectionLeftFromMiddle; }

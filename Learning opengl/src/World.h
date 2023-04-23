@@ -16,6 +16,7 @@
 
 #include "PaintBlobCombiner.h"
 #include "WorldBackgroundTile.h"
+#include <IndoorArea.h>
 
 class World
 {
@@ -39,6 +40,7 @@ private:
 	std::unordered_map<int, std::unordered_map<int, std::shared_ptr<GameObject>>> m_GameObjects;
 	// make a list of worldbackgroundtiles and use it on line 255 in renderer.h
 	std::unordered_map<int, std::unordered_map<int, std::shared_ptr<WorldBackgroundTile>>> m_WorldBackgroundTiles;
+	std::vector<IndoorArea> m_IndoorAreas;
 
 	bool AddBelt(BeltType beltColor, Vec3 pos, Direction direction);
 	bool AddPaintBlob(Vec4 BlobColor, Vec3 pos, float size);
@@ -57,6 +59,9 @@ public:
 	bool NothingAtPos(Vec3 pos);
 	void DeleteAllAtPos(Vec3 pos);
 	int GetBeltDirectionAt(int x, int y);
+	std::shared_ptr<Belt> GetBeltAtPos(float x, float y);
+	std::shared_ptr<PaintBlob> GetPaintBlobAtPos(float x, float y);
+	std::shared_ptr<GameObject> GetGameObjectAtPos(float x, float y);
 
 	inline glm::vec3 GetPosition() const { return m_Position; }
 	inline int GetZoomAmount() const { return (int)m_ZoomAmount;  }
@@ -67,16 +72,14 @@ public:
 	inline void SetInput() { m_Input = new Input(m_Window, IS3D);}
 	inline Input* GetInput() { return m_Input; }
 
-	inline std::shared_ptr<PaintBlob> GetPaintBlobAtPos(float x, float y) { return m_PaintBlobs[(int)std::floor(x)][(int)std::floor(y)]; }
 	inline void AddPaintBlobAtPos(std::shared_ptr<PaintBlob> newObject, float x, float y) { m_PaintBlobs[(int)std::floor(x)][(int)std::floor(y)] = newObject; }
 
-	inline std::shared_ptr<Belt> GetBeltAtPos(float x, float y) { return m_Belts[(int)std::floor(x)][(int)std::floor(y)]; }
 	inline void AddBeltAtPos(std::shared_ptr <Belt> newBelt, float x, float y) { m_Belts[(int)std::floor(x)][(int)std::floor(y)] = newBelt; }
 
-	inline std::shared_ptr<GameObject> GetGameObjectAtPos(float x, float y) { return m_GameObjects[(int)std::floor(x)][(int)std::floor(y)]; }
 	inline void AddGameObjectAtPos(std::shared_ptr <GameObject> newObject, float x, float y) { m_GameObjects[(int)std::floor(x)][(int)std::floor(y)] = newObject; }
 
 	inline std::shared_ptr<WorldBackgroundTile> GetWorldBackgroundTileAtPos(float x, float y) { return m_WorldBackgroundTiles[(int)std::floor(x)][(int)std::floor(y)]; }
 	inline void AddWorldBackgroundTileAtPos(std::shared_ptr <WorldBackgroundTile> newObject, float x, float y) { m_WorldBackgroundTiles[(int)std::floor(x)][(int)std::floor(y)] = newObject; }
 
+	inline std::vector<IndoorArea> GetIndoorAreas() { return m_IndoorAreas; }
 };

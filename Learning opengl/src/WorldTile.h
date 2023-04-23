@@ -4,11 +4,12 @@
 #include "glm/glm.hpp"
 #include "MathStuff.h"
 
+
 enum TileType
 {
 	TileTypePaintBlob,
 	TileTypePaintBlobShading,
-	TileTypeBackgroundDarkIndoor,
+	TileTypeBackgroundIndoor,
 	TileTypeStraightBelt,
 	TileTypeTurnBelt,
 	TileTypeTurnBeltBackwards,
@@ -20,7 +21,6 @@ enum TileType
 	TileTypeDrawerBackground,
 	TileTypeDrawerBackgroundSelected,
 	TileTypeRoad,
-	TileTypeRoadWithCurb,
 	TileTypeRoadMiddle,
 	TileTypeGrass,
 	TileTypeWall,

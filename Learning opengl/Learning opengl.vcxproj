@@ -147,6 +147,7 @@
     <ClCompile Include="src\BeltOLD.cpp" />
     <ClCompile Include="src\ErrorCatching.cpp" />
     <ClCompile Include="src\GameObject.cpp" />
+    <ClCompile Include="src\IndoorArea.cpp" />
     <ClCompile Include="src\PaintBlob.cpp" />
     <ClCompile Include="src\IndexBuffer.cpp" />
     <ClCompile Include="src\Input.cpp" />
@@ -317,6 +318,7 @@
     <ClInclude Include="src\BeltOLD.h" />
     <ClInclude Include="src\ErrorCatching.h" />
     <ClInclude Include="src\GameObject.h" />
+    <ClInclude Include="src\IndoorArea.h" />
     <ClInclude Include="src\PaintBlob.h" />
     <ClInclude Include="src\IndexBuffer.h" />
     <ClInclude Include="src\Input.h" />

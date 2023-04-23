@@ -124,16 +124,18 @@ void Belt::Update()
 
 std::shared_ptr<GameObject> findWorldObjectAtPos(int xPos, int yPos, std::unordered_map<int, std::unordered_map<int, std::shared_ptr<GameObject>>>& worldGameObjects)
 {
-	if (worldGameObjects[xPos][yPos] != NULL) {
-		std::shared_ptr<GameObject> obj;
-		if (worldGameObjects[xPos][yPos]->GetParentObject() != NULL) { // use the parent obj
-			obj = worldGameObjects[xPos][yPos]->GetParentObject();
-		}
-		else
-			obj = worldGameObjects[xPos][yPos];
-		if (obj->AllowNewItem())
-			return obj;
+	if (worldGameObjects.find(xPos) != worldGameObjects.end() && worldGameObjects[xPos].find(yPos) != worldGameObjects[xPos].end()) {
+		if (worldGameObjects[xPos][yPos] != NULL) {
+			std::shared_ptr<GameObject> obj;
+			if (worldGameObjects[xPos][yPos]->GetParentObject() != NULL) { // use the parent obj
+				obj = worldGameObjects[xPos][yPos]->GetParentObject();
+			}
+			else
+				obj = worldGameObjects[xPos][yPos];
+			if (obj->AllowNewItem())
+				return obj;
 
+		}
 	}
 	std::unique_ptr<Belt> fake;
 	return fake;
@@ -172,15 +174,19 @@ std::shared_ptr<GameObject> Belt::GetNextOrLastObject(bool isLastBelt, std::unor
 		else if (GetDirection() == DirectionRight)
 			xPos += 1 * signFlip;
 
-
-		std::shared_ptr<Belt> possibleNextBelt = AllOtherBelts[xPos][yPos];
-		// if there isnt a belt there 
-		if (possibleNextBelt == NULL)
-			return findWorldObjectAtPos(xPos, yPos, worldGameObjects);
-
-		if (possibleNextBelt != NULL && possibleNextBelt->GetTile()->GetType() != TileTypeTurnBelt && possibleNextBelt->GetTile()->GetType() != TileTypeTurnBeltBackwards)
-			if (possibleNextBelt->GetDirection() != GetDirection())
+		if (AllOtherBelts.find(xPos) != AllOtherBelts.end() && AllOtherBelts[xPos].find(yPos) != AllOtherBelts[xPos].end()) {
+			std::shared_ptr<Belt> possibleNextBelt = AllOtherBelts[xPos][yPos];
+			// if there isnt a belt there 
+			if (possibleNextBelt == NULL)
 				return findWorldObjectAtPos(xPos, yPos, worldGameObjects);
+
+			if (possibleNextBelt != NULL && possibleNextBelt->GetTile()->GetType() != TileTypeTurnBelt && possibleNextBelt->GetTile()->GetType() != TileTypeTurnBeltBackwards)
+				if (possibleNextBelt->GetDirection() != GetDirection())
+					return findWorldObjectAtPos(xPos, yPos, worldGameObjects);
+		}
+		else {
+			return findWorldObjectAtPos(xPos, yPos, worldGameObjects);
+		}
 	}
 	else // if we are a turn belt and we are looking for the last belt
 	{
@@ -223,15 +229,18 @@ std::shared_ptr<GameObject> Belt::GetNextOrLastObject(bool isLastBelt, std::unor
 				wantedDirection = DirectionDown;
 			}
 		}
+		if (AllOtherBelts.find(xPos) != AllOtherBelts.end() && AllOtherBelts[xPos].find(yPos) != AllOtherBelts[xPos].end()) {
+			std::shared_ptr<Belt> possibleNextBelt = AllOtherBelts[xPos][yPos];
+			// if there isnt a belt there 
+			if (possibleNextBelt == NULL)
+				return findWorldObjectAtPos(xPos, yPos, worldGameObjects);
 
-		std::shared_ptr<Belt> possibleNextBelt = AllOtherBelts[xPos][yPos];
-		// if there isnt a belt there 
-		if (possibleNextBelt == NULL)
+			if (possibleNextBelt == NULL && possibleNextBelt->GetDirection() != wantedDirection) 
+				return findWorldObjectAtPos(xPos, yPos, worldGameObjects);
+		}
+		else {
 			return findWorldObjectAtPos(xPos, yPos, worldGameObjects);
-
-		if (possibleNextBelt == NULL && possibleNextBelt->GetDirection() != wantedDirection)
-			return findWorldObjectAtPos(xPos, yPos, worldGameObjects);
-		
+		}
 	}
 
 	// check if other belt already has a connected belt
