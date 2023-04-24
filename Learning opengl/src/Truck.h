@@ -11,6 +11,7 @@ private:
 	int m_NumPaintBlobs = 0;
 	int m_MaxPaintBlobs = 1000;
 	std::shared_ptr<TruckNode> m_CurrentNode;
+	std::vector<std::shared_ptr<TruckNode>> m_Path;
 	std::shared_ptr<TruckStop> m_TargetStop;
 	Vec3 m_Pos;
 	Direction m_Direction = DirectionUp; // should be based off of which way the truck is moving
@@ -25,12 +26,13 @@ public:
 	Truck(PaintBlob paintBlob, std::shared_ptr<TruckNode> spawnNode);
 	
 	inline int GetNumPaintBlobs() const { return m_NumPaintBlobs; }
-	inline void SetTargetStop(std::shared_ptr<TruckStop> targetStop) { m_TargetStop = targetStop; }
 	inline void SetPos(Vec3 pos) { m_Pos = pos; }
 	inline Vec3 GetPos() const { return m_Pos; }
 	inline void SetDirection(Direction direction) { m_Direction = direction; }
 	inline Direction GetDirection() const { return m_Direction; }
 	
+
+	void SetTargetStop(std::shared_ptr<TruckStop> targetStop);
 	bool SetPaintBlobType(PaintBlob paintBlob);
 	bool AddPaintBlob(PaintBlob paintBlob);
 	std::shared_ptr<PaintBlob> RemovePaintBlob();

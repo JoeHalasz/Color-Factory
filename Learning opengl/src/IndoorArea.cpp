@@ -58,15 +58,11 @@ IndoorArea::IndoorArea(Vec3 MiddlePosition, Direction lastAreaDirection,
 	// create truck stops on the left and right walls and truck nodes for those stops
 	std::shared_ptr<TruckNode> leftNode = std::make_shared<TruckNode>(Vec3{ m_MiddlePosition.x - m_DirectionLeftFromMiddle, m_MiddlePosition.y, m_MiddlePosition.z }, true);
 	leftNode->addConnectedNode(topLeft);
-	leftNode->addConnectedNode(bottomLeft);
 	topLeft->addConnectedNode(leftNode);
-	bottomLeft->addConnectedNode(leftNode);
 	std::shared_ptr<TruckStop> leftStop = std::make_shared<TruckStop>(leftNode);
 
 	std::shared_ptr<TruckNode> rightNode = std::make_shared<TruckNode>(Vec3{ m_MiddlePosition.x + m_DirectionRightFromMiddle, m_MiddlePosition.y, m_MiddlePosition.z }, true);
-	rightNode->addConnectedNode(topRight);
 	rightNode->addConnectedNode(bottomRight);
-	topRight->addConnectedNode(rightNode);
 	bottomRight->addConnectedNode(rightNode);
 	std::shared_ptr<TruckStop> rightStop = std::make_shared<TruckStop>(rightNode);
 
