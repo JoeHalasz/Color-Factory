@@ -17,7 +17,7 @@ const char* WorldTile::TileTypeToString(TileType type)
 	{
 	case(TileTypePaintBlob):				return "paint blob/paint blob.png";
 	case(TileTypePaintBlobShading):			return "paint blob/paint blob shading.png";
-	case(TileTypeBackgroundIndoor):		return "background/floortile dark.png";
+	case(TileTypeBackgroundIndoor):			return "background/floortile dark.png";
 	case(TileTypeStraightBelt):				return "belts/straight belt.png";
 	case(TileTypeTurnBelt):					return "belts/turn belt.png";
 	case(TileTypeTurnBeltBackwards):		return "belts/turn belt backwards.png";
@@ -34,6 +34,7 @@ const char* WorldTile::TileTypeToString(TileType type)
 	case(TileTypeWall):						return "background/wall.png";
 	case(TileTypeWallCorner):				return "background/wall corner.png";
 	case(TileTypeWallCornerBackwards):		return "background/wall corner backwards.png";
+	case(TileTypeTruck):					return "truck/truck.png";
 	default:								return "";
 	}
 }

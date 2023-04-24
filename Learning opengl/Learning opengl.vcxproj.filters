@@ -93,6 +93,18 @@
     <ClCompile Include="src\IndoorArea.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Truck.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TruckNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TruckStop.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HelperFunctions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shaders\vertex.shader" />
@@ -1460,6 +1472,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\IndoorArea.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Truck.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\TruckNode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\TruckStop.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\HelperFunctions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

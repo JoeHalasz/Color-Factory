@@ -13,7 +13,15 @@ World::World(GLFWwindow* window)
     // set up inputs
     SetInput();
     // make the first indoor area
-    AddIndoorArea(IndoorArea(), DirectionUp, true);
+    std::shared_ptr<IndoorArea> newIndoorArea = std::make_shared<IndoorArea>();
+    AddIndoorArea(newIndoorArea, DirectionUp, true);
+    for (auto& row : m_TruckNodes)
+    {
+        for (auto& col : row.second)
+        {
+            std::cout << "HERE" << std::endl;
+        }
+    }
 }
 
 World::World(GLFWwindow* window, glm::vec3 position)
@@ -24,50 +32,13 @@ World::World(GLFWwindow* window, glm::vec3 position)
     // set up inputs
     SetInput();
     // make the first indoor area
-    AddIndoorArea(IndoorArea(), DirectionUp, true);
+    std::shared_ptr<IndoorArea> newIndoorArea = std::make_shared<IndoorArea>();
+    AddIndoorArea(newIndoorArea, DirectionUp, true);
+
 }
 
 World::~World()
 {
-}
-
-std::shared_ptr<Belt> World::GetBeltAtPos(float _x, float _y)
-{
-    int x = (int)std::floor(_x);
-    int y = (int)std::floor(_y);
-    if (m_Belts.find(x) == m_Belts.end())
-		return NULL;
-	
-    if (m_Belts[x].find(y) == m_Belts[x].end())
-        return NULL;
-    
-    return m_Belts[(int)std::floor(x)][(int)std::floor(y)];
-}
-
-std::shared_ptr<PaintBlob> World::GetPaintBlobAtPos(float _x, float _y)
-{
-    int x = (int)std::floor(_x);
-    int y = (int)std::floor(_y);
-    if (m_PaintBlobs.find(x) == m_PaintBlobs.end())
-        return NULL;
-
-    if (m_PaintBlobs[x].find(y) == m_PaintBlobs[x].end())
-        return NULL;
-
-    return m_PaintBlobs[(int)std::floor(x)][(int)std::floor(y)];
-}
-
-std::shared_ptr<GameObject> World::GetGameObjectAtPos(float _x, float _y)
-{
-    int x = (int)std::floor(_x);
-    int y = (int)std::floor(_y);
-    if (m_GameObjects.find(x) == m_GameObjects.end())
-        return NULL;
-
-    if (m_GameObjects[x].find(y) == m_GameObjects[x].end())
-        return NULL;
-
-    return m_GameObjects[(int)std::floor(x)][(int)std::floor(y)];
 }
 
 
@@ -110,6 +81,35 @@ bool World::AddPaintBlob(Vec4 BlobColor, Vec3 pos, float size)
     else AddPaintBlobAtPos(paintBlob, paintBlob->GetPos().x, paintBlob->GetPos().y);
 
     return true;
+}
+
+bool World::AddTruck()
+{
+    std::shared_ptr<TruckNode> node;
+    std::shared_ptr<TruckStop> stop;
+
+    for (auto& row : m_TruckNodes)
+    {
+        for (auto& col : row.second)
+        {
+			node = col.second;
+        }
+    }
+
+    for (auto& row : m_TruckStops)
+    {
+        for (auto& col : row.second)
+        {
+            stop = col.second;
+            break;
+        }
+        break;
+    }
+    
+    std::shared_ptr<Truck> truck = std::make_shared<Truck>(node);
+    truck->SetTargetStop(stop);
+    AddTruckAtPos(truck, truck->GetPos().x, truck->GetPos().y);
+	return true;
 }
 
 bool World::NothingAtPos(Vec3 pos)
@@ -279,42 +279,40 @@ bool World::AddPaintBlobCombiner(Vec3 pos, Direction direction, int numInputs)
 }
 
 
-bool World::AddIndoorArea(IndoorArea lastArea, Direction directionToCreate, bool isFirst=false)
+bool World::AddIndoorArea(std::shared_ptr<IndoorArea> lastArea, Direction directionToCreate, bool isFirst)
 {
-    IndoorArea newArea;
+    std::shared_ptr<IndoorArea> newArea;
     int amountExtra = 6;
     if (isFirst) // if its the first area then just create it in the middle at the default size
-    {
-        newArea = IndoorArea(Vec3{0,0,1}, DirectionUp, true);
-        m_IndoorAreas.push_back(newArea);
-    }
+        newArea = std::make_shared<IndoorArea>(Vec3{ 0,0,1 }, DirectionUp, m_TruckNodes, m_TruckStops, true);
+    
     else 
     {
         // check if we can expand in the direction we want to create a new area
-        if (lastArea.checkExpandAvailable(directionToCreate)) {
-            Vec3 newPos = lastArea.GetMiddlePosition();
+        if (lastArea->checkExpandAvailable(directionToCreate)) {
+            Vec3 newPos = lastArea->GetMiddlePosition();
             int lengthFromMiddle = 20;
             switch (directionToCreate)
             {
-            case (DirectionUp): newPos = { newPos.x, newPos.y + lastArea.GetDirectionDownFromMiddle() + lengthFromMiddle + amountExtra, newPos.z }; break;
-            case (DirectionDown):newPos = { newPos.x, newPos.y - lastArea.GetDirectionUpFromMiddle() - lengthFromMiddle - amountExtra, newPos.z }; break;
-            case (DirectionLeft): newPos = { newPos.x + lastArea.GetDirectionRightFromMiddle() + lengthFromMiddle + amountExtra, newPos.y, newPos.z }; break;
-            case (DirectionRight): newPos = { newPos.x - lastArea.GetDirectionLeftFromMiddle() - lengthFromMiddle - amountExtra, newPos.y, newPos.z }; break;
+            case (DirectionUp): newPos = { newPos.x, newPos.y + lastArea->GetDirectionDownFromMiddle() + lengthFromMiddle + amountExtra, newPos.z }; break;
+            case (DirectionDown):newPos = { newPos.x, newPos.y - lastArea->GetDirectionUpFromMiddle() - lengthFromMiddle - amountExtra, newPos.z }; break;
+            case (DirectionLeft): newPos = { newPos.x + lastArea->GetDirectionRightFromMiddle() + lengthFromMiddle + amountExtra, newPos.y, newPos.z }; break;
+            case (DirectionRight): newPos = { newPos.x - lastArea->GetDirectionLeftFromMiddle() - lengthFromMiddle - amountExtra, newPos.y, newPos.z }; break;
             }
-            newArea = IndoorArea(newPos, directionToCreate, false, lengthFromMiddle, lengthFromMiddle, lengthFromMiddle, lengthFromMiddle);
+            newArea = std::make_shared<IndoorArea>(newPos, directionToCreate, m_TruckNodes, m_TruckStops, false, lengthFromMiddle, lengthFromMiddle, lengthFromMiddle, lengthFromMiddle);
 
-            lastArea.AddDirectionToOtherAreas(directionToCreate);
+            lastArea->AddDirectionToOtherAreas(directionToCreate);
         }
         else
             return false;
     }
     std::shared_ptr<WorldBackgroundTile> tile;
     std::shared_ptr<WorldBackgroundTile> tile2;
-    Vec3 middle = newArea.GetMiddlePosition();
+    Vec3 middle = newArea->GetMiddlePosition();
     // add the new squares of that area to the world based on newArea.size(doesnt exist) info TODO
-    for (float x = middle.x - newArea.GetDirectionLeftFromMiddle(); x < middle.x + newArea.GetDirectionRightFromMiddle(); x++)
+    for (float x = middle.x - newArea->GetDirectionLeftFromMiddle(); x < middle.x + newArea->GetDirectionRightFromMiddle(); x++)
     {
-        for (float y = middle.y - newArea.GetDirectionDownFromMiddle(); y < middle.y + newArea.GetDirectionUpFromMiddle(); y++)
+        for (float y = middle.y - newArea->GetDirectionDownFromMiddle(); y < middle.y + newArea->GetDirectionUpFromMiddle(); y++)
         {
             tile = std::make_shared<WorldBackgroundTile>(TileTypeBackgroundIndoor, DirectionUp);
             AddWorldBackgroundTileAtPos(tile, x ,y );
@@ -323,53 +321,53 @@ bool World::AddIndoorArea(IndoorArea lastArea, Direction directionToCreate, bool
     // add the walls
     tile = std::make_shared<WorldBackgroundTile>(TileTypeWall, DirectionLeft);
     tile2 = std::make_shared<WorldBackgroundTile>(TileTypeWall, DirectionRight);
-    for (float x = middle.x - newArea.GetDirectionDownFromMiddle()+1; x < middle.x + newArea.GetDirectionUpFromMiddle(); x++)
+    for (float x = middle.x - newArea->GetDirectionDownFromMiddle()+1; x < middle.x + newArea->GetDirectionUpFromMiddle(); x++)
     {
-        AddWorldBackgroundTileAtPos(tile, x, middle.y - newArea.GetDirectionDownFromMiddle());
-        AddWorldBackgroundTileAtPos(tile2, x, middle.y + newArea.GetDirectionDownFromMiddle());
+        AddWorldBackgroundTileAtPos(tile, x, middle.y - newArea->GetDirectionDownFromMiddle());
+        AddWorldBackgroundTileAtPos(tile2, x, middle.y + newArea->GetDirectionDownFromMiddle());
 	}
 	tile = std::make_shared<WorldBackgroundTile>(TileTypeWall, DirectionDown);
     tile2 = std::make_shared<WorldBackgroundTile>(TileTypeWall, DirectionUp);
-    for (float y = middle.y - newArea.GetDirectionLeftFromMiddle()+1; y < middle.y + newArea.GetDirectionRightFromMiddle(); y++)
+    for (float y = middle.y - newArea->GetDirectionLeftFromMiddle()+1; y < middle.y + newArea->GetDirectionRightFromMiddle(); y++)
     {
-		AddWorldBackgroundTileAtPos(tile, middle.x - newArea.GetDirectionLeftFromMiddle(), y);
-        AddWorldBackgroundTileAtPos(tile2, middle.x + newArea.GetDirectionRightFromMiddle(), y);
+		AddWorldBackgroundTileAtPos(tile, middle.x - newArea->GetDirectionLeftFromMiddle(), y);
+        AddWorldBackgroundTileAtPos(tile2, middle.x + newArea->GetDirectionRightFromMiddle(), y);
 	}
     // add the corners
     tile = std::make_shared<WorldBackgroundTile>(TileTypeWallCorner, DirectionUp);
-    AddWorldBackgroundTileAtPos(tile, middle.x + newArea.GetDirectionRightFromMiddle(), middle.y - newArea.GetDirectionUpFromMiddle());
+    AddWorldBackgroundTileAtPos(tile, middle.x + newArea->GetDirectionRightFromMiddle(), middle.y - newArea->GetDirectionUpFromMiddle());
     tile = std::make_shared<WorldBackgroundTile>(TileTypeWallCornerBackwards, DirectionDown);
-    AddWorldBackgroundTileAtPos(tile, middle.x + newArea.GetDirectionRightFromMiddle(), middle.y + newArea.GetDirectionDownFromMiddle());
+    AddWorldBackgroundTileAtPos(tile, middle.x + newArea->GetDirectionRightFromMiddle(), middle.y + newArea->GetDirectionDownFromMiddle());
     tile = std::make_shared<WorldBackgroundTile>(TileTypeWallCorner, DirectionDown);
-    AddWorldBackgroundTileAtPos(tile, middle.x - newArea.GetDirectionLeftFromMiddle(), middle.y + newArea.GetDirectionDownFromMiddle());
+    AddWorldBackgroundTileAtPos(tile, middle.x - newArea->GetDirectionLeftFromMiddle(), middle.y + newArea->GetDirectionDownFromMiddle());
     tile = std::make_shared<WorldBackgroundTile>(TileTypeWallCornerBackwards, DirectionUp);
-    AddWorldBackgroundTileAtPos(tile, middle.x - newArea.GetDirectionLeftFromMiddle(), middle.y - newArea.GetDirectionUpFromMiddle());
+    AddWorldBackgroundTileAtPos(tile, middle.x - newArea->GetDirectionLeftFromMiddle(), middle.y - newArea->GetDirectionUpFromMiddle());
 
     // add the roads
     tile = std::make_shared<WorldBackgroundTile>(TileTypeRoad, DirectionLeft);
     tile2 = std::make_shared<WorldBackgroundTile>(TileTypeRoadMiddle, DirectionLeft);
-    for (float x = middle.x - newArea.GetDirectionDownFromMiddle() - amountExtra + 1; x < middle.x + newArea.GetDirectionUpFromMiddle() + amountExtra; x++)
+    for (float x = middle.x - newArea->GetDirectionDownFromMiddle() - amountExtra + 1; x < middle.x + newArea->GetDirectionUpFromMiddle() + amountExtra; x++)
     { 
         for (int i = 1; i < 6; i++)
         {
-            AddWorldBackgroundTileAtPos(tile, x, middle.y - newArea.GetDirectionDownFromMiddle() - i);
-            AddWorldBackgroundTileAtPos(tile, x, middle.y + newArea.GetDirectionDownFromMiddle() + i);
+            AddWorldBackgroundTileAtPos(tile, x, middle.y - newArea->GetDirectionDownFromMiddle() - i);
+            AddWorldBackgroundTileAtPos(tile, x, middle.y + newArea->GetDirectionDownFromMiddle() + i);
         }
-        AddWorldBackgroundTileAtPos(tile2, x, middle.y - newArea.GetDirectionDownFromMiddle() - 3);
-        AddWorldBackgroundTileAtPos(tile2, x, middle.y + newArea.GetDirectionDownFromMiddle() + 3);
+        AddWorldBackgroundTileAtPos(tile2, x, middle.y - newArea->GetDirectionDownFromMiddle() - 3);
+        AddWorldBackgroundTileAtPos(tile2, x, middle.y + newArea->GetDirectionDownFromMiddle() + 3);
 	}
     tile = std::make_shared<WorldBackgroundTile>(TileTypeRoad, DirectionUp);
     tile2 = std::make_shared<WorldBackgroundTile>(TileTypeRoadMiddle, DirectionUp);
-    for (float y = middle.y - newArea.GetDirectionLeftFromMiddle() - amountExtra + 1; y < middle.y + newArea.GetDirectionUpFromMiddle() + amountExtra; y++)
+    for (float y = middle.y - newArea->GetDirectionLeftFromMiddle() - amountExtra + 1; y < middle.y + newArea->GetDirectionUpFromMiddle() + amountExtra; y++)
     {
         for (int i = 1; i < 6; i++)
         {
-            AddWorldBackgroundTileAtPos(tile, middle.x - newArea.GetDirectionDownFromMiddle() - i, y);
-            AddWorldBackgroundTileAtPos(tile, middle.x + newArea.GetDirectionDownFromMiddle() + i, y);
+            AddWorldBackgroundTileAtPos(tile, middle.x - newArea->GetDirectionDownFromMiddle() - i, y);
+            AddWorldBackgroundTileAtPos(tile, middle.x + newArea->GetDirectionDownFromMiddle() + i, y);
         }
         // add middle parts
-        AddWorldBackgroundTileAtPos(tile2, middle.x - newArea.GetDirectionDownFromMiddle() - 3, y);
-        AddWorldBackgroundTileAtPos(tile2, middle.x + newArea.GetDirectionDownFromMiddle() + 3, y);
+        AddWorldBackgroundTileAtPos(tile2, middle.x - newArea->GetDirectionDownFromMiddle() - 3, y);
+        AddWorldBackgroundTileAtPos(tile2, middle.x + newArea->GetDirectionDownFromMiddle() + 3, y);
     }
     // fix some of the middle parts
 
@@ -377,16 +375,12 @@ bool World::AddIndoorArea(IndoorArea lastArea, Direction directionToCreate, bool
     tile = std::make_shared<WorldBackgroundTile>(TileTypeRoad, DirectionUp);
     for (int i = 1; i < 6; i++)
     {
-        AddWorldBackgroundTileAtPos(tile, middle.x - newArea.GetDirectionLeftFromMiddle() - 3, middle.y - newArea.GetDirectionUpFromMiddle() - i);
-        AddWorldBackgroundTileAtPos(tile, middle.x + newArea.GetDirectionRightFromMiddle() + 3, middle.y - newArea.GetDirectionUpFromMiddle() - i);
-        AddWorldBackgroundTileAtPos(tile, middle.x - newArea.GetDirectionLeftFromMiddle() - 3, middle.y + newArea.GetDirectionDownFromMiddle() + i);
-        AddWorldBackgroundTileAtPos(tile, middle.x + newArea.GetDirectionRightFromMiddle() + 3, middle.y + newArea.GetDirectionDownFromMiddle() + i);
+        AddWorldBackgroundTileAtPos(tile, middle.x - newArea->GetDirectionLeftFromMiddle() - 3, middle.y - newArea->GetDirectionUpFromMiddle() - i);
+        AddWorldBackgroundTileAtPos(tile, middle.x + newArea->GetDirectionRightFromMiddle() + 3, middle.y - newArea->GetDirectionUpFromMiddle() - i);
+        AddWorldBackgroundTileAtPos(tile, middle.x - newArea->GetDirectionLeftFromMiddle() - 3, middle.y + newArea->GetDirectionDownFromMiddle() + i);
+        AddWorldBackgroundTileAtPos(tile, middle.x + newArea->GetDirectionRightFromMiddle() + 3, middle.y + newArea->GetDirectionDownFromMiddle() + i);
     }
     
-    
-
-    
-
     // add the area
     m_IndoorAreas.push_back(newArea);
     
@@ -436,6 +430,7 @@ void World::OnUpdate()
             case(6): AddPaintBlob(Vec4{ 1.0f, 1.0f, 0.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2f); break;
             case(7): AddPaintBlob(Vec4{ 0.0f, 0.0f, 0.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2f); break;
             case(8): AddPaintBlob(Vec4{ .6f, .4f, .4f, 1.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2f); break;
+            case(9): AddTruck(); break;
             default: std::cout << "No tile for that number yet" << std::endl;
         }
     }
@@ -502,6 +497,23 @@ void World::OnUpdate()
 
         }
     }
+    
+    // update all the trucks
+    for (auto& row : m_Trucks)
+    {
+        x = row.first;
+        for (auto& col : row.second)
+        {
+            y = col.first;
+            std::shared_ptr<Truck> truck = col.second;
+            if (truck != NULL)
+            {
+                truck->Update();
+            }
+
+        }
+    }
+
     m_Input->Reset();
 }
 

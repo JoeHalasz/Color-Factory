@@ -278,9 +278,6 @@ void Renderer::DrawWorld(World& world, int width, int height)
                 blobsOnBelts.push_back(belt->GetAllObjects()[i]);
             }
         }
-    }
-    // draw the rest of the world except paint blobs on belts
-    for (unsigned int i = 0; i < OnScreenPositions.size(); i++) {
 
         // draw paint blob combiners
         std::shared_ptr<GameObject> gameObject = world.GetGameObjectAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
@@ -297,7 +294,13 @@ void Renderer::DrawWorld(World& world, int width, int height)
             AddQuad(paintBlob, paintBlob->ConvertToRGB());
             paintBlob->GetTile()->SetType(TileTypePaintBlob);
         }
+
+        // draw trucks
+        std::shared_ptr<Truck> truck = world.GetTruckAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
+        if (truck != NULL)
+            AddQuad(TileTypeTruck, size, truck->GetDirection(), truck->GetPos(), {0,0,0,0});
     }
+
 
     // draw the belt paint blobs
     for (unsigned int i = 0; i < blobsOnBelts.size(); i++)

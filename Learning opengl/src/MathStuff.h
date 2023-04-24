@@ -24,7 +24,6 @@ struct Vec3
         { return x == a.x && y == a.y && z == a.z; };
     }
     inline Vec3 operator+(Vec2 a) {
-        std::cout << " HERE " << x + a.x << " " << y + a.y << z << std::endl;
         return {x + a.x, y + a.y, z};
 	}
     inline Vec3 Round() {

@@ -1,6 +1,8 @@
 #pragma once
 #include <WorldBackgroundTile.h>
-
+#include <unordered_map>
+#include <TruckNode.h>
+#include <TruckStop.h>
 
 
 class IndoorArea
@@ -18,7 +20,13 @@ private:
 
 public:
 	IndoorArea();
-	IndoorArea(Vec3 MiddlePosition, Direction lastAreaDirection, bool isFirst = false, int DirectionLeftFromMiddle = 20, int DirectionRightFromMiddle = 20, int DirectionUpFromMiddle = 20, int DirectionDownFromMiddle = 20);
+	IndoorArea(Vec3 MiddlePosition, Direction lastAreaDirection, 
+		std::unordered_map<int, std::unordered_map<int, std::shared_ptr<TruckNode>>>& AllTruckNodes, 
+		std::unordered_map<int, std::unordered_map<int, std::shared_ptr<TruckStop>>>& AllTruckStops, 
+		bool isFirst = false, int DirectionLeftFromMiddle = 20, int DirectionRightFromMiddle = 20, 
+		int DirectionUpFromMiddle = 20, int DirectionDownFromMiddle = 20);
+
+
 	inline Vec3 GetMiddlePosition() const { return m_MiddlePosition; }
 	inline void SetMiddlePosition(Vec3 MiddlePosition) { m_MiddlePosition = MiddlePosition; }
 	inline int GetDirectionLeftFromMiddle() const { return m_DirectionLeftFromMiddle; }

@@ -17,6 +17,10 @@
 #include "PaintBlobCombiner.h"
 #include "WorldBackgroundTile.h"
 #include <IndoorArea.h>
+#include <Truck.h>
+
+#include "HelperFunctions.h"
+
 
 class World
 {
@@ -38,14 +42,19 @@ private:
 	std::unordered_map<int, std::unordered_map<int, std::shared_ptr<PaintBlob>>> m_PaintBlobs;
 	std::unordered_map<int, std::unordered_map<int, std::shared_ptr<Belt>>> m_Belts;
 	std::unordered_map<int, std::unordered_map<int, std::shared_ptr<GameObject>>> m_GameObjects;
-	// make a list of worldbackgroundtiles and use it on line 255 in renderer.h
 	std::unordered_map<int, std::unordered_map<int, std::shared_ptr<WorldBackgroundTile>>> m_WorldBackgroundTiles;
-	std::vector<IndoorArea> m_IndoorAreas;
+	std::unordered_map<int, std::unordered_map<int, std::shared_ptr<Truck>>> m_Trucks;
+	std::unordered_map<int, std::unordered_map<int, std::shared_ptr<TruckStop>>> m_TruckStops;
+	std::unordered_map<int, std::unordered_map<int, std::shared_ptr<TruckNode>>> m_TruckNodes;
+
+	// TODO this should be like the ones above so that indoor areas cant be placed on top of each other. Current logic allows for that sometimes.
+	std::vector<std::shared_ptr<IndoorArea>> m_IndoorAreas;
 
 	bool AddBelt(BeltType beltColor, Vec3 pos, Direction direction);
 	bool AddPaintBlob(Vec4 BlobColor, Vec3 pos, float size);
+	bool AddTruck();
 	bool AddPaintBlobCombiner(Vec3 pos, Direction direction, int numInputs);
-	bool AddIndoorArea(IndoorArea lastArea, Direction directionToCreate, bool isFirst);
+	bool AddIndoorArea(std::shared_ptr <IndoorArea> lastArea, Direction directionToCreate, bool isFirst=false);
 	bool CheckAddBackgroundTile(Vec3 pos);
 
 public:
@@ -59,9 +68,14 @@ public:
 	bool NothingAtPos(Vec3 pos);
 	void DeleteAllAtPos(Vec3 pos);
 	int GetBeltDirectionAt(int x, int y);
-	std::shared_ptr<Belt> GetBeltAtPos(float x, float y);
-	std::shared_ptr<PaintBlob> GetPaintBlobAtPos(float x, float y);
-	std::shared_ptr<GameObject> GetGameObjectAtPos(float x, float y);
+
+	std::shared_ptr<Belt> GetBeltAtPos(float x, float y) { return GetTAtPos<Belt>(x, y, m_Belts); }
+	std::shared_ptr<PaintBlob> GetPaintBlobAtPos(float x, float y) { return GetTAtPos<PaintBlob>(x, y, m_PaintBlobs); }
+	std::shared_ptr<GameObject> GetGameObjectAtPos(float x, float y) { return GetTAtPos<GameObject>(x, y, m_GameObjects); }
+	std::shared_ptr<WorldBackgroundTile> GetWorldBackgroundTileAtPos(float x, float y) { return GetTAtPos<WorldBackgroundTile>(x, y, m_WorldBackgroundTiles); }
+	std::shared_ptr<Truck> GetTruckAtPos(float x, float y) { return GetTAtPos<Truck>(x, y, m_Trucks); }
+	std::shared_ptr<TruckStop> GetTruckStopAtPos(float x, float y) { return GetTAtPos<TruckStop>(x, y, m_TruckStops); }
+	std::shared_ptr<TruckNode> GetTruckNodeAtPos(float x, float y) { return GetTAtPos<TruckNode>(x, y, m_TruckNodes); }
 
 	inline glm::vec3 GetPosition() const { return m_Position; }
 	inline int GetZoomAmount() const { return (int)m_ZoomAmount;  }
@@ -73,13 +87,13 @@ public:
 	inline Input* GetInput() { return m_Input; }
 
 	inline void AddPaintBlobAtPos(std::shared_ptr<PaintBlob> newObject, float x, float y) { m_PaintBlobs[(int)std::floor(x)][(int)std::floor(y)] = newObject; }
-
 	inline void AddBeltAtPos(std::shared_ptr <Belt> newBelt, float x, float y) { m_Belts[(int)std::floor(x)][(int)std::floor(y)] = newBelt; }
-
 	inline void AddGameObjectAtPos(std::shared_ptr <GameObject> newObject, float x, float y) { m_GameObjects[(int)std::floor(x)][(int)std::floor(y)] = newObject; }
-
-	inline std::shared_ptr<WorldBackgroundTile> GetWorldBackgroundTileAtPos(float x, float y) { return m_WorldBackgroundTiles[(int)std::floor(x)][(int)std::floor(y)]; }
 	inline void AddWorldBackgroundTileAtPos(std::shared_ptr <WorldBackgroundTile> newObject, float x, float y) { m_WorldBackgroundTiles[(int)std::floor(x)][(int)std::floor(y)] = newObject; }
+	inline void AddTruckAtPos(std::shared_ptr <Truck> newObject, float x, float y) { m_Trucks[(int)std::floor(x)][(int)std::floor(y)] = newObject; }
+	inline void AddTruckStopAtPos(std::shared_ptr <TruckStop> newObject, float x, float y) { m_TruckStops[(int)std::floor(x)][(int)std::floor(y)] = newObject; }
+	inline void AddTruckNodeAtPos(std::shared_ptr <TruckNode> newObject, float x, float y) { m_TruckNodes[(int)std::floor(x)][(int)std::floor(y)] = newObject; }
 
-	inline std::vector<IndoorArea> GetIndoorAreas() { return m_IndoorAreas; }
+
+	inline std::vector<std::shared_ptr<IndoorArea>> GetIndoorAreas() { return m_IndoorAreas; }
 };

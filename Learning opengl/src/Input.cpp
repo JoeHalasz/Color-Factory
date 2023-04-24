@@ -20,7 +20,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 {
     bool numberPressedThisFrame = false;
     if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) { i->ChangeDirection(); }
-    for (int x = 0; x < 9; x++)
+    for (int x = 0; x <= 9; x++)
     {
         if (glfwGetKey(window, GLFW_KEY_0+x)) {
             numberPressedThisFrame = true; 
