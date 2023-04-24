@@ -56,6 +56,11 @@ int Distance(int a, int b)
 	return abs(a - b);
 }
 
+float Distance(float a, float b)
+{
+	return abs(a - b);
+}
+
 // will return true if the truck is at the target stop
 bool Truck::PickNextNode()
 {	
@@ -80,7 +85,7 @@ bool Truck::MoveTowardsNextNode()
 		amountToAdd = 4;
 		amountToSubtract = 1;
 	}
-
+	//TODO make trucks stay on the correct side of the road
 	// if we are not within .1 of the cuurent node, then move towards it
 	if (Distance(m_Pos, m_CurrentNode->GetPos()) > .1f)
 	{
