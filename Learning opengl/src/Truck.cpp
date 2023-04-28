@@ -3,15 +3,15 @@
 #include <queue>
 
 Truck::Truck(std::shared_ptr<TruckNode> spawnNode)
-	:m_CurrentNode(spawnNode)
+	:m_CurrentNode(spawnNode, DirectionUp)
 {
-	m_Pos = m_CurrentNode->GetPos();
+	m_Pos = m_CurrentNode.first->GetPos();
 }
 
 Truck::Truck(PaintBlob paintBlob, std::shared_ptr<TruckNode> spawnNode)
-	: m_PaintBlobType(paintBlob), m_CurrentNode(spawnNode)
+	: m_PaintBlobType(paintBlob), m_CurrentNode(spawnNode, DirectionUp)
 {
-	m_Pos = m_CurrentNode->GetPos();
+	m_Pos = m_CurrentNode.first->GetPos();
 }
 
 // will return false if the truck already has a paint blob type, and there are more than 0 paint blobs in the truck
@@ -65,7 +65,7 @@ float Distance(float a, float b)
 bool Truck::PickNextNode()
 {	
 	// get the next node in the path. If we are currently at the target stop, then return true
-	if (m_CurrentNode == m_TargetStop->GetNode())
+	if (m_CurrentNode.first == m_TargetStop->GetNode())
 	{
 		return true;
 	}
@@ -75,57 +75,143 @@ bool Truck::PickNextNode()
 	return false;
 }
 
+
+// will return true if there is a truck in the way, and its on the same side of the street (moving in the same direction)
+bool Truck::CheckTruckInTheWay(Direction movementDirection)
+{
+	// if there is a truck on the next square and that truck is moving in the same direction as this truck, then return true
+	if (movementDirection == DirectionUp)
+	{
+		if (m_AllTrucks[m_Pos.x][m_Pos.y - 1] != nullptr && m_AllTrucks[m_Pos.x][m_Pos.y - 1]->GetDirection() == GetDirection())
+			return true;
+	}
+	else if (movementDirection == DirectionDown)
+	{
+		if (m_AllTrucks[m_Pos.x][m_Pos.y + 1] != nullptr && m_AllTrucks[m_Pos.x][m_Pos.y + 1]->GetDirection() == GetDirection())
+			return true;
+	}
+	else if (movementDirection == DirectionLeft)
+	{
+		if (m_AllTrucks[m_Pos.x - 1][m_Pos.y] != nullptr && m_AllTrucks[m_Pos.x - 1][m_Pos.y]->GetDirection() == GetDirection())
+			return true;
+	}
+	else if (movementDirection == DirectionRight)
+	{
+		if (m_AllTrucks[m_Pos.x + 1][m_Pos.y] != nullptr && m_AllTrucks[m_Pos.x + 1][m_Pos.y]->GetDirection() == GetDirection())
+			return true;
+	}
+}
+
+
+// will move the truck to the correct side of the street over time
+void Truck::FixRoadOffset(Direction movementDirection)
+{
+	float targetPos;
+	if (movementDirection == DirectionUp || movementDirection == DirectionDown)
+	{
+		targetPos = m_CurrentNode.first->GetPos().x;
+	}
+	else
+	{
+		targetPos = m_CurrentNode.first->GetPos().y;
+	}
+	if (m_CurrentNode.first->GetIsStop())
+	{
+		if (movementDirection == DirectionUp)
+		{
+			targetPos += 2; // move it over by 2 so its centered
+		}
+		if (movementDirection == DirectionDown)
+		{
+			targetPos -= 3; // same as last but other side
+		}
+	}
+	// if we are moving up then move the truck to the right until one off the node
+	if (movementDirection == DirectionUp)
+	{
+		if (m_Pos.x < targetPos+1 && Distance(m_Pos.x, targetPos + 1) > .1f)
+			m_Pos.x += .1f;
+		else if (m_Pos.x > targetPos+1 && Distance(m_Pos.x, targetPos + 1) > .1f)
+			m_Pos.x -= .1f;
+	}
+	else if (movementDirection == DirectionDown)
+	{
+		if (m_Pos.x < targetPos - 1 && Distance(m_Pos.x, targetPos - 1) > .1f)
+			m_Pos.x += .1f;
+		else if (m_Pos.x > targetPos - 1 && Distance(m_Pos.x, targetPos - 1) > .1f)
+			m_Pos.x -= .1f;
+	}
+	else if (movementDirection == DirectionLeft)
+	{
+		if (m_Pos.y < targetPos + 1 && Distance(m_Pos.y, targetPos + 1) > .1f)
+			m_Pos.y += .1f;
+		else if (m_Pos.y > targetPos + 1 && Distance(m_Pos.y, targetPos + 1) > .1f)
+			m_Pos.y -= .1f;
+	}
+	else if (movementDirection == DirectionDown)
+	{
+		if (m_Pos.y < targetPos - 1 && Distance(m_Pos.y, targetPos - 1) > .1f)
+			m_Pos.y += .1f;
+		else if (m_Pos.y > targetPos - 1 && Distance(m_Pos.y, targetPos - 1) > .1f)
+			m_Pos.y -= .1f;
+	}
+}
+
+// this function will return true if the target node is not a stop, or if it is a stop and it is close enough to the stop
+bool Truck::CheckMoveToStop()
+{
+	// if the target node is not a stop, then return true
+	if (!m_CurrentNode.first->GetIsStop())
+		return true;
+	// if the target node is a stop, then check if we are close enough to the stop
+	std::cout << "Here" << std::endl; // only here once, then it moves to the next node
+	if (m_CurrentNode.second == DirectionUp || m_CurrentNode.second == DirectionDown)
+	{
+		if (Distance(m_Pos.x, m_CurrentNode.first->GetPos().x) <= .1f) 
+			return true;
+	}
+	else if (m_CurrentNode.second == DirectionLeft || m_CurrentNode.second == DirectionRight)
+	{
+		if (Distance(m_Pos.y, m_CurrentNode.first->GetPos().y) <= .1f)
+			return true;
+	}
+	// move towards the stop
+	if (m_CurrentNode.second == DirectionUp) // can only be up or down cause its a stop
+		m_Pos.x -= .1f;
+	else if (m_CurrentNode.second == DirectionDown)
+		m_Pos.x += .1f;
+	return false;
+}
+
 // will return true if the truck is at the target node
 bool Truck::MoveTowardsNextNode()
 {
-	float amountToAdd = 1;
-	float amountToSubtract = -1;
-	if (m_CurrentNode->GetIsStop())
-	{
-		amountToAdd = 4;
-		amountToSubtract = 1;
-	}
-	//TODO make trucks stay on the correct side of the road
-	// if we are not within .1 of the cuurent node, then move towards it
-	if (Distance(m_Pos, m_CurrentNode->GetPos()) > .1f)
-	{
-		// move in the y direction
-		if (m_Pos.y < m_CurrentNode->GetPos().y && Distance(m_Pos.y, m_CurrentNode->GetPos().y) > .1f)
-		{
-			m_Pos.y += .1f;
-		}
-		else if (m_Pos.y > m_CurrentNode->GetPos().y && Distance(m_Pos.y, m_CurrentNode->GetPos().y) > .1f)
-		{
-			m_Pos.y += -.1f;
-		}
-		// move in the x direction
-		else if (m_Pos.x < m_CurrentNode->GetPos().x && Distance(m_Pos.x, m_CurrentNode->GetPos().x) > .1f)
-		{
-			m_Pos.x += .1f;
-		}
-		else if (m_Pos.x > m_CurrentNode->GetPos().x && Distance(m_Pos.x, m_CurrentNode->GetPos().x) > .1f)
-		{
-			m_Pos.x += -.1f;
-		}
-		
+	// if we are within .1 of the current node, go to next node
+	Direction directionToMove = m_CurrentNode.second;
+	if ((directionToMove == DirectionUp || directionToMove == DirectionDown) && Distance(m_Pos.y, m_CurrentNode.first->GetPos().y) <= .1f)
+		return CheckMoveToStop();
+
+	if ((directionToMove == DirectionLeft || directionToMove == DirectionRight) && Distance(m_Pos.x, m_CurrentNode.first->GetPos().x) <= .1f)
+		return CheckMoveToStop();
+	
+	// dont move if there is another truck in the way
+	if (CheckTruckInTheWay(directionToMove))
 		return false;
-	}
-	// if we are within .1 of the current node, then move to the next node
-	return true;
-
-
-
-
-
-	// change direction and position (one off from center of road) based on the direction the truck is moving
-	// also move in Y direction first so that the truck doesnt move into a wall when going to a stop
-
-
-	// TODO  SET THE DIRECTION THAT THE TRUCK SHOULD MOVE WHEN FIGURING OUT NEXT NODE AND JUST MOVE IN THAT DIRECTIOn
-	// also do truck collision, need to save all trucks in constructor
 	
+	// we are not close enough yet, so move towards the node
+	if (directionToMove == DirectionUp)
+		m_Pos.y += .1f;
+	else if (directionToMove == DirectionDown)
+		m_Pos.y -= .1f;
+	else if (directionToMove == DirectionLeft)
+		m_Pos.x -= .1f;
+	else if (directionToMove == DirectionRight)
+		m_Pos.x += .1f;
 	
-	return false;
+	// correct for side of the street
+	FixRoadOffset(directionToMove);
+	
+	return false; // if we made it to here then we moved, so we are not at the node yet
 }
 
 void Truck::Update()
@@ -197,23 +283,31 @@ void Truck::Update()
 	}
 }
 
-std::vector<std::shared_ptr<TruckNode>> findPath(std::shared_ptr<TruckNode> startNode, std::shared_ptr<TruckNode> targetNode)
+struct pair_hash {
+	std::size_t operator () (const std::pair<std::shared_ptr<TruckNode>, Direction>& p) const {
+		// use the hash of the node's position and the direction
+		return std::hash<int>()(p.first->GetPos().x) ^ (std::hash<int>()(p.first->GetPos().y) * std::hash<int>()(p.second));
+	}
+};
+
+
+std::vector<std::pair<std::shared_ptr<TruckNode>, Direction>> findPath(std::pair<std::shared_ptr<TruckNode>, Direction> startNode, std::shared_ptr<TruckNode> targetNode)
 {
 	// use BFS search to find the shortest path to the target node
-	std::vector<std::shared_ptr<TruckNode>> path;
-	std::queue<std::shared_ptr<TruckNode>> q;
-	std::unordered_map<std::shared_ptr<TruckNode>, std::shared_ptr<TruckNode>> parentMap;
+	std::vector<std::pair<std::shared_ptr<TruckNode>, Direction>> path;
+	std::queue<std::pair<std::shared_ptr<TruckNode>, Direction>> q;
+	std::unordered_map<std::pair<std::shared_ptr<TruckNode>, Direction>, std::pair<std::shared_ptr<TruckNode>, Direction>, pair_hash> parentMap;
 	q.push(startNode);
-	parentMap[startNode] = nullptr;
+	parentMap[startNode] = std::pair <std::shared_ptr<TruckNode>, Direction>(nullptr, DirectionUp);
 	while (!q.empty())
 	{
-		std::shared_ptr<TruckNode> currentNode = q.front();
+		std::pair<std::shared_ptr<TruckNode>, Direction> currentNode = q.front();
 		q.pop();
-		if (currentNode == targetNode)
+		if (currentNode.first == targetNode)
 		{
 			// we found the target node, now we need to backtrack to find the path
-			std::shared_ptr<TruckNode> currentPathNode = currentNode;
-			while (currentPathNode != nullptr)
+			std::pair<std::shared_ptr<TruckNode>, Direction> currentPathNode = currentNode;
+			while (currentPathNode != std::pair <std::shared_ptr<TruckNode>, Direction>(nullptr, DirectionUp))
 			{
 				path.push_back(currentPathNode);
 				currentPathNode = parentMap[currentPathNode];
@@ -221,12 +315,12 @@ std::vector<std::shared_ptr<TruckNode>> findPath(std::shared_ptr<TruckNode> star
 			std::reverse(path.begin(), path.end());
 			return path;
 		}
-		for (auto& node : currentNode->GetConnectedNodes())
+		for (auto& node : currentNode.first->GetConnectedNodes())
 		{
 			if (parentMap.find(node) == parentMap.end())
 			{
-				parentMap[node] = currentNode;
 				q.push(node);
+				parentMap[node] = currentNode;
 			}
 		}
 	}

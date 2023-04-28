@@ -38,17 +38,17 @@ IndoorArea::IndoorArea(Vec3 MiddlePosition, Direction lastAreaDirection,
 		bottomRight = std::make_shared<TruckNode>(Vec3{ m_MiddlePosition.x + m_DirectionRightFromMiddle + 3, m_MiddlePosition.y - m_DirectionDownFromMiddle - 3, m_MiddlePosition.z });
 
 
-	topLeft->addConnectedNode(topRight);
-	topLeft->addConnectedNode(bottomLeft);
+	topLeft->addConnectedNode(topRight, DirectionRight);
+	topLeft->addConnectedNode(bottomLeft, DirectionDown);
 
-	topRight->addConnectedNode(topLeft);
-	topRight->addConnectedNode(bottomRight);
+	topRight->addConnectedNode(topLeft, DirectionLeft);
+	topRight->addConnectedNode(bottomRight, DirectionDown);
 
-	bottomLeft->addConnectedNode(topLeft);
-	bottomLeft->addConnectedNode(bottomRight);
+	bottomLeft->addConnectedNode(topLeft, DirectionUp);
+	bottomLeft->addConnectedNode(bottomRight, DirectionRight);
 
-	bottomRight->addConnectedNode(topRight);
-	bottomRight->addConnectedNode(bottomLeft);
+	bottomRight->addConnectedNode(topRight, DirectionUp);
+	bottomRight->addConnectedNode(bottomLeft, DirectionLeft);
 
 	AllTruckNodes[(int)std::floor(m_MiddlePosition.x - m_DirectionLeftFromMiddle - 3)][(int)std::floor(m_MiddlePosition.y + m_DirectionUpFromMiddle + 3)] = topLeft;
 	AllTruckNodes[(int)std::floor(m_MiddlePosition.x + m_DirectionRightFromMiddle + 3)][(int)std::floor(m_MiddlePosition.y + m_DirectionUpFromMiddle + 3)] = topRight;
@@ -57,13 +57,13 @@ IndoorArea::IndoorArea(Vec3 MiddlePosition, Direction lastAreaDirection,
 	
 	// create truck stops on the left and right walls and truck nodes for those stops
 	std::shared_ptr<TruckNode> leftNode = std::make_shared<TruckNode>(Vec3{ m_MiddlePosition.x - m_DirectionLeftFromMiddle, m_MiddlePosition.y, m_MiddlePosition.z }, true);
-	leftNode->addConnectedNode(topLeft);
-	topLeft->addConnectedNode(leftNode);
+	leftNode->addConnectedNode(topLeft, DirectionUp);
+	topLeft->addConnectedNode(leftNode, DirectionDown);
 	std::shared_ptr<TruckStop> leftStop = std::make_shared<TruckStop>(leftNode);
 
 	std::shared_ptr<TruckNode> rightNode = std::make_shared<TruckNode>(Vec3{ m_MiddlePosition.x + m_DirectionRightFromMiddle, m_MiddlePosition.y, m_MiddlePosition.z }, true);
-	rightNode->addConnectedNode(bottomRight);
-	bottomRight->addConnectedNode(rightNode);
+	rightNode->addConnectedNode(bottomRight, DirectionDown);
+	bottomRight->addConnectedNode(rightNode, DirectionUp);
 	std::shared_ptr<TruckStop> rightStop = std::make_shared<TruckStop>(rightNode);
 
 	// add the truck stops

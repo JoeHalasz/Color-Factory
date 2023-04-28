@@ -10,9 +10,11 @@ private:
 	PaintBlob m_PaintBlobType = PaintBlob({ 0,0,0 }, 0, {0,0,0,0}, DirectionUp);
 	int m_NumPaintBlobs = 0;
 	int m_MaxPaintBlobs = 1000;
-	std::shared_ptr<TruckNode> m_CurrentNode;
-	std::vector<std::shared_ptr<TruckNode>> m_Path;
+	std::pair<std::shared_ptr<TruckNode>, Direction> m_CurrentNode;
+	std::vector<std::pair<std::shared_ptr<TruckNode>, Direction>> m_Path;
 	std::shared_ptr<TruckStop> m_TargetStop;
+	std::unordered_map<int, std::unordered_map<int, std::shared_ptr<Truck>>> m_AllTrucks;
+
 	Vec3 m_Pos;
 	Direction m_Direction = DirectionUp; // should be based off of which way the truck is moving
 
@@ -31,7 +33,9 @@ public:
 	inline void SetDirection(Direction direction) { m_Direction = direction; }
 	inline Direction GetDirection() const { return m_Direction; }
 	
-
+	bool CheckMoveToStop();
+	bool CheckTruckInTheWay(Direction movementDirection);
+	void FixRoadOffset(Direction movementDirection);
 	void SetTargetStop(std::shared_ptr<TruckStop> targetStop);
 	bool SetPaintBlobType(PaintBlob paintBlob);
 	bool AddPaintBlob(PaintBlob paintBlob);

@@ -1,12 +1,13 @@
 #pragma once
 #include <MathStuff.h>
 #include <vector>
-
+#include "GameObject.h"
+#include <utility>
 
 class TruckNode
 {
 private:
-	std::vector<std::shared_ptr<TruckNode>> m_ConnectedNodes;
+	std::vector<std::pair<std::shared_ptr<TruckNode>, Direction>> m_ConnectedNodes;
 	Vec3 m_Position;
 	bool m_IsStop = false;
 	int m_F = 0;
@@ -19,8 +20,8 @@ public:
 	TruckNode() : m_Position(Vec3{ 0,0,0 }) {}
 	TruckNode(Vec3 position,bool isStop = false);
 
-	std::vector<std::shared_ptr<TruckNode>> GetConnectedNodes() const { return m_ConnectedNodes; }
-	inline void addConnectedNode(std::shared_ptr<TruckNode> node) { m_ConnectedNodes.push_back(node); }
+	std::vector<std::pair<std::shared_ptr<TruckNode>, Direction>>& GetConnectedNodes() { return m_ConnectedNodes; }
+	inline void addConnectedNode(std::shared_ptr<TruckNode> node, Direction directionToMove) { m_ConnectedNodes.push_back(std::pair<std::shared_ptr<TruckNode>, Direction>(node, directionToMove)); }
 	Vec3 GetPos() const { return m_Position; }
 
 	inline bool GetIsStop() const { return m_IsStop; }
