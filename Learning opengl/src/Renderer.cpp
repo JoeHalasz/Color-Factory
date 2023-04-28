@@ -299,6 +299,11 @@ void Renderer::DrawWorld(World& world, int width, int height)
         std::shared_ptr<Truck> truck = world.GetTruckAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
         if (truck != NULL)
             AddQuad(TileTypeTruck, size, truck->GetDirection(), truck->GetPos(), {0,0,0,0});
+
+        // draw AddIndoorAreaButton
+        std::shared_ptr<AddIndoorAreaButton> addIndoorAreaButton = world.GetAddIndoorAreaButtonAtPos(OnScreenPositions[i].x, OnScreenPositions[i].y);
+        if (addIndoorAreaButton != NULL)
+			AddQuad(TileTypePlusButton, size, DirectionUp, addIndoorAreaButton->GetPos(), {0,0,0,0});
     }
 
 

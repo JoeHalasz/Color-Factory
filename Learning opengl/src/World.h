@@ -46,6 +46,10 @@ private:
 	std::unordered_map<int, std::unordered_map<int, std::shared_ptr<Truck>>> m_Trucks;
 	std::unordered_map<int, std::unordered_map<int, std::shared_ptr<TruckStop>>> m_TruckStops;
 	std::unordered_map<int, std::unordered_map<int, std::shared_ptr<TruckNode>>> m_TruckNodes;
+	std::unordered_map<int, std::unordered_map<int, std::shared_ptr<AddIndoorAreaButton>>> m_AddIndoorAreaButtons;
+	
+	// this will be populated by buttons, and then used by the world to call things that cant be called from the button class
+	std::vector<std::pair<IndoorArea,Direction>> m_ButtonMessages;
 
 	// TODO this should be like the ones above so that indoor areas cant be placed on top of each other. Current logic allows for that sometimes.
 	std::vector<std::shared_ptr<IndoorArea>> m_IndoorAreas;
@@ -76,6 +80,8 @@ public:
 	std::shared_ptr<Truck> GetTruckAtPos(float x, float y) { return GetTAtPos<Truck>(x, y, m_Trucks); }
 	std::shared_ptr<TruckStop> GetTruckStopAtPos(float x, float y) { return GetTAtPos<TruckStop>(x, y, m_TruckStops); }
 	std::shared_ptr<TruckNode> GetTruckNodeAtPos(float x, float y) { return GetTAtPos<TruckNode>(x, y, m_TruckNodes); }
+	std::shared_ptr<AddIndoorAreaButton> GetAddIndoorAreaButtonAtPos(float x, float y) { return GetTAtPos<AddIndoorAreaButton>(x, y, m_AddIndoorAreaButtons); }
+
 
 	inline glm::vec3 GetPosition() const { return m_Position; }
 	inline int GetZoomAmount() const { return (int)m_ZoomAmount;  }
@@ -93,7 +99,7 @@ public:
 	inline void AddTruckAtPos(std::shared_ptr <Truck> newObject, float x, float y) { m_Trucks[(int)std::floor(x)][(int)std::floor(y)] = newObject; }
 	inline void AddTruckStopAtPos(std::shared_ptr <TruckStop> newObject, float x, float y) { m_TruckStops[(int)std::floor(x)][(int)std::floor(y)] = newObject; }
 	inline void AddTruckNodeAtPos(std::shared_ptr <TruckNode> newObject, float x, float y) { m_TruckNodes[(int)std::floor(x)][(int)std::floor(y)] = newObject; }
-
+	inline void AddAddIndoorAreaButtonAtPos(std::shared_ptr <AddIndoorAreaButton> newObject, float x, float y) { m_AddIndoorAreaButtons[(int)std::floor(x)][(int)std::floor(y)] = newObject; }
 
 	inline std::vector<std::shared_ptr<IndoorArea>> GetIndoorAreas() { return m_IndoorAreas; }
 };

@@ -35,6 +35,7 @@ const char* WorldTile::TileTypeToString(TileType type)
 	case(TileTypeWallCorner):				return "background/wall corner.png";
 	case(TileTypeWallCornerBackwards):		return "background/wall corner backwards.png";
 	case(TileTypeTruck):					return "trucks/truck.png";
+	case(TileTypePlusButton):				return "overlay/plus button.png";
 	default:								return "";
 	}
 }

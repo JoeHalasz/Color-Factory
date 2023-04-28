@@ -284,7 +284,7 @@ bool World::AddIndoorArea(std::shared_ptr<IndoorArea> lastArea, Direction direct
     std::shared_ptr<IndoorArea> newArea;
     int amountExtra = 6;
     if (isFirst) // if its the first area then just create it in the middle at the default size
-        newArea = std::make_shared<IndoorArea>(Vec3{ 0,0,1 }, DirectionUp, m_TruckNodes, m_TruckStops, true);
+        newArea = std::make_shared<IndoorArea>(Vec3{ 0,0,1 }, DirectionUp, m_TruckNodes, m_TruckStops, m_AddIndoorAreaButtons, m_ButtonMessages, true);
     
     else 
     {
@@ -299,7 +299,7 @@ bool World::AddIndoorArea(std::shared_ptr<IndoorArea> lastArea, Direction direct
             case (DirectionLeft): newPos = { newPos.x + lastArea->GetDirectionRightFromMiddle() + lengthFromMiddle + amountExtra, newPos.y, newPos.z }; break;
             case (DirectionRight): newPos = { newPos.x - lastArea->GetDirectionLeftFromMiddle() - lengthFromMiddle - amountExtra, newPos.y, newPos.z }; break;
             }
-            newArea = std::make_shared<IndoorArea>(newPos, directionToCreate, m_TruckNodes, m_TruckStops, false, lengthFromMiddle, lengthFromMiddle, lengthFromMiddle, lengthFromMiddle);
+            newArea = std::make_shared<IndoorArea>(newPos, directionToCreate, m_TruckNodes, m_TruckStops, m_AddIndoorAreaButtons, m_ButtonMessages, false, lengthFromMiddle, lengthFromMiddle, lengthFromMiddle, lengthFromMiddle);
 
             lastArea->AddDirectionToOtherAreas(directionToCreate);
         }

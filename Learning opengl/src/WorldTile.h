@@ -27,6 +27,7 @@ enum TileType
 	TileTypeWallCorner,
 	TileTypeWallCornerBackwards,
 	TileTypeTruck,
+	TileTypePlusButton,
 	TileTypeNumTileTypes
 };
 
