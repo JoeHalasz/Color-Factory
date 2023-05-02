@@ -1,10 +1,10 @@
 #pragma once
-#include <WorldBackgroundTile.h>
-#include <unordered_map>
-#include <TruckNode.h>
-#include <TruckStop.h>
+#include "WorldBackgroundTile.h"
+#include "unordered_map"
+#include "TruckNode.h"
+#include "TruckStop.h"
+#include "HelperFunctions.h"
 
-class AddIndoorAreaButton;
 
 class IndoorArea
 {
@@ -24,8 +24,6 @@ public:
 	IndoorArea(Vec3 MiddlePosition, Direction lastAreaDirection, 
 		std::unordered_map<int, std::unordered_map<int, std::shared_ptr<TruckNode>>>& AllTruckNodes, 
 		std::unordered_map<int, std::unordered_map<int, std::shared_ptr<TruckStop>>>& AllTruckStops, 
-		std::unordered_map<int, std::unordered_map<int, std::shared_ptr<AddIndoorAreaButton>>>& AllButtons,
-		std::vector<std::pair<IndoorArea, Direction>>& buttonMessages,
 		bool isFirst = false, int DirectionLeftFromMiddle = 20, int DirectionRightFromMiddle = 20, 
 		int DirectionUpFromMiddle = 20, int DirectionDownFromMiddle = 20);
 
@@ -47,17 +45,3 @@ public:
 
 };
 
-class AddIndoorAreaButton
-{
-private:
-	IndoorArea m_ConnectedTo;
-	Direction m_Direction;
-	Vec3 m_Pos;
-	std::vector<std::pair<IndoorArea, Direction>> m_ButtonMessages;
-public:
-	AddIndoorAreaButton(IndoorArea& connectedTo, Direction direction, Vec3 pos, std::vector<std::pair<IndoorArea, Direction>>& buttonMessages)
-		: m_ConnectedTo(connectedTo), m_Direction(direction), m_Pos(pos), m_ButtonMessages(buttonMessages){}
-	void OnClick(){ m_ButtonMessages.push_back(std::pair<IndoorArea, Direction>(m_ConnectedTo, m_Direction));}
-	inline Vec3 GetPos() const { return m_Pos; }
-	inline void SetPos(Vec3 pos) { m_Pos = pos; }
-};

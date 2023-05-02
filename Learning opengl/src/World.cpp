@@ -1,9 +1,9 @@
-#include "World.h"
 #include <cstdint>
 #include <algorithm>
 #include <iostream>
 #include <iomanip>
-#include <IndoorArea.h>
+#include "IndoorArea.h"
+#include "World.h"
 
 World::World(GLFWwindow* window)
     :m_Window(window)
@@ -279,14 +279,33 @@ bool World::AddPaintBlobCombiner(Vec3 pos, Direction direction, int numInputs)
 }
 
 
+// this will return true if there is an indoor area in the passed in direction from the passed in pos 
+bool World::HasIndoorAreaInDirection(Vec3 pos, Direction direction)
+{
+    switch (direction) {
+    case(DirectionUp):
+        if (GetIndoorAreaAddButtonAtPos(pos.x, pos.y-1) != NULL)
+            return true;
+    case(DirectionDown):
+        if (GetIndoorAreaAddButtonAtPos(pos.x, pos.y + 1) != NULL)
+            return true;
+    case(DirectionLeft):
+        if (GetIndoorAreaAddButtonAtPos(pos.x-1, pos.y) != NULL)
+            return true;
+    case(DirectionRight):
+        if (GetIndoorAreaAddButtonAtPos(pos.x + 1, pos.y) != NULL)
+            return true;
+    }
+}
+
+
 bool World::AddIndoorArea(std::shared_ptr<IndoorArea> lastArea, Direction directionToCreate, bool isFirst)
 {
     std::shared_ptr<IndoorArea> newArea;
     int amountExtra = 6;
     if (isFirst) // if its the first area then just create it in the middle at the default size
-        newArea = std::make_shared<IndoorArea>(Vec3{ 0,0,1 }, DirectionUp, m_TruckNodes, m_TruckStops, m_AddIndoorAreaButtons, m_ButtonMessages, true);
-    
-    else 
+        newArea = std::make_shared<IndoorArea>(Vec3{ 0,0,1 }, DirectionUp, m_TruckNodes, m_TruckStops, true);
+    else
     {
         // check if we can expand in the direction we want to create a new area
         if (lastArea->checkExpandAvailable(directionToCreate)) {
@@ -299,7 +318,7 @@ bool World::AddIndoorArea(std::shared_ptr<IndoorArea> lastArea, Direction direct
             case (DirectionLeft): newPos = { newPos.x + lastArea->GetDirectionRightFromMiddle() + lengthFromMiddle + amountExtra, newPos.y, newPos.z }; break;
             case (DirectionRight): newPos = { newPos.x - lastArea->GetDirectionLeftFromMiddle() - lengthFromMiddle - amountExtra, newPos.y, newPos.z }; break;
             }
-            newArea = std::make_shared<IndoorArea>(newPos, directionToCreate, m_TruckNodes, m_TruckStops, m_AddIndoorAreaButtons, m_ButtonMessages, false, lengthFromMiddle, lengthFromMiddle, lengthFromMiddle, lengthFromMiddle);
+            newArea = std::make_shared<IndoorArea>(newPos, directionToCreate, m_TruckNodes, m_TruckStops, false, lengthFromMiddle, lengthFromMiddle, lengthFromMiddle, lengthFromMiddle);
 
             lastArea->AddDirectionToOtherAreas(directionToCreate);
         }
@@ -315,24 +334,24 @@ bool World::AddIndoorArea(std::shared_ptr<IndoorArea> lastArea, Direction direct
         for (float y = middle.y - newArea->GetDirectionDownFromMiddle(); y < middle.y + newArea->GetDirectionUpFromMiddle(); y++)
         {
             tile = std::make_shared<WorldBackgroundTile>(TileTypeBackgroundIndoor, DirectionUp);
-            AddWorldBackgroundTileAtPos(tile, x ,y );
+            AddWorldBackgroundTileAtPos(tile, x, y);
         }
     }
     // add the walls
     tile = std::make_shared<WorldBackgroundTile>(TileTypeWall, DirectionLeft);
     tile2 = std::make_shared<WorldBackgroundTile>(TileTypeWall, DirectionRight);
-    for (float x = middle.x - newArea->GetDirectionDownFromMiddle()+1; x < middle.x + newArea->GetDirectionUpFromMiddle(); x++)
+    for (float x = middle.x - newArea->GetDirectionDownFromMiddle() + 1; x < middle.x + newArea->GetDirectionUpFromMiddle(); x++)
     {
         AddWorldBackgroundTileAtPos(tile, x, middle.y - newArea->GetDirectionDownFromMiddle());
         AddWorldBackgroundTileAtPos(tile2, x, middle.y + newArea->GetDirectionDownFromMiddle());
-	}
-	tile = std::make_shared<WorldBackgroundTile>(TileTypeWall, DirectionDown);
+    }
+    tile = std::make_shared<WorldBackgroundTile>(TileTypeWall, DirectionDown);
     tile2 = std::make_shared<WorldBackgroundTile>(TileTypeWall, DirectionUp);
-    for (float y = middle.y - newArea->GetDirectionLeftFromMiddle()+1; y < middle.y + newArea->GetDirectionRightFromMiddle(); y++)
+    for (float y = middle.y - newArea->GetDirectionLeftFromMiddle() + 1; y < middle.y + newArea->GetDirectionRightFromMiddle(); y++)
     {
-		AddWorldBackgroundTileAtPos(tile, middle.x - newArea->GetDirectionLeftFromMiddle(), y);
+        AddWorldBackgroundTileAtPos(tile, middle.x - newArea->GetDirectionLeftFromMiddle(), y);
         AddWorldBackgroundTileAtPos(tile2, middle.x + newArea->GetDirectionRightFromMiddle(), y);
-	}
+    }
     // add the corners
     tile = std::make_shared<WorldBackgroundTile>(TileTypeWallCorner, DirectionUp);
     AddWorldBackgroundTileAtPos(tile, middle.x + newArea->GetDirectionRightFromMiddle(), middle.y - newArea->GetDirectionUpFromMiddle());
@@ -347,7 +366,7 @@ bool World::AddIndoorArea(std::shared_ptr<IndoorArea> lastArea, Direction direct
     tile = std::make_shared<WorldBackgroundTile>(TileTypeRoad, DirectionLeft);
     tile2 = std::make_shared<WorldBackgroundTile>(TileTypeRoadMiddle, DirectionLeft);
     for (float x = middle.x - newArea->GetDirectionDownFromMiddle() - amountExtra + 1; x < middle.x + newArea->GetDirectionUpFromMiddle() + amountExtra; x++)
-    { 
+    {
         for (int i = 1; i < 6; i++)
         {
             AddWorldBackgroundTileAtPos(tile, x, middle.y - newArea->GetDirectionDownFromMiddle() - i);
@@ -355,7 +374,7 @@ bool World::AddIndoorArea(std::shared_ptr<IndoorArea> lastArea, Direction direct
         }
         AddWorldBackgroundTileAtPos(tile2, x, middle.y - newArea->GetDirectionDownFromMiddle() - 3);
         AddWorldBackgroundTileAtPos(tile2, x, middle.y + newArea->GetDirectionDownFromMiddle() + 3);
-	}
+    }
     tile = std::make_shared<WorldBackgroundTile>(TileTypeRoad, DirectionUp);
     tile2 = std::make_shared<WorldBackgroundTile>(TileTypeRoadMiddle, DirectionUp);
     for (float y = middle.y - newArea->GetDirectionLeftFromMiddle() - amountExtra + 1; y < middle.y + newArea->GetDirectionUpFromMiddle() + amountExtra; y++)
@@ -379,6 +398,24 @@ bool World::AddIndoorArea(std::shared_ptr<IndoorArea> lastArea, Direction direct
         AddWorldBackgroundTileAtPos(tile, middle.x + newArea->GetDirectionRightFromMiddle() + 3, middle.y - newArea->GetDirectionUpFromMiddle() - i);
         AddWorldBackgroundTileAtPos(tile, middle.x - newArea->GetDirectionLeftFromMiddle() - 3, middle.y + newArea->GetDirectionDownFromMiddle() + i);
         AddWorldBackgroundTileAtPos(tile, middle.x + newArea->GetDirectionRightFromMiddle() + 3, middle.y + newArea->GetDirectionDownFromMiddle() + i);
+    }
+
+    // add the add new Indoor Area buttons
+    if (HasIndoorAreaInDirection(Vec3{ middle.x,middle.y - newArea->GetDirectionUpFromMiddle() - 1 , 0 }, DirectionUp)) {
+        std::shared_ptr <IndoorAreaAddButton> newButton = std::make_shared<IndoorAreaAddButton>(newArea, DirectionUp, Vec3{ middle.x, middle.y - newArea->GetDirectionUpFromMiddle() - 5 , 1 }, *this);
+        AddIndoorAreaAddButtonAtPos(newButton, middle.x, middle.y - newArea->GetDirectionUpFromMiddle() - 5);
+    }
+    if (HasIndoorAreaInDirection(Vec3{ middle.x,middle.y + newArea->GetDirectionDownFromMiddle() + 1 , 0 }, DirectionDown)) {
+        std::shared_ptr <IndoorAreaAddButton> newButton = std::make_shared<IndoorAreaAddButton>(newArea, DirectionDown, Vec3{ middle.x, middle.y + newArea->GetDirectionDownFromMiddle() + 5 , 1 }, *this);
+        AddIndoorAreaAddButtonAtPos(newButton, middle.x, middle.y + newArea->GetDirectionDownFromMiddle() + 5);
+    }
+    if (HasIndoorAreaInDirection(Vec3{ middle.x - newArea->GetDirectionLeftFromMiddle() - 1 ,middle.y, 0 }, DirectionLeft)) {
+        std::shared_ptr <IndoorAreaAddButton> newButton = std::make_shared<IndoorAreaAddButton>(newArea, DirectionLeft, Vec3{ middle.x + newArea->GetDirectionLeftFromMiddle() + 5 ,middle.y , 1 }, *this);
+        AddIndoorAreaAddButtonAtPos(newButton, middle.x - newArea->GetDirectionLeftFromMiddle() - 5, middle.y);
+    }
+    if (HasIndoorAreaInDirection(Vec3{ middle.x + newArea->GetDirectionRightFromMiddle() + 1 ,middle.y, 0 }, DirectionRight)) {
+        std::shared_ptr <IndoorAreaAddButton> newButton = std::make_shared<IndoorAreaAddButton>(newArea, DirectionRight, Vec3{ middle.x - newArea->GetDirectionRightFromMiddle() - 5 ,middle.y , 1 }, *this);
+        AddIndoorAreaAddButtonAtPos(newButton, middle.x + newArea->GetDirectionRightFromMiddle() + 5, middle.y);
     }
     
     // add the area
@@ -421,7 +458,7 @@ void World::OnUpdate()
     if (m_Input->GetLeftMouseDown())
     {
         switch (m_Input->GetLastNumPressed())
-        {
+        { // TODO do the check to make sure its indoors before this, and if its not check for button presses instead 
             case(1): AddBelt((BeltType)std::max(std::min((BeltTypeYellow + m_Input->m_SecondNumPressed - 1), 2), 0), { mousePosX, mousePosY, 1 }, (Direction)m_Input->GetDirection()); break;
             case(2): AddPaintBlobCombiner(Vec3{ mousePosX, mousePosY,1 }, (Direction)m_Input->GetDirection(), std::max(std::min(m_Input->m_SecondNumPressed+1, 3), 2));break;
             case(3): AddIndoorArea(GetIndoorAreas()[GetIndoorAreas().size() - 1], (Direction)(std::max(std::min(m_Input->m_SecondNumPressed, 4), 1)-1), false); break;

@@ -1,5 +1,4 @@
 #include "IndoorArea.h"
-#include "HelperFunctions.h"
 
 
 IndoorArea::IndoorArea()
@@ -9,9 +8,7 @@ IndoorArea::IndoorArea()
 
 IndoorArea::IndoorArea(Vec3 MiddlePosition, Direction lastAreaDirection, 
 	std::unordered_map<int, std::unordered_map<int, std::shared_ptr<TruckNode>>>& AllTruckNodes, 
-	std::unordered_map<int, std::unordered_map<int, std::shared_ptr<TruckStop>>>& AllTruckStops, 
-	std::unordered_map<int, std::unordered_map<int, std::shared_ptr<AddIndoorAreaButton>>>& AllButtons, 
-	std::vector<std::pair<IndoorArea, Direction>>& buttonMessages, bool isFirst,
+	std::unordered_map<int, std::unordered_map<int, std::shared_ptr<TruckStop>>>& AllTruckStops, bool isFirst,
 	int DirectionLeftFromMiddle, int DirectionRightFromMiddle, int DirectionUpFromMiddle, int DirectionDownFromMiddle)
 	: m_MiddlePosition(MiddlePosition), m_DirectionLeftFromMiddle(DirectionLeftFromMiddle), m_DirectionRightFromMiddle(DirectionRightFromMiddle), 
 	m_DirectionUpFromMiddle(DirectionUpFromMiddle), m_DirectionDownFromMiddle(DirectionDownFromMiddle)
@@ -77,19 +74,7 @@ IndoorArea::IndoorArea(Vec3 MiddlePosition, Direction lastAreaDirection,
 	AllTruckStops[(int)std::floor(m_MiddlePosition.x - m_DirectionLeftFromMiddle)][(int)std::floor(m_MiddlePosition.y)] = leftStop;
 	AllTruckStops[(int)std::floor(m_MiddlePosition.x + m_DirectionRightFromMiddle)][(int)std::floor(m_MiddlePosition.y)] = rightStop;
 
-	// add the add new Indoor Area buttons
-	if (std::find(m_DirectionsToOtherAreas.begin(), m_DirectionsToOtherAreas.end(), DirectionUp) == m_DirectionsToOtherAreas.end())
-		AllButtons[(int)std::floor(m_MiddlePosition.x)][(int)std::floor(m_MiddlePosition.y - m_DirectionUpFromMiddle - 5)] = std::make_shared<AddIndoorAreaButton>(*this, DirectionUp, Vec3{ m_MiddlePosition.x, m_MiddlePosition.y - m_DirectionUpFromMiddle - 5 , 1}, buttonMessages);
-	if (std::find(m_DirectionsToOtherAreas.begin(), m_DirectionsToOtherAreas.end(), DirectionDown) == m_DirectionsToOtherAreas.end())
-		AllButtons[(int)std::floor(m_MiddlePosition.x)][(int)std::floor(m_MiddlePosition.y + m_DirectionDownFromMiddle + 5)] = std::make_shared<AddIndoorAreaButton>(*this, DirectionDown, Vec3{ m_MiddlePosition.x, m_MiddlePosition.y + m_DirectionDownFromMiddle + 5 , 1}, buttonMessages);
-	if (std::find(m_DirectionsToOtherAreas.begin(), m_DirectionsToOtherAreas.end(), DirectionLeft) == m_DirectionsToOtherAreas.end())
-		AllButtons[(int)std::floor(m_MiddlePosition.x - m_DirectionLeftFromMiddle - 5)][(int)std::floor(m_MiddlePosition.y)] = std::make_shared<AddIndoorAreaButton>(*this, DirectionLeft, Vec3{ m_MiddlePosition.x - m_DirectionLeftFromMiddle - 5, m_MiddlePosition.y , 1}, buttonMessages);
-	if (std::find(m_DirectionsToOtherAreas.begin(), m_DirectionsToOtherAreas.end(), DirectionRight) == m_DirectionsToOtherAreas.end())
-		AllButtons[(int)std::floor(m_MiddlePosition.x + m_DirectionRightFromMiddle + 5)][(int)std::floor(m_MiddlePosition.y)] = std::make_shared<AddIndoorAreaButton>(*this, DirectionRight, Vec3{ m_MiddlePosition.x + m_DirectionRightFromMiddle + 5, m_MiddlePosition.y , 1}, buttonMessages);
-
 }
-	
-
 
 
 bool IndoorArea::checkExpandAvailable(Direction direction) {
