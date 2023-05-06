@@ -1,14 +1,7 @@
 #pragma once
 #include "WorldTile.h"
 #include <vector>
-
-enum Direction
-{
-	DirectionUp = 0,
-	DirectionRight = 1,
-	DirectionDown = 2,
-	DirectionLeft = 3,
-};
+#include "HelperFunctions.h"
 
 class GameObject
 {

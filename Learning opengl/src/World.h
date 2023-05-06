@@ -70,7 +70,7 @@ public:
 	bool NothingAtPos(Vec3 pos);
 	void DeleteAllAtPos(Vec3 pos);
 	int GetBeltDirectionAt(int x, int y);
-	bool HasIndoorAreaInDirection(Vec3 pos, Direction direction);
+	bool HasIndoorAreaInDirection(std::shared_ptr<IndoorArea> area, Direction direction);
 	bool AddIndoorArea(std::shared_ptr <IndoorArea> lastArea, Direction directionToCreate, bool isFirst=false);
 
 	std::shared_ptr<Belt> GetBeltAtPos(float x, float y) { return GetTAtPos<Belt>(x, y, m_Belts); }
@@ -80,7 +80,7 @@ public:
 	std::shared_ptr<Truck> GetTruckAtPos(float x, float y) { return GetTAtPos<Truck>(x, y, m_Trucks); }
 	std::shared_ptr<TruckStop> GetTruckStopAtPos(float x, float y) { return GetTAtPos<TruckStop>(x, y, m_TruckStops); }
 	std::shared_ptr<TruckNode> GetTruckNodeAtPos(float x, float y) { return GetTAtPos<TruckNode>(x, y, m_TruckNodes); }
-	std::shared_ptr<IndoorAreaAddButton> GetIndoorAreaAddButtonAtPos(float x, float y) { return GetTAtPos<IndoorAreaAddButton>(x, y, m_IndoorAreaAddButtons); }
+	std::shared_ptr<IndoorAreaAddButton> GetIndoorAreaAddButtonAtPos(float x, float y, bool printIt=false) { return GetTAtPos<IndoorAreaAddButton>(x, y, m_IndoorAreaAddButtons, printIt); }
 
 
 	inline glm::vec3 GetPosition() const { return m_Position; }
@@ -101,7 +101,16 @@ public:
 	inline void AddTruckNodeAtPos(std::shared_ptr <TruckNode> newObject, float x, float y) { m_TruckNodes[(int)std::floor(x)][(int)std::floor(y)] = newObject; }
 	inline void AddIndoorAreaAddButtonAtPos(std::shared_ptr <IndoorAreaAddButton> newObject, float x, float y) { m_IndoorAreaAddButtons[(int)std::floor(x)][(int)std::floor(y)] = newObject; }
 
+
+	inline bool isIndoors(Vec3 pos)
+	{
+		if (GetWorldBackgroundTileAtPos(pos.x, pos.y) == NULL || GetWorldBackgroundTileAtPos(pos.x, pos.y)->GetTileType() != TileTypeBackgroundIndoor)
+			return false; 
+		return true;
+	}
 	inline std::vector<std::shared_ptr<IndoorArea>> GetIndoorAreas() { return m_IndoorAreas; }
+	inline void DeleteIndoorAreaAddButtonAtPos(float x, float y) { m_IndoorAreaAddButtons[(int)std::floor(x)][(int)std::floor(y)] = NULL; }
+
 };
 
 
@@ -118,4 +127,6 @@ public:
 	inline void OnClick() { m_World.AddIndoorArea(m_ConnectedTo, m_Direction, false); }
 	inline Vec3 GetPos() const { return m_Pos; }
 	inline void SetPos(Vec3 pos) { m_Pos = pos; }
+	inline std::shared_ptr<IndoorArea> GetConnectedTo(){ return m_ConnectedTo; }
+	inline Direction GetDirection() { return m_Direction; }
 };

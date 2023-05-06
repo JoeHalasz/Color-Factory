@@ -17,7 +17,7 @@ private:
 	int m_DirectionDownFromMiddle;
 
 	// if a direction is included here that means you cannot expand in that direction because there is already an area there
-	std::vector<Direction> m_DirectionsToOtherAreas;
+	std::vector<Direction> m_DirectionsToOtherAreas; // TODO delete this. it isnt used anymore
 
 public:
 	IndoorArea();

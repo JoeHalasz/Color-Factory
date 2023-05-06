@@ -221,17 +221,17 @@ bool World::AddPaintBlobCombiner(Vec3 pos, Direction direction, int numInputs)
 {
     if (!NothingAtPos(pos))
         return false;
-    if (GetWorldBackgroundTileAtPos(pos.x, pos.y) == NULL || GetWorldBackgroundTileAtPos(pos.x, pos.y)->GetTileType() != TileTypeBackgroundIndoor)
+    if (!isIndoors(pos))
         return false; // this means its not indoors
     if (!NothingAtPos(Vec3{ pos.x + 1, pos.y, pos.z }))
         return false;
-    if (GetWorldBackgroundTileAtPos(pos.x + 1, pos.y) == NULL || GetWorldBackgroundTileAtPos(pos.x + 1, pos.y)->GetTileType() != TileTypeBackgroundIndoor)
+    if (!isIndoors(pos + Vec3{1,0,0}))
 		return false; // this means its not indoors
     if (numInputs == 3)
     {
         if (!NothingAtPos(Vec3 { pos.x - 1, pos.y, pos.z }))
 			return false;
-        if (GetWorldBackgroundTileAtPos(pos.x - 1, pos.y) == NULL || GetWorldBackgroundTileAtPos(pos.x - 1, pos.y)->GetTileType() != TileTypeBackgroundIndoor)
+        if (!isIndoors(pos + Vec3{ -1,0,0 }))
             return false; // this means its not indoors
     }
 
@@ -280,22 +280,20 @@ bool World::AddPaintBlobCombiner(Vec3 pos, Direction direction, int numInputs)
 
 
 // this will return true if there is an indoor area in the passed in direction from the passed in pos 
-bool World::HasIndoorAreaInDirection(Vec3 pos, Direction direction)
+bool World::HasIndoorAreaInDirection(std::shared_ptr<IndoorArea> area, Direction direction)
 {
+    Vec3 pos = area->GetMiddlePosition();
+    float roadWidth = 6.5f;
     switch (direction) {
-    case(DirectionUp):
-        if (GetIndoorAreaAddButtonAtPos(pos.x, pos.y-1) != NULL)
-            return true;
-    case(DirectionDown):
-        if (GetIndoorAreaAddButtonAtPos(pos.x, pos.y + 1) != NULL)
-            return true;
-    case(DirectionLeft):
-        if (GetIndoorAreaAddButtonAtPos(pos.x-1, pos.y) != NULL)
-            return true;
-    case(DirectionRight):
-        if (GetIndoorAreaAddButtonAtPos(pos.x + 1, pos.y) != NULL)
-            return true;
+        case(DirectionUp): pos = pos + Vec3{ 0,area->GetDirectionRightFromMiddle() + roadWidth,0 }; break;
+        case(DirectionDown): pos = pos + Vec3{ 0,-1*(area->GetDirectionRightFromMiddle() + roadWidth),0}; break;
+        case(DirectionLeft): pos = pos + Vec3{ -1 * (area->GetDirectionRightFromMiddle() + roadWidth), 0,0 }; break;
+        case(DirectionRight): pos = pos + Vec3{ area->GetDirectionRightFromMiddle() + roadWidth, 0,0 }; break;
     }
+    std::cout << GetWorldBackgroundTileAtPos(pos.x, pos.y) << std::endl;
+    if (GetWorldBackgroundTileAtPos(pos.x, pos.y) != NULL)
+        return true;
+    return false;
 }
 
 
@@ -401,22 +399,32 @@ bool World::AddIndoorArea(std::shared_ptr<IndoorArea> lastArea, Direction direct
     }
 
     // add the add new Indoor Area buttons
-    if (HasIndoorAreaInDirection(Vec3{ middle.x,middle.y - newArea->GetDirectionUpFromMiddle() - 1 , 0 }, DirectionUp)) {
+    if (!HasIndoorAreaInDirection(newArea, DirectionDown)) {
         std::shared_ptr <IndoorAreaAddButton> newButton = std::make_shared<IndoorAreaAddButton>(newArea, DirectionUp, Vec3{ middle.x, middle.y - newArea->GetDirectionUpFromMiddle() - 5 , 1 }, *this);
-        AddIndoorAreaAddButtonAtPos(newButton, middle.x, middle.y - newArea->GetDirectionUpFromMiddle() - 5);
+        AddIndoorAreaAddButtonAtPos(newButton, newButton->GetPos().x, newButton->GetPos().y);
     }
-    if (HasIndoorAreaInDirection(Vec3{ middle.x,middle.y + newArea->GetDirectionDownFromMiddle() + 1 , 0 }, DirectionDown)) {
+    if (!HasIndoorAreaInDirection(newArea, DirectionUp)) {
         std::shared_ptr <IndoorAreaAddButton> newButton = std::make_shared<IndoorAreaAddButton>(newArea, DirectionDown, Vec3{ middle.x, middle.y + newArea->GetDirectionDownFromMiddle() + 5 , 1 }, *this);
-        AddIndoorAreaAddButtonAtPos(newButton, middle.x, middle.y + newArea->GetDirectionDownFromMiddle() + 5);
+        AddIndoorAreaAddButtonAtPos(newButton, newButton->GetPos().x, newButton->GetPos().y);
     }
-    if (HasIndoorAreaInDirection(Vec3{ middle.x - newArea->GetDirectionLeftFromMiddle() - 1 ,middle.y, 0 }, DirectionLeft)) {
-        std::shared_ptr <IndoorAreaAddButton> newButton = std::make_shared<IndoorAreaAddButton>(newArea, DirectionLeft, Vec3{ middle.x + newArea->GetDirectionLeftFromMiddle() + 5 ,middle.y , 1 }, *this);
-        AddIndoorAreaAddButtonAtPos(newButton, middle.x - newArea->GetDirectionLeftFromMiddle() - 5, middle.y);
+    if (!HasIndoorAreaInDirection(newArea, DirectionRight)) {
+        std::shared_ptr <IndoorAreaAddButton> newButton = std::make_shared<IndoorAreaAddButton>(newArea, DirectionRight, Vec3{ middle.x + newArea->GetDirectionLeftFromMiddle() + 5 ,middle.y , 1 }, *this);
+        AddIndoorAreaAddButtonAtPos(newButton, newButton->GetPos().x, newButton->GetPos().y);
     }
-    if (HasIndoorAreaInDirection(Vec3{ middle.x + newArea->GetDirectionRightFromMiddle() + 1 ,middle.y, 0 }, DirectionRight)) {
-        std::shared_ptr <IndoorAreaAddButton> newButton = std::make_shared<IndoorAreaAddButton>(newArea, DirectionRight, Vec3{ middle.x - newArea->GetDirectionRightFromMiddle() - 5 ,middle.y , 1 }, *this);
-        AddIndoorAreaAddButtonAtPos(newButton, middle.x + newArea->GetDirectionRightFromMiddle() + 5, middle.y);
+    if (!HasIndoorAreaInDirection(newArea, DirectionLeft)) {
+        std::shared_ptr <IndoorAreaAddButton> newButton = std::make_shared<IndoorAreaAddButton>(newArea, DirectionLeft, Vec3{ middle.x - newArea->GetDirectionRightFromMiddle() - 5 ,middle.y , 1 }, *this);
+        AddIndoorAreaAddButtonAtPos(newButton, newButton->GetPos().x, newButton->GetPos().y);
     }
+    // find any other indoor area add buttons around it that shouldnt be there anymore and delete them
+    if (GetIndoorAreaAddButtonAtPos(newArea->GetMiddlePosition().x, newArea->GetMiddlePosition().y - newArea->GetDirectionUpFromMiddle() - 1) != NULL)
+        DeleteIndoorAreaAddButtonAtPos(newArea->GetMiddlePosition().x, newArea->GetMiddlePosition().y - newArea->GetDirectionUpFromMiddle() - 1);
+    if (GetIndoorAreaAddButtonAtPos(newArea->GetMiddlePosition().x, newArea->GetMiddlePosition().y + newArea->GetDirectionUpFromMiddle() + 1) != NULL)
+        DeleteIndoorAreaAddButtonAtPos(newArea->GetMiddlePosition().x, newArea->GetMiddlePosition().y + newArea->GetDirectionUpFromMiddle() + 1);
+    if (GetIndoorAreaAddButtonAtPos(newArea->GetMiddlePosition().x + newArea->GetDirectionLeftFromMiddle() + 1, newArea->GetMiddlePosition().y) != NULL)
+        DeleteIndoorAreaAddButtonAtPos(newArea->GetMiddlePosition().x + newArea->GetDirectionLeftFromMiddle() + 1, newArea->GetMiddlePosition().y);
+    if (GetIndoorAreaAddButtonAtPos(newArea->GetMiddlePosition().x - newArea->GetDirectionLeftFromMiddle() - 1, newArea->GetMiddlePosition().y) != NULL)
+        DeleteIndoorAreaAddButtonAtPos(newArea->GetMiddlePosition().x - newArea->GetDirectionLeftFromMiddle() - 1, newArea->GetMiddlePosition().y);
+
     
     // add the area
     m_IndoorAreas.push_back(newArea);
@@ -440,35 +448,47 @@ void World::OnUpdate()
     m_Position += m_Input->GetSpeed() + (m_Input->GetSpeed() * ((float)m_ZoomAmount/10));
     m_Rotation += m_Input->GetRotationChange();
     
-   
     int WIDTH, HEIGHT;
     glfwGetWindowSize(m_Window, &WIDTH, &HEIGHT);
-    
-    float zoomedWidth = (float)((WIDTH / 2) + (m_ZoomAmount * (WIDTH / 20)));
+
+    float zoomedWidth  = (float)((WIDTH  / 2) + (m_ZoomAmount * (WIDTH  / 20)));
     float zoomedHeight = (float)((HEIGHT / 2) + (m_ZoomAmount * (HEIGHT / 20)));
 
-    float mousePosX = (float)(((((m_Input->GetMousePosX() / (WIDTH / 2)) * zoomedWidth) - zoomedWidth) - m_Position.x) / m_BlockSize);
+    float mousePosX = (float)(     ((((m_Input->GetMousePosX() / (WIDTH  / 2)) * zoomedWidth ) - zoomedWidth ) - m_Position.x) / m_BlockSize);
     float mousePosY = (float)(-1 * ((((m_Input->GetMousePosY() / (HEIGHT / 2)) * zoomedHeight) - zoomedHeight) + m_Position.y) / m_BlockSize);
+    
+    // adjust for bottom and top of the screen making the calculation off (not sure why this is needed but without it the mouse is off a little at the top of the screen)
+    mousePosY += (((HEIGHT - m_Input->GetMousePosY()) / HEIGHT)/2) + (std::max(0.0f,((zoomedHeight - HEIGHT)/HEIGHT)))/2;
 
-    if (mousePosX < 0) mousePosX = floor(mousePosX);
-    else mousePosX = floor(mousePosX);
-    if (mousePosY < 0) mousePosY = floor(mousePosY);
-    else mousePosY = floor(mousePosY);
+    mousePosX = floor(mousePosX);
+    mousePosY = floor(mousePosY);
 
     if (m_Input->GetLeftMouseDown())
     {
-        switch (m_Input->GetLastNumPressed())
-        { // TODO do the check to make sure its indoors before this, and if its not check for button presses instead 
-            case(1): AddBelt((BeltType)std::max(std::min((BeltTypeYellow + m_Input->m_SecondNumPressed - 1), 2), 0), { mousePosX, mousePosY, 1 }, (Direction)m_Input->GetDirection()); break;
-            case(2): AddPaintBlobCombiner(Vec3{ mousePosX, mousePosY,1 }, (Direction)m_Input->GetDirection(), std::max(std::min(m_Input->m_SecondNumPressed+1, 3), 2));break;
-            case(3): AddIndoorArea(GetIndoorAreas()[GetIndoorAreas().size() - 1], (Direction)(std::max(std::min(m_Input->m_SecondNumPressed, 4), 1)-1), false); break;
-            case(4): AddPaintBlob(Vec4{ 0.0f, 1.0f, 1.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2f); break;
-            case(5): AddPaintBlob(Vec4{ 1.0f, 0.0f, 1.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2f); break;
-            case(6): AddPaintBlob(Vec4{ 1.0f, 1.0f, 0.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2f); break;
-            case(7): AddPaintBlob(Vec4{ 0.0f, 0.0f, 0.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2f); break;
-            case(8): AddPaintBlob(Vec4{ .6f, .4f, .4f, 1.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2f); break;
-            case(9): AddTruck(); break;
-            default: std::cout << "No tile for that number yet" << std::endl;
+        // if there is a indoor background square on the mouse pos place something
+        if ((isIndoors(Vec3{ mousePosX, mousePosY, 1 }))) {
+            switch (m_Input->GetLastNumPressed())
+            {
+                case(1): AddBelt((BeltType)std::max(std::min((BeltTypeYellow + m_Input->m_SecondNumPressed - 1), 2), 0), { mousePosX, mousePosY, 1 }, (Direction)m_Input->GetDirection()); break;
+                case(2): AddPaintBlobCombiner(Vec3{ mousePosX, mousePosY,1 }, (Direction)m_Input->GetDirection(), std::max(std::min(m_Input->m_SecondNumPressed + 1, 3), 2)); break;
+                case(3): AddIndoorArea(GetIndoorAreas()[GetIndoorAreas().size() - 1], (Direction)(std::max(std::min(m_Input->m_SecondNumPressed, 4), 1) - 1), false); break;
+                case(4): AddPaintBlob(Vec4{ 0.0f, 1.0f, 1.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2f); break;
+                case(5): AddPaintBlob(Vec4{ 1.0f, 0.0f, 1.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2f); break;
+                case(6): AddPaintBlob(Vec4{ 1.0f, 1.0f, 0.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2f); break;
+                case(7): AddPaintBlob(Vec4{ 0.0f, 0.0f, 0.0f, 0.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2f); break;
+                case(8): AddPaintBlob(Vec4{ .6f, .4f, .4f, 1.0f }, Vec3{ mousePosX, mousePosY, 1 }, .2f); break;
+                case(9): AddTruck(); break;
+                default: std::cout << "No tile for that number yet" << std::endl;
+            }
+        }
+        else {
+            // check for button presses instead
+            std::shared_ptr<IndoorAreaAddButton> button = GetIndoorAreaAddButtonAtPos(mousePosX, mousePosY, true);
+            if (button != NULL)
+            {
+                // button was pressed, add an indoor area
+                AddIndoorArea(button->GetConnectedTo(), (Direction)InvertDirection(button->GetDirection()));
+            }
         }
     }
     if (m_Input->GetRightMouseDown())
@@ -560,7 +580,7 @@ bool World::BeltCanBeMade(Vec3 pos, BeltType beltColor, Direction direction)
     std::shared_ptr<Belt> belt = GetBeltAtPos(pos.x, pos.y);
     std::shared_ptr<PaintBlob> paintBlob = GetPaintBlobAtPos(pos.x, pos.y);
 
-    if (GetWorldBackgroundTileAtPos(pos.x, pos.y) == NULL || GetWorldBackgroundTileAtPos(pos.x, pos.y)->GetTileType() != TileTypeBackgroundIndoor)
+    if (!isIndoors(pos))
 		return false; // this means its not indoors
 
     if (belt != NULL) // there is no belt here already
